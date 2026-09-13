@@ -4,10 +4,10 @@
   var data = window.ALBUM_DATA;
   var cfg = window.SITE_CONFIG || {};
   var base = cfg.basePath && cfg.basePath !== "./" ? (cfg.basePath.endsWith("/") ? cfg.basePath : cfg.basePath + "/") : "";
-  var pages = [];
+  var pages = [{ type: "letter" }];
   data.chapters.forEach(function (ch) {
     ch.pages.forEach(function (pg) {
-      pages.push({ chapter: ch, photos: pg.photos || [] });
+      pages.push({ type: "photos", chapter: ch, photos: pg.photos || [] });
     });
   });
 
@@ -162,7 +162,7 @@
     btn.onclick = function () {
       if (book.classList.contains("is-open")) return;
       var entered = false;
-      function enterAlbum() {
+      function enterLetter() {
         if (entered) return;
         entered = true;
         state.page = 0;
@@ -170,52 +170,63 @@
       }
       btn.disabled = true;
       book.classList.add("is-open");
-      var fallback = setTimeout(enterAlbum, 1200);
+      var fallback = setTimeout(enterLetter, 1200);
       leaf.addEventListener("transitionend", function onEnd(e) {
         if (e.target !== leaf) return;
         if (e.propertyName && e.propertyName.indexOf("transform") === -1) return;
         leaf.removeEventListener("transitionend", onEnd);
         clearTimeout(fallback);
-        enterAlbum();
+        enterLetter();
       });
     };
   }
 
-  function renderStory() {
+  function letterHtml() {
     var n = zh() ? "zh" : "en";
     var paras = data.story.paragraphs.map(function (p) {
       return "<p class=\"" + n + "\">" + esc(zh() ? p.zh : p.en) + "</p>";
     }).join("");
-    document.getElementById("story-copy").innerHTML =
-      "<h2 class=\"" + n + "\">" + esc(zh() ? data.story.titleZh : data.story.titleEn) + "</h2>" +
-      '<div class="ornament" style="margin:0.7rem auto 1.1rem;width:40px;height:1px;background:var(--gold)"></div>' +
+    return "<h2 class=\"" + n + "\">" + esc(zh() ? data.story.titleZh : data.story.titleEn) + "</h2>" +
+      '<div class="ornament" style="margin:0.55rem auto 0.9rem;width:36px;height:1px;background:var(--gold)"></div>' +
       paras +
       "<div class=\"dedication " + n + "\">" + esc(zh() ? data.meta.dedicationZh : data.meta.dedicationEn) + "</div>";
+  }
+
+  function renderStory() {
+    document.getElementById("story-copy").innerHTML = letterHtml();
   }
 
   function renderPage(animate) {
     var item = pages[state.page];
     if (!item) return;
     var n = zh() ? "zh" : "en";
-    var ch = item.chapter;
-    document.getElementById("chapter-header").innerHTML =
-      "<h2 class=\"" + n + "\">" + esc(zh() ? ch.titleZh : ch.titleEn) + "</h2>" +
-      "<p class=\"" + n + "\">" + esc(zh() ? ch.introZh : ch.introEn) + "</p>";
+    var head = document.getElementById("chapter-header");
     var box = document.getElementById("book-page");
-    box.classList.remove("is-turn-next", "is-turn-prev");
+    box.classList.remove("is-turn-next", "is-turn-prev", "is-letter");
+    if (item.type === "letter") {
+      head.innerHTML = "<h2 class=\"" + n + "\">" + esc(zh() ? "信" : "A letter") + "</h2>" +
+        "<p class=\"" + n + "\">" + esc(zh() ? "翻开之后，先读这一页。" : "The first leaf is the letter.") + "</p>";
+      box.classList.add("is-letter");
+      box.innerHTML = letterHtml();
+    } else {
+      var ch = item.chapter;
+      head.innerHTML =
+        "<h2 class=\"" + n + "\">" + esc(zh() ? ch.titleZh : ch.titleEn) + "</h2>" +
+        "<p class=\"" + n + "\">" + esc(zh() ? ch.introZh : ch.introEn) + "</p>";
+      box.innerHTML = '<div class="stack">' + item.photos.map(function (ph, i) {
+        var cap = zh() ? ph.captionZh : ph.captionEn;
+        var note = zh() ? ph.noteZh : ph.noteEn;
+        return '<article class="card">' +
+          '<img src="' + esc(asset(ph.src)) + '" alt="' + esc(cap) + '" data-i="' + i + '" />' +
+          (cap ? "<h3 class=\"" + n + "\">" + esc(cap) + "</h3>" : "") +
+          (note ? "<p class=\"" + n + "\">" + esc(note) + "</p>" : "") +
+          "</article>";
+      }).join("") + "</div>";
+    }
     if (animate) {
       void box.offsetWidth;
       box.classList.add(animate === "prev" ? "is-turn-prev" : "is-turn-next");
     }
-    box.innerHTML = '<div class="stack">' + item.photos.map(function (ph, i) {
-      var cap = zh() ? ph.captionZh : ph.captionEn;
-      var note = zh() ? ph.noteZh : ph.noteEn;
-      return '<article class="card">' +
-        '<img src="' + esc(asset(ph.src)) + '" alt="' + esc(cap) + '" data-i="' + i + '" />' +
-        (cap ? "<h3 class=\"" + n + "\">" + esc(cap) + "</h3>" : "") +
-        (note ? "<p class=\"" + n + "\">" + esc(note) + "</p>" : "") +
-        "</article>";
-    }).join("") + "</div>";
     document.getElementById("page-indicator").textContent = t("pageOf")
       .replace("{current}", String(state.page + 1))
       .replace("{total}", String(pages.length));
@@ -265,10 +276,38 @@
       var img = e.target.closest ? e.target.closest("#book-page img") : null;
       if (!img) return;
       var item = pages[state.page];
-      if (item) openLightbox(item.photos[Number(img.dataset.i)]);
+      if (item && item.photos) openLightbox(item.photos[Number(img.dataset.i)]);
     });
     prev.addEventListener("click", function () { go(state.page - 1, true); });
     next.addEventListener("click", function () { go(state.page + 1, true); });
+  }
+
+  function bindMotifs() {
+    var row = document.getElementById("motif-row");
+    if (!row || row._bound) return;
+    row._bound = true;
+    row.addEventListener("click", function (e) {
+      var motif = e.target.closest && e.target.closest(".motif");
+      if (!motif) return;
+      var icon = motif.querySelector(".i");
+      var glyph = icon && !icon.classList.contains("mist") ? (icon.textContent || "✦") : "✦";
+      motif.classList.remove("is-pop");
+      void motif.offsetWidth;
+      motif.classList.add("is-pop");
+      var host = document.getElementById("leaves");
+      if (!host) return;
+      var r = motif.getBoundingClientRect();
+      for (var i = 0; i < 5; i++) {
+        var bit = document.createElement("span");
+        bit.className = "motif-bit";
+        bit.textContent = glyph;
+        bit.style.left = r.left + r.width / 2 + "px";
+        bit.style.top = r.top + "px";
+        bit.style.setProperty("--mx", Math.round(Math.random() * 56 - 28) + "px");
+        host.appendChild(bit);
+        window.setTimeout(function (node) { node.remove(); }, 900, bit);
+      }
+    });
   }
 
   function sprinkleLeaves() {
@@ -292,12 +331,22 @@
     });
     document.querySelectorAll("#nav button").forEach(function (btn) {
       btn.onclick = function () {
-        if (btn.dataset.view === "album") state.page = Math.min(state.page, pages.length - 1);
-        open(btn.dataset.view);
+        var view = btn.dataset.view;
+        if (view === "story") {
+          state.page = 0;
+          open("album");
+          return;
+        }
+        if (view === "album") {
+          if (state.page === 0) state.page = Math.min(1, pages.length - 1);
+          open("album");
+          return;
+        }
+        open(view);
       };
     });
     document.getElementById("btn-see-us").onclick = function () {
-      state.page = 0;
+      state.page = Math.min(1, pages.length - 1);
       open("album");
     };
     document.getElementById("lightbox-close").onclick = closeLightbox;
@@ -308,6 +357,7 @@
       if (!document.getElementById("lightbox").hidden && e.key === "Escape") closeLightbox();
     });
     bindAlbumTurn();
+    bindMotifs();
     setLang(state.lang);
     open("cover");
     window.ClaireAlbum = { open: open, go: go };
