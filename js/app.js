@@ -86,6 +86,7 @@
       btn.classList.toggle("active", btn.dataset.view === view);
     });
     if (view === "album") renderPage(false);
+    else updateBirthdayWish();
     if (view === "cover") {
       var book = document.getElementById("cover-book");
       var openBtn = document.getElementById("btn-open");
@@ -226,6 +227,30 @@
     document.getElementById("btn-next").className = "ctrl " + n;
     document.getElementById("btn-prev").disabled = state.page <= 0;
     document.getElementById("btn-next").disabled = state.page >= pages.length - 1;
+    updateBirthdayWish();
+  }
+
+  function updateBirthdayWish() {
+    var el = document.getElementById("bday-wish");
+    if (!el) return;
+    var n = state.page + 1;
+    var on = state.view === "album" && n >= 9 && n <= 22;
+    if (!on) {
+      el.hidden = true;
+      el.classList.remove("is-on");
+      el.setAttribute("aria-hidden", "true");
+      return;
+    }
+    el.hidden = false;
+    el.setAttribute("aria-hidden", "false");
+    el.classList.remove("is-on");
+    void el.offsetWidth;
+    el.classList.add("is-on");
+    var text = el.querySelector(".bday-text");
+    if (text) {
+      text.textContent = zh() ? "祝大宝生日快乐" : "Happy birthday, Da Bao";
+      text.className = "bday-text " + (zh() ? "zh" : "en");
+    }
   }
 
   function go(i, animate) {
@@ -301,15 +326,16 @@
 
   function sprinkleLeaves() {
     var root = document.getElementById("leaves");
-    var glyphs = ["🍁", "🍂", "🍁"];
-    for (var i = 0; i < 12; i++) {
+    var glyphs = ["🍁", "🍂", "🌸", "✿", "❀", "🌼"];
+    for (var i = 0; i < 16; i++) {
       var el = document.createElement("span");
       el.className = "leaf";
       el.textContent = glyphs[i % glyphs.length];
       el.style.left = Math.random() * 100 + "%";
-      el.style.setProperty("--dx", (Math.random() * 80 - 40) + "px");
-      el.style.animationDuration = 9 + Math.random() * 10 + "s";
-      el.style.animationDelay = -Math.random() * 12 + "s";
+      el.style.setProperty("--dx", (Math.random() * 90 - 45) + "px");
+      el.style.animationDuration = 10 + Math.random() * 12 + "s";
+      el.style.animationDelay = -Math.random() * 14 + "s";
+      el.style.fontSize = (0.7 + Math.random() * 0.55) + "rem";
       root.appendChild(el);
     }
   }
