@@ -234,7 +234,7 @@
     var el = document.getElementById("bday-wish");
     if (!el) return;
     var n = state.page + 1;
-    var on = state.view === "album" && n >= 9 && n <= 22;
+    var on = state.view === "album" && (n === 9 || n === 22);
     if (!on) {
       el.hidden = true;
       el.classList.remove("is-on");
