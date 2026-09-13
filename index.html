@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hans" data-lang="zh" data-screen="cover">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f4e6d4" />
+    <title>For Claire My Love · 写给秋然</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body class="locked">
+    <div id="leaves" aria-hidden="true"></div>
+
+    <div id="password-gate" class="gate">
+      <div class="gate-card">
+        <p class="kicker zh">写给秋然</p>
+        <h1 class="zh">请输入密码</h1>
+        <p class="sub zh">For Claire My Love</p>
+        <form id="password-form">
+          <input type="password" id="password-input" placeholder="密码 / password" required autocomplete="off" />
+          <button type="submit" class="btn zh">进入</button>
+        </form>
+        <p id="password-error" class="error" hidden>密码不对，再试一次</p>
+      </div>
+    </div>
+
+    <div id="app" hidden>
+      <header class="top">
+        <div>
+          <div id="brand-title" class="brand-title zh">写给秋然</div>
+          <div id="brand-sub" class="brand-sub zh">秋日</div>
+        </div>
+        <div class="top-actions">
+          <nav id="nav" class="nav">
+            <button type="button" data-view="cover" class="active">封面</button>
+            <button type="button" data-view="story">信</button>
+            <button type="button" data-view="album">相册</button>
+          </nav>
+          <div class="lang">
+            <button type="button" data-lang="zh" class="active">中文</button>
+            <button type="button" data-lang="en">EN</button>
+          </div>
+        </div>
+      </header>
+
+      <section id="view-cover" class="view active" data-view="cover"></section>
+
+      <section id="view-story" class="view" data-view="story">
+        <article id="story-copy" class="letter"></article>
+        <p class="center">
+          <button type="button" id="btn-see-us" class="btn">去看看我们</button>
+        </p>
+      </section>
+
+      <section id="view-album" class="view" data-view="album">
+        <div id="chapter-header" class="chapter"></div>
+        <div id="book-page" class="page"></div>
+        <p id="swipe-hint" class="hint"></p>
+        <div class="controls">
+          <button type="button" id="btn-prev" class="ctrl">‹</button>
+          <div id="page-indicator" class="indicator"></div>
+          <button type="button" id="btn-next" class="ctrl">›</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="lightbox" class="lightbox" hidden>
+      <button type="button" id="lightbox-close" class="lightbox-close" aria-label="Close">×</button>
+      <img id="lightbox-img" alt="" />
+      <p id="lightbox-caption"></p>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/sha256.js"></script>
+    <script src="data/album.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
