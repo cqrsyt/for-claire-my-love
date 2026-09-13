@@ -86,6 +86,12 @@
       btn.classList.toggle("active", btn.dataset.view === view);
     });
     if (view === "album") renderPage(false);
+    if (view === "cover") {
+      var book = document.getElementById("cover-book");
+      var openBtn = document.getElementById("btn-open");
+      if (book) book.classList.remove("is-open");
+      if (openBtn) openBtn.disabled = false;
+    }
     window.scrollTo(0, 0);
   }
 
@@ -123,21 +129,56 @@
     var him = asset(data.meta.avatarHim);
     var her = asset(data.meta.avatarHer);
     document.getElementById("view-cover").innerHTML =
-      '<div class="cover"><div class="cover-card">' +
+      '<div class="cover">' +
+      '<div class="cover-stage">' +
+      '<div class="cover-book" id="cover-book">' +
+      '<div class="cover-stack" aria-hidden="true"></div>' +
+      '<div class="cover-spine" aria-hidden="true"></div>' +
+      '<div class="cover-leaf" id="cover-leaf">' +
+      '<div class="cover-face cover-face-front">' +
       '<p class="kicker ' + n + '">' + esc(zh() ? data.meta.occasionZh : data.meta.occasionEn) + "</p>" +
       "<h1 class=\"" + n + "\">" + esc(zh() ? data.meta.titleZh : data.meta.titleEn) + "</h1>" +
-      "<p class=\"" + n + "\">" + esc(zh() ? data.meta.subtitleZh : data.meta.subtitleEn) + "</p>" +
-      '<div class="ornament"></div>' +
+      "<p class=\"cover-sub " + n + "\">" + esc(zh() ? data.meta.subtitleZh : data.meta.subtitleEn) + "</p>" +
+      '<div class="cover-ornament" aria-hidden="true"></div>' +
       '<div class="avatars">' +
       (him ? '<img src="' + esc(him) + '" alt="" />' : "") +
-      '<span class="heart">♥</span>' +
+      '<span class="heart" aria-hidden="true">♥</span>' +
       (her ? '<img src="' + esc(her) + '" alt="" />' : "") +
       "</div>" +
       "<p class=\"names " + n + "\">" + esc(zh() ? data.meta.fromZh + " × " + data.meta.toZh : data.meta.fromEn + " × " + data.meta.toEn) + "</p>" +
       "<p class=\"date " + n + "\">" + esc(zh() ? data.cover.dateLineZh : data.cover.dateLineEn) + "</p>" +
-      "<button type=\"button\" class=\"btn " + n + "\" id=\"btn-open\">" + esc(zh() ? data.cover.hintZh : data.cover.hintEn) + "</button>" +
-      "</div></div>";
-    document.getElementById("btn-open").onclick = function () { open("story"); };
+      "<button type=\"button\" class=\"btn-open " + n + "\" id=\"btn-open\">" + esc(zh() ? data.cover.hintZh : data.cover.hintEn) + "</button>" +
+      "</div>" +
+      '<div class="cover-face cover-face-back" aria-hidden="true"></div>' +
+      "</div></div></div></div>";
+    bindCoverOpen();
+  }
+
+  function bindCoverOpen() {
+    var btn = document.getElementById("btn-open");
+    var book = document.getElementById("cover-book");
+    var leaf = document.getElementById("cover-leaf");
+    if (!btn || !book || !leaf) return;
+    btn.onclick = function () {
+      if (book.classList.contains("is-open")) return;
+      var entered = false;
+      function enterAlbum() {
+        if (entered) return;
+        entered = true;
+        state.page = 0;
+        open("album");
+      }
+      btn.disabled = true;
+      book.classList.add("is-open");
+      var fallback = setTimeout(enterAlbum, 1200);
+      leaf.addEventListener("transitionend", function onEnd(e) {
+        if (e.target !== leaf) return;
+        if (e.propertyName && e.propertyName.indexOf("transform") === -1) return;
+        leaf.removeEventListener("transitionend", onEnd);
+        clearTimeout(fallback);
+        enterAlbum();
+      });
+    };
   }
 
   function renderStory() {
@@ -161,40 +202,37 @@
       "<h2 class=\"" + n + "\">" + esc(zh() ? ch.titleZh : ch.titleEn) + "</h2>" +
       "<p class=\"" + n + "\">" + esc(zh() ? ch.introZh : ch.introEn) + "</p>";
     var box = document.getElementById("book-page");
-    box.classList.remove("is-turn");
+    box.classList.remove("is-turn-next", "is-turn-prev");
     if (animate) {
       void box.offsetWidth;
-      box.classList.add("is-turn");
+      box.classList.add(animate === "prev" ? "is-turn-prev" : "is-turn-next");
     }
     box.innerHTML = '<div class="stack">' + item.photos.map(function (ph, i) {
       var cap = zh() ? ph.captionZh : ph.captionEn;
       var note = zh() ? ph.noteZh : ph.noteEn;
       return '<article class="card">' +
-        '<img src="' + esc(asset(ph.src)) + '" alt="' + esc(cap) + '" data-full="' + esc(asset(ph.src)) + '" data-i="' + i + '" />' +
+        '<img src="' + esc(asset(ph.src)) + '" alt="' + esc(cap) + '" data-i="' + i + '" />' +
         (cap ? "<h3 class=\"" + n + "\">" + esc(cap) + "</h3>" : "") +
         (note ? "<p class=\"" + n + "\">" + esc(note) + "</p>" : "") +
         "</article>";
     }).join("") + "</div>";
-    box.querySelectorAll("img").forEach(function (img) {
-      img.onclick = function (e) {
-        var r = box.getBoundingClientRect();
-        if (e.clientX < r.left + r.width * 0.22) { go(state.page - 1, true); return; }
-        if (e.clientX > r.right - r.width * 0.22) { go(state.page + 1, true); return; }
-        openLightbox(item.photos[Number(img.dataset.i)]);
-      };
-    });
     document.getElementById("page-indicator").textContent = t("pageOf")
       .replace("{current}", String(state.page + 1))
       .replace("{total}", String(pages.length));
     document.getElementById("swipe-hint").textContent = t("swipeHint");
+    document.getElementById("btn-prev").textContent = t("prev");
+    document.getElementById("btn-next").textContent = t("next");
+    document.getElementById("btn-prev").className = "ctrl " + n;
+    document.getElementById("btn-next").className = "ctrl " + n;
     document.getElementById("btn-prev").disabled = state.page <= 0;
     document.getElementById("btn-next").disabled = state.page >= pages.length - 1;
   }
 
   function go(i, animate) {
-    if (i < 0 || i >= pages.length) return;
+    if (i < 0 || i >= pages.length || i === state.page) return;
+    var dir = i < state.page ? "prev" : "next";
     state.page = i;
-    renderPage(!!animate);
+    renderPage(animate ? dir : false);
   }
 
   function openLightbox(ph) {
@@ -208,27 +246,29 @@
     document.getElementById("lightbox").hidden = true;
   }
 
-  function bindSwipe() {
-    var page = document.getElementById("book-page");
-    var x0 = 0, y0 = 0, tracking = false;
-    page.addEventListener("pointerdown", function (e) {
+  function bindAlbumTurn() {
+    var stage = document.getElementById("book-stage");
+    var prev = document.getElementById("btn-prev");
+    var next = document.getElementById("btn-next");
+    stage.addEventListener("click", function (e) {
       if (state.view !== "album") return;
-      x0 = e.clientX; y0 = e.clientY; tracking = true;
-    });
-    page.addEventListener("pointerup", function (e) {
-      if (!tracking) return;
-      tracking = false;
-      if (e.target.closest && e.target.closest("img")) return;
-      var dx = e.clientX - x0, dy = e.clientY - y0;
-      if (Math.abs(dx) >= 48 && Math.abs(dx) > Math.abs(dy)) {
-        if (dx < 0) go(state.page + 1, true);
-        else go(state.page - 1, true);
+      var r = stage.getBoundingClientRect();
+      var x = e.clientX - r.left;
+      if (x < r.width * 0.28) {
+        go(state.page - 1, true);
         return;
       }
-      var r = page.getBoundingClientRect();
-      if (e.clientX < r.left + r.width * 0.22) go(state.page - 1, true);
-      else if (e.clientX > r.right - r.width * 0.22) go(state.page + 1, true);
+      if (x > r.width * 0.72) {
+        go(state.page + 1, true);
+        return;
+      }
+      var img = e.target.closest ? e.target.closest("#book-page img") : null;
+      if (!img) return;
+      var item = pages[state.page];
+      if (item) openLightbox(item.photos[Number(img.dataset.i)]);
     });
+    prev.addEventListener("click", function () { go(state.page - 1, true); });
+    next.addEventListener("click", function () { go(state.page + 1, true); });
   }
 
   function sprinkleLeaves() {
@@ -260,18 +300,14 @@
       state.page = 0;
       open("album");
     };
-    document.getElementById("btn-prev").onclick = function () { go(state.page - 1, true); };
-    document.getElementById("btn-next").onclick = function () { go(state.page + 1, true); };
     document.getElementById("lightbox-close").onclick = closeLightbox;
     document.getElementById("lightbox").onclick = function (e) {
       if (e.target.id === "lightbox") closeLightbox();
     };
     document.addEventListener("keydown", function (e) {
       if (!document.getElementById("lightbox").hidden && e.key === "Escape") closeLightbox();
-      else if (state.view === "album" && e.key === "ArrowRight") go(state.page + 1, true);
-      else if (state.view === "album" && e.key === "ArrowLeft") go(state.page - 1, true);
     });
-    bindSwipe();
+    bindAlbumTurn();
     setLang(state.lang);
     open("cover");
     window.ClaireAlbum = { open: open, go: go };

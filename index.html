@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#f4e6d4" />
+    <meta name="theme-color" content="#f6f1e8" />
     <title>For Claire My Love · 写给秋然</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,6 +12,8 @@
   </head>
   <body class="locked">
     <div id="leaves" aria-hidden="true"></div>
+    <div class="edge-pattern edge-left" aria-hidden="true">🍅 🫑 🍆 🐕 🍁</div>
+    <div class="edge-pattern edge-right" aria-hidden="true">🍁 🐕 🍆 🫑 🍅</div>
 
     <div id="password-gate" class="gate">
       <div class="gate-card">
@@ -45,6 +47,39 @@
         </div>
       </header>
 
+      <div id="motif-row" class="motif-row">
+        <label class="motif">
+          <input type="radio" name="motif" />
+          <span class="i" aria-hidden="true">🍅</span>
+          <span class="say">红着</span>
+        </label>
+        <label class="motif">
+          <input type="radio" name="motif" />
+          <span class="i" aria-hidden="true">🫑</span>
+          <span class="say">青着</span>
+        </label>
+        <label class="motif">
+          <input type="radio" name="motif" />
+          <span class="i" aria-hidden="true">🍆</span>
+          <span class="say">静静的</span>
+        </label>
+        <label class="motif">
+          <input type="radio" name="motif" />
+          <span class="i" aria-hidden="true">🐕</span>
+          <span class="say">小狗</span>
+        </label>
+        <label class="motif">
+          <input type="radio" name="motif" />
+          <span class="i" aria-hidden="true">🍁</span>
+          <span class="say">秋</span>
+        </label>
+        <label class="motif">
+          <input type="radio" name="motif" />
+          <span class="i mist" aria-hidden="true"></span>
+          <span class="say">淡淡的</span>
+        </label>
+      </div>
+
       <section id="view-cover" class="view active" data-view="cover"></section>
 
       <section id="view-story" class="view" data-view="story">
@@ -56,12 +91,14 @@
 
       <section id="view-album" class="view" data-view="album">
         <div id="chapter-header" class="chapter"></div>
-        <div id="book-page" class="page"></div>
+        <div id="book-stage" class="book-stage">
+          <div id="book-page" class="page"></div>
+        </div>
         <p id="swipe-hint" class="hint"></p>
         <div class="controls">
-          <button type="button" id="btn-prev" class="ctrl">‹</button>
+          <button type="button" id="btn-prev" class="ctrl">上一页</button>
           <div id="page-indicator" class="indicator"></div>
-          <button type="button" id="btn-next" class="ctrl">›</button>
+          <button type="button" id="btn-next" class="ctrl">下一页</button>
         </div>
       </section>
     </div>
