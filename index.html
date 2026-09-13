@@ -8,7 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/styles.css?v=2" />
+    <link rel="stylesheet" href="css/book.css?v=2" />
   </head>
   <body class="locked">
     <div id="leaves" aria-hidden="true"></div>
@@ -92,7 +93,13 @@
       <section id="view-album" class="view" data-view="album">
         <div id="chapter-header" class="chapter"></div>
         <div id="book-stage" class="book-stage">
-          <div id="book-page" class="page"></div>
+          <div class="album-book">
+            <div class="album-spine" aria-hidden="true"></div>
+            <div class="album-stack" aria-hidden="true"></div>
+            <div class="album-block">
+              <div id="book-page" class="page"></div>
+            </div>
+          </div>
         </div>
         <p id="swipe-hint" class="hint"></p>
         <div class="controls">

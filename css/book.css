@@ -1,0 +1,108 @@
+/* Album book body. Clicks stay on #book-stage and the two page buttons. */
+.book-stage {
+  perspective: 1600px;
+  display: flex;
+  justify-content: center;
+  padding: 0.4rem 0 0.8rem;
+}
+
+.album-book {
+  position: relative;
+  width: min(100%, 560px);
+  transform: rotateY(-7deg) rotateX(4deg);
+  transform-style: preserve-3d;
+}
+
+.album-spine,
+.album-stack {
+  pointer-events: none;
+}
+
+.album-spine {
+  position: absolute;
+  left: -10px;
+  top: 8px;
+  bottom: 8px;
+  width: 12px;
+  border-radius: 3px 0 0 3px;
+  background: linear-gradient(90deg, #9aa8b8, #c5d0dc 55%, #b7c2cf);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.35);
+  z-index: 3;
+}
+
+.album-stack {
+  position: absolute;
+  inset: 10px -8px 10px 4px;
+  border-radius: 2px 10px 10px 2px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #d7dee7 0 1px,
+      #f4f1ea 1px 3px
+    );
+  box-shadow: 10px 16px 28px rgba(58, 68, 80, 0.12);
+  z-index: 0;
+}
+
+.album-block {
+  position: relative;
+  z-index: 2;
+  transform-style: preserve-3d;
+}
+
+#book-page.page {
+  transform-origin: left center;
+  background:
+    linear-gradient(90deg, rgba(138, 155, 176, 0.16), transparent 14px),
+    var(--paper);
+}
+
+#book-page.page.is-turn-next {
+  animation: book-turn-next 0.7s cubic-bezier(0.37, 0.02, 0.2, 1);
+}
+
+#book-page.page.is-turn-prev {
+  animation: book-turn-prev 0.7s cubic-bezier(0.37, 0.02, 0.2, 1);
+}
+
+@keyframes book-turn-next {
+  0% {
+    transform: rotateY(0deg);
+    box-shadow: 8px 14px 32px var(--shadow);
+  }
+  42% {
+    transform: rotateY(-88deg);
+    box-shadow: 0 10px 18px rgba(58, 68, 80, 0.18);
+  }
+  58% {
+    transform: rotateY(88deg);
+    opacity: 0.88;
+  }
+  100% {
+    transform: rotateY(0deg);
+    box-shadow: 8px 14px 32px var(--shadow);
+  }
+}
+
+@keyframes book-turn-prev {
+  0% {
+    transform: rotateY(0deg);
+  }
+  42% {
+    transform: rotateY(88deg);
+  }
+  58% {
+    transform: rotateY(-88deg);
+    opacity: 0.88;
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #book-page.page.is-turn-next,
+  #book-page.page.is-turn-prev {
+    animation: none;
+  }
+}
