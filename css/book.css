@@ -66,6 +66,7 @@
   position: relative;
   z-index: 2;
   transform-style: preserve-3d;
+  min-height: 280px;
 }
 
 #book-page.page {
@@ -260,4 +261,32 @@
   .motif-bit {
     animation: none;
   }
+}
+
+/* WebGL page lives in #book-gl. Canvas never captures clicks. */
+.book-gl {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+html.webgl-book #book-page {
+  opacity: 0;
+}
+
+html.webgl-book .album-book {
+  transform: none;
+}
+
+html.webgl-book .album-spine,
+html.webgl-book .album-stack {
+  opacity: 0;
+}
+
+html.webgl-book .album-book.is-flipping-next,
+html.webgl-book .album-book.is-flipping-prev,
+html.webgl-book #book-page.page.is-turn-next,
+html.webgl-book #book-page.page.is-turn-prev {
+  animation: none;
 }
