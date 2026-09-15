@@ -62,10 +62,13 @@ body {
 html[data-lang="zh"] body,
 html[data-lang="zh"] button,
 html[data-lang="zh"] input,
+html[data-lang="zh"] select,
 html[data-lang="zh"] .hint,
 html[data-lang="zh"] .indicator,
 html[data-lang="zh"] .say,
-html[data-lang="zh"] .bday-text {
+html[data-lang="zh"] .bday-text,
+html[data-lang="zh"] .wish-text,
+html[data-lang="zh"] .page-jump {
   font-family: var(--font-zh);
   letter-spacing: 0;
   font-weight: 400;
@@ -138,14 +141,14 @@ html[data-lang="zh"] .bday-text {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.42rem;
-  min-height: 1.6rem;
-  margin: 0.15rem 0 0.55rem;
+  gap: 0.08rem;
+  min-height: 44px;
+  margin: 0.1rem 0 0.45rem;
 }
 .motif {
   position: relative;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -199,13 +202,19 @@ html[data-lang="zh"] .bday-text {
   display: none;
   position: absolute;
   left: 50%;
-  top: 1.4rem;
+  top: 2.45rem;
   transform: translateX(-50%);
   font-size: var(--fs-meta);
   color: var(--soft);
   white-space: nowrap;
   letter-spacing: 0;
   text-shadow: 0 1px 0 rgba(246, 241, 232, 0.9);
+}
+.motif.is-found .i {
+  opacity: 0.88;
+}
+.motif.is-found .i.mist {
+  box-shadow: 0 0 8px rgba(197, 208, 220, 0.55);
 }
 .motif input:checked ~ .i {
   opacity: 0.95;
@@ -284,6 +293,81 @@ html[data-lang="zh"] .bday-text {
 @keyframes heart-pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.12); }
+}
+
+.wish-toast {
+  pointer-events: none;
+  position: fixed;
+  left: 50%;
+  top: 26%;
+  z-index: 14;
+  transform: translateX(-50%);
+}
+.wish-toast[hidden] { display: none !important; }
+.wish-toast.is-on {
+  display: block;
+  animation: wish-hold 3.1s ease forwards;
+}
+.wish-text {
+  display: block;
+  padding: 0.55rem 1.15rem;
+  border-radius: 999px;
+  background: rgba(254, 252, 248, 0.88);
+  border: 1px solid rgba(197, 208, 220, 0.45);
+  color: #8a97a6;
+  font-size: var(--fs-title);
+  letter-spacing: 0;
+  box-shadow: 0 10px 28px rgba(107, 118, 132, 0.08);
+}
+@keyframes wish-hold {
+  0% { opacity: 0; transform: translate(-50%, 16px); }
+  14% { opacity: 1; transform: translate(-50%, 0); }
+  78% { opacity: 1; transform: translate(-50%, -8px); }
+  100% { opacity: 0; transform: translate(-50%, -22px); }
+}
+
+.star-field {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+html[data-chapter="stars-and-gold"][data-screen="album"] .star-field {
+  opacity: 1;
+}
+.star-field span {
+  position: absolute;
+  width: var(--s, 2px);
+  height: var(--s, 2px);
+  border-radius: 50%;
+  background: #c5d0dc;
+  opacity: 0.28;
+  box-shadow: 0 0 6px rgba(197, 208, 220, 0.45);
+  animation: twinkle var(--dur, 3s) ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+.star-field span.is-glyph {
+  width: auto;
+  height: auto;
+  background: none;
+  box-shadow: none;
+  color: #a8b5c4;
+  font-size: 0.55rem;
+  line-height: 1;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.12; transform: scale(0.82); }
+  50% { opacity: 0.7; transform: scale(1.18); }
+}
+
+html[data-chapter="stars-and-gold"] .chapter h2::after {
+  content: " ✦";
+  font-size: 0.72em;
+  color: #a8b5c4;
+  font-family: var(--font-en);
+  font-style: normal;
 }
 
 body.locked #app { display: none !important; }
@@ -650,6 +734,33 @@ html:not([data-screen="album"]) .controls { display: none; }
 .ctrl { min-width: 5.2rem; height: 2.6rem; padding: 0.35rem 0.9rem; font-size: var(--fs-ui); color: var(--maple); letter-spacing: 0; }
 .ctrl:disabled { opacity: 0.35; cursor: not-allowed; }
 .indicator { min-width: 8rem; text-align: center; color: var(--muted); font-size: var(--fs-meta); letter-spacing: 0; }
+.page-jump {
+  appearance: none;
+  -webkit-appearance: none;
+  max-width: min(48vw, 12.2rem);
+  min-width: 7.2rem;
+  min-height: 44px;
+  height: 2.6rem;
+  padding: 0.28rem 1.7rem 0.28rem 0.85rem;
+  border: 1px solid rgba(138, 155, 176, 0.28);
+  border-radius: 999px;
+  background-color: rgba(253, 250, 245, 0.96);
+  background-image: linear-gradient(45deg, transparent 50%, #8a97a6 50%), linear-gradient(135deg, #8a97a6 50%, transparent 50%);
+  background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-meta);
+  letter-spacing: 0;
+  line-height: 1.2;
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+.page-jump:focus {
+  outline: 2px solid rgba(168, 181, 196, 0.55);
+  outline-offset: 2px;
+}
 
 .lightbox {
   position: fixed;

@@ -54,8 +54,8 @@ window.ALBUM_DATA = {
     nextEn: "Next",
     pageOfZh: "第 {current} 页 · 共 {total} 页",
     pageOfEn: "Page {current} of {total}",
-    swipeHintZh: "点左右两侧翻页，点照片可以放大",
-    swipeHintEn: "Tap the sides to turn. Tap a photo to enlarge.",
+    swipeHintZh: "点左右两侧翻页，点照片可以放大。下方可以选页。",
+    swipeHintEn: "Tap the sides to turn. Tap a photo to enlarge. Jump from the menu below.",
   },
   chapters: [
     {
@@ -451,6 +451,27 @@ window.ALBUM_DATA = {
         { photos: [
           { src: "photos/100-aug-01.jpg", captionZh: "三里屯 · 撸猫", captionEn: "Sanlitun · cats", noteZh: "最后一次见面大约八月中旬，三里屯。很喜欢那家 PS 店——能玩游戏，也能撸猫。", noteEn: "Last meeting around mid-August, Sanlitun. We love that PlayStation shop — games, and cats to pet." },
           { src: "photos/101-aug-02.jpg", captionZh: "也爱 gaga", captionEn: "And gaga", noteZh: "那几天玩得很开心。我们也爱吃 gaga。", noteEn: "Those days were so happy. We also love eating at gaga." },
+        ] },
+      ],
+    },
+    {
+      id: "stars-and-gold",
+      titleZh: "星星和金毛",
+      titleEn: "Stars and gold",
+      introZh: "你是我认真看待的那一朵。金毛会笑，星星会亮。点一点上面的小图案，也许会有惊喜。",
+      introEn: "You are the one I look at carefully. Goldens smile; stars shine. Tap the little marks above — there may be a surprise.",
+      pages: [
+        { photos: [{ src: "photos/x-star-rose.jpg", captionZh: "一朵花", captionEn: "A single rose", noteZh: "世界上的花很多。认真对待的，只有这一朵。", noteEn: "There are many flowers. The one I tend with care is this one." }] },
+        { photos: [{ src: "photos/x-star-fox.jpg", captionZh: "狐狸看星", captionEn: "The fox and a star", noteZh: "被驯养过的心，会一直望着同一颗星。", noteEn: "A heart that has been tamed keeps looking at the same star." }] },
+        { photos: [{ src: "photos/x-star-claire.jpg", captionZh: "秋夜里的你", captionEn: "You, in autumn night", noteZh: "大宝举着花，看星星。我站在很远的地方，也觉得被照亮。", noteEn: "Da Bao holding a flower, looking at stars. Even from far away, I feel lit." }] },
+        { photos: [{ src: "photos/x-star-us.jpg", captionZh: "小小的星球", captionEn: "A small planet", noteZh: "两个小朋友，走在同一颗很小的星球上。", noteEn: "Two little ones, walking the same small planet." }] },
+        { photos: [
+          { src: "photos/x-gold-look.jpg", captionZh: "金毛看着你", captionEn: "The golden looks at you", noteZh: "我们也是彼此的狗狗。这样看着，就够了。", noteEn: "We are each other's puppies, too. Looking like this is enough." },
+          { src: "photos/x-gold-play.jpg", captionZh: "要玩", captionEn: "Want to play", noteZh: "金毛一跑，秋天也跟着跑。", noteEn: "When the golden runs, autumn runs too." },
+        ] },
+        { photos: [
+          { src: "photos/x-gold-field.jpg", captionZh: "草地", captionEn: "In the grass", noteZh: "软软的、亮亮的。像你笑起来的时候。", noteEn: "Soft, and bright — like you, when you smile." },
+          { src: "photos/x-gold-leaf.jpg", captionZh: "秋叶里", captionEn: "Among the leaves", noteZh: "金毛坐在枫叶里。秋然两个字，也像坐在秋天里。", noteEn: "A golden sitting in maple leaves. The name Qiu Ran sits in autumn, too." },
         ] },
       ],
     },

@@ -241,20 +241,91 @@ html.webgl-book #book-page.page {
   100% { transform: scale(1); opacity: 0.7; }
 }
 
+#motif-bits {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 11;
+  overflow: hidden;
+}
+
 .motif-bit {
   pointer-events: none;
   position: fixed;
-  z-index: 6;
-  font-size: 0.7rem;
-  opacity: 0.7;
-  animation: motif-fly 0.85s ease forwards;
+  z-index: 11;
+  font-size: var(--sz, 0.78rem);
+  line-height: 1;
+  opacity: 0.85;
+  animation: motif-fly 0.95s ease forwards;
+  animation-delay: var(--d, 0s);
+}
+.motif-bit.is-tomato { animation-name: motif-burst; color: #c48a92; }
+.motif-bit.is-pepper { animation-name: motif-scatter; }
+.motif-bit.is-eggplant { animation-name: motif-float; animation-duration: 1.45s; }
+.motif-bit.is-dog { animation-name: motif-bounce; }
+.motif-bit.is-maple { animation-name: motif-fall; animation-duration: 1.55s; }
+.motif-bit.is-flower { animation-name: motif-petal; }
+.motif-bit.is-mist { animation-name: motif-drift; color: #a8b5c4; }
+.motif-bit.is-star { animation-name: motif-star; animation-duration: 1.5s; color: #8a97a6; }
+
+.motif-ring {
+  pointer-events: none;
+  position: fixed;
+  z-index: 10;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 1px solid rgba(168, 181, 196, 0.55);
+  border-radius: 50%;
+  animation: motif-ring 1.25s ease-out forwards;
+  animation-delay: var(--d, 0s);
 }
 
 @keyframes motif-fly {
   to {
-    transform: translate3d(var(--mx, 20px), -36px, 0);
+    transform: translate3d(var(--mx, 20px), var(--my, -36px), 0);
     opacity: 0;
   }
+}
+@keyframes motif-burst {
+  0% { transform: translate3d(0, 0, 0) scale(0.55); opacity: 0.95; }
+  55% { transform: translate3d(calc(var(--mx) * 0.7), calc(var(--my, -48px) * 0.7), 0) scale(1.18); opacity: 1; }
+  100% { transform: translate3d(var(--mx), var(--my, -48px), 0) scale(0.9); opacity: 0; }
+}
+@keyframes motif-scatter {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0.9; }
+  100% { transform: translate3d(var(--mx), var(--my, -28px), 0) rotate(48deg); opacity: 0; }
+}
+@keyframes motif-float {
+  0% { transform: translate3d(0, 10px, 0); opacity: 0; }
+  18% { opacity: 0.8; }
+  100% { transform: translate3d(var(--mx), var(--my, -72px), 0); opacity: 0; }
+}
+@keyframes motif-bounce {
+  0% { transform: translate3d(0, 0, 0) scale(0.8); opacity: 1; }
+  38% { transform: translate3d(calc(var(--mx) * 0.35), -30px, 0) scale(1.16); }
+  100% { transform: translate3d(var(--mx), 18px, 0) scale(0.92); opacity: 0; }
+}
+@keyframes motif-fall {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0.95; }
+  100% { transform: translate3d(var(--mx), 96px, 0) rotate(170deg); opacity: 0; }
+}
+@keyframes motif-petal {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(0.7); opacity: 0.95; }
+  100% { transform: translate3d(var(--mx), var(--my, -42px), 0) rotate(150deg) scale(1.05); opacity: 0; }
+}
+@keyframes motif-drift {
+  0% { transform: translate3d(0, 0, 0) scale(0.4); opacity: 0.7; filter: blur(0); }
+  100% { transform: translate3d(var(--mx), var(--my, -24px), 0) scale(1.45); opacity: 0; filter: blur(2px); }
+}
+@keyframes motif-star {
+  0% { transform: translate3d(0, 0, 0) scale(0.25) rotate(0deg); opacity: 0; }
+  28% { opacity: 1; }
+  100% { transform: translate3d(var(--mx), var(--my, -88px), 0) scale(1) rotate(90deg); opacity: 0; }
+}
+@keyframes motif-ring {
+  0% { transform: scale(0.35); opacity: 0.55; }
+  100% { transform: scale(9); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -265,9 +336,13 @@ html.webgl-book #book-page.page {
   .album-book.is-flipping-next,
   .album-book.is-flipping-prev,
   .motif.is-pop .i,
-  .motif-bit {
+  .motif-bit,
+  .motif-ring,
+  .star-field span,
+  .wish-toast.is-on {
     animation: none;
   }
+  .star-field { opacity: 0.35; }
 }
 
 .book-gl {

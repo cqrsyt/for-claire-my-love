@@ -8,13 +8,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="css/styles.css?v=12" />
-    <link rel="stylesheet" href="css/book.css?v=12" />
-    <link rel="stylesheet" href="css/polish.css?v=12" />
+    <link rel="stylesheet" href="css/styles.css?v=13" />
+    <link rel="stylesheet" href="css/book.css?v=13" />
+    <link rel="stylesheet" href="css/polish.css?v=13" />
   </head>
   <body class="locked">
     <div class="paper-grain" aria-hidden="true"></div>
+    <div class="star-field" id="star-field" aria-hidden="true"></div>
     <div id="leaves" aria-hidden="true"></div>
+    <div id="motif-bits" aria-hidden="true"></div>
     <div class="bloom-field" aria-hidden="true">
       <img class="bloom bloom-a" src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=480&q=60" alt="" />
       <img class="bloom bloom-b" src="https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?auto=format&fit=crop&w=480&q=60" alt="" />
@@ -27,6 +29,9 @@
     <div id="bday-wish" class="bday-wish" hidden aria-hidden="true">
       <span class="bday-heart">♥</span>
       <span class="bday-text zh">祝大宝生日快乐</span>
+    </div>
+    <div id="wish-toast" class="wish-toast" hidden aria-hidden="true">
+      <span class="wish-text zh">大宝，我在。</span>
     </div>
 
     <div id="password-gate" class="gate">
@@ -62,43 +67,43 @@
       </header>
 
       <div id="motif-row" class="motif-row">
-        <label class="motif m1">
+        <label class="motif m1" data-kind="tomato">
           <input type="radio" name="motif" />
           <span class="i" aria-hidden="true">🍅</span>
           <span class="spark" aria-hidden="true"></span>
           <span class="say">红着</span>
         </label>
-        <label class="motif m2">
+        <label class="motif m2" data-kind="pepper">
           <input type="radio" name="motif" />
           <span class="i" aria-hidden="true">🫑</span>
           <span class="spark" aria-hidden="true"></span>
           <span class="say">青着</span>
         </label>
-        <label class="motif m3">
+        <label class="motif m3" data-kind="eggplant">
           <input type="radio" name="motif" />
           <span class="i" aria-hidden="true">🍆</span>
           <span class="spark" aria-hidden="true"></span>
           <span class="say">静静的</span>
         </label>
-        <label class="motif m4">
+        <label class="motif m4" data-kind="dog">
           <input type="radio" name="motif" />
           <span class="i" aria-hidden="true">🐕</span>
           <span class="spark" aria-hidden="true"></span>
           <span class="say">小狗</span>
         </label>
-        <label class="motif m5">
+        <label class="motif m5" data-kind="maple">
           <input type="radio" name="motif" />
           <span class="i" aria-hidden="true">🍁</span>
           <span class="spark" aria-hidden="true"></span>
           <span class="say">秋</span>
         </label>
-        <label class="motif m6">
+        <label class="motif m6" data-kind="flower">
           <input type="radio" name="motif" />
           <span class="i" aria-hidden="true">🌸</span>
           <span class="spark" aria-hidden="true"></span>
           <span class="say">花开</span>
         </label>
-        <label class="motif m7">
+        <label class="motif m7" data-kind="mist">
           <input type="radio" name="motif" />
           <span class="i mist" aria-hidden="true"></span>
           <span class="spark" aria-hidden="true"></span>
@@ -130,7 +135,7 @@
         <p id="swipe-hint" class="hint"></p>
         <div class="controls">
           <button type="button" id="btn-prev" class="ctrl">上一页</button>
-          <div id="page-indicator" class="indicator"></div>
+          <select id="page-jump" class="page-jump" aria-label="选页"></select>
           <button type="button" id="btn-next" class="ctrl">下一页</button>
         </div>
       </section>
@@ -143,10 +148,10 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
-    <script src="js/config.js?v=12"></script>
+    <script src="js/config.js?v=13"></script>
     <script src="js/sha256.js"></script>
-    <script src="data/album.js"></script>
-    <script src="js/webgl-book.js?v=12"></script>
-    <script src="js/app.js?v=12"></script>
+    <script src="data/album.js?v=13"></script>
+    <script src="js/webgl-book.js?v=13"></script>
+    <script src="js/app.js?v=13"></script>
   </body>
 </html>

@@ -44,7 +44,8 @@
 }
 
 .controls .ctrl,
-.controls .indicator {
+.controls .indicator,
+.controls .page-jump {
   pointer-events: auto;
 }
 
@@ -95,7 +96,7 @@ html[data-screen="story"] .bloom-a {
     opacity: 0.06;
   }
   .motif .say {
-    top: 1.55rem;
+    top: 2.4rem;
   }
 }
 

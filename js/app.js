@@ -91,7 +91,10 @@
       btn.classList.toggle("active", btn.dataset.view === view);
     });
     if (view === "album") renderPage(false);
-    else updateBirthdayWish();
+    else {
+      document.documentElement.removeAttribute("data-chapter");
+      updateBirthdayWish();
+    }
     if (view === "cover") {
       var book = document.getElementById("cover-book");
       var openBtn = document.getElementById("btn-open");
@@ -219,9 +222,6 @@
         (note ? "<p class=\"" + n + "\">" + esc(note) + "</p>" : "") +
         "</article>";
     }).join("") + "</div>";
-    document.getElementById("page-indicator").textContent = t("pageOf")
-      .replace("{current}", String(state.page + 1))
-      .replace("{total}", String(pages.length));
     document.getElementById("swipe-hint").textContent = t("swipeHint");
     document.getElementById("btn-prev").textContent = t("prev");
     document.getElementById("btn-next").textContent = t("next");
@@ -229,6 +229,8 @@
     document.getElementById("btn-next").className = "ctrl " + n;
     document.getElementById("btn-prev").disabled = state.page <= 0;
     document.getElementById("btn-next").disabled = state.page >= pages.length - 1;
+    document.documentElement.setAttribute("data-chapter", ch.id || "");
+    fillPageJump();
     updateBirthdayWish();
     if (glBook && glBook.ready) {
       if (animate !== "gl-keep") glBook.show(item, pages[state.page + 1] || null, helpers());
@@ -318,6 +320,130 @@
     });
     prev.addEventListener("click", function () { go(state.page - 1, true); });
     next.addEventListener("click", function () { go(state.page + 1, true); });
+    var jump = document.getElementById("page-jump");
+    if (jump && !jump._bound) {
+      jump._bound = true;
+      jump.addEventListener("change", function () {
+        var i = Number(jump.value);
+        if (glBook && glBook.busy) {
+          jump.value = String(state.page);
+          return;
+        }
+        go(i, true);
+      });
+    }
+  }
+
+  var MOTIF_FX = {
+    tomato: ["🍅", "♥", "🍅", "✦", "♥", "🍅"],
+    pepper: ["🫑", "✦", "·", "🫑", "✧", "·"],
+    eggplant: ["🍆", "✦", "·", "✧", "🍆"],
+    dog: ["🐕", "♥", "🐕", "♡", "✦", "🐕"],
+    maple: ["🍁", "🍂", "🍁", "✿", "🍂", "🍁", "🍂"],
+    flower: ["🌸", "✿", "❀", "🌼", "✦", "✿"],
+    mist: ["✦", "✧", "·", "✦", "✧"],
+    star: ["✦", "✧", "·", "♥", "✦"]
+  };
+  var foundKinds = {};
+  var lastDog = 0;
+  var wishOnce = false;
+
+  function goldPageIndex() {
+    for (var i = 0; i < pages.length; i++) {
+      var photos = pages[i].photos || [];
+      for (var j = 0; j < photos.length; j++) {
+        if (/x-gold/.test(photos[j].src || "")) return i;
+      }
+    }
+    return -1;
+  }
+
+  function fillPageJump() {
+    var sel = document.getElementById("page-jump");
+    if (!sel) return;
+    var current = String(state.page);
+    if (sel.dataset.lang === state.lang && sel.options.length) {
+      sel.value = current;
+      return;
+    }
+    sel.dataset.lang = state.lang;
+    sel.innerHTML = "";
+    var idx = 0;
+    data.chapters.forEach(function (ch) {
+      var group = document.createElement("optgroup");
+      group.label = zh() ? ch.titleZh : ch.titleEn;
+      (ch.pages || []).forEach(function (pg) {
+        var opt = document.createElement("option");
+        opt.value = String(idx);
+        var cap = pg.photos && pg.photos[0] ? (zh() ? pg.photos[0].captionZh : pg.photos[0].captionEn) : "";
+        opt.textContent = (idx + 1) + (cap ? " · " + cap : "");
+        group.appendChild(opt);
+        idx += 1;
+      });
+      sel.appendChild(group);
+    });
+    sel.value = current;
+    sel.className = "page-jump " + (zh() ? "zh" : "en");
+    sel.setAttribute("aria-label", zh() ? "选页" : "Jump to page");
+  }
+
+  function spawnBits(kind, x, y, extra) {
+    var host = document.getElementById("motif-bits") || document.getElementById("leaves");
+    if (!host) return;
+    var glyphs = MOTIF_FX[kind] || ["✦"];
+    var count = glyphs.length + (extra || 0);
+    for (var i = 0; i < count; i++) {
+      var angle = (Math.PI * 2 * i) / count + (Math.random() * 0.4 - 0.2);
+      var dist = 28 + Math.random() * 42;
+      if (kind === "mist" && i < 3) {
+        var ring = document.createElement("span");
+        ring.className = "motif-ring";
+        ring.style.left = x + "px";
+        ring.style.top = y + "px";
+        ring.style.animationDelay = (i * 0.04) + "s";
+        host.appendChild(ring);
+        window.setTimeout(function (node) { node.remove(); }, 1400, ring);
+        continue;
+      }
+      var bit = document.createElement("span");
+      bit.className = "motif-bit is-" + kind;
+      bit.textContent = glyphs[i % glyphs.length];
+      bit.style.left = x + "px";
+      bit.style.top = y + "px";
+      bit.style.setProperty("--mx", Math.round(Math.cos(angle) * dist) + "px");
+      bit.style.setProperty("--my", Math.round(Math.sin(angle) * dist - (kind === "maple" ? -40 : 36)) + "px");
+      bit.style.setProperty("--d", (i * 0.04) + "s");
+      bit.style.setProperty("--sz", (0.72 + Math.random() * 0.45) + "rem");
+      host.appendChild(bit);
+      window.setTimeout(function (node) { node.remove(); }, 1800, bit);
+    }
+  }
+
+  function showerStars() {
+    spawnBits("star", window.innerWidth / 2, window.innerHeight * 0.38, 14);
+  }
+
+  function showWish() {
+    if (wishOnce) return;
+    wishOnce = true;
+    var el = document.getElementById("wish-toast");
+    if (!el) return;
+    var text = el.querySelector(".wish-text");
+    if (text) {
+      text.textContent = zh() ? "大宝，我在。" : "Da Bao, I am here.";
+      text.className = "wish-text " + (zh() ? "zh" : "en");
+    }
+    el.hidden = false;
+    el.classList.remove("is-on");
+    void el.offsetWidth;
+    el.classList.add("is-on");
+    el.setAttribute("aria-hidden", "false");
+    showerStars();
+    window.setTimeout(function () {
+      el.hidden = true;
+      el.classList.remove("is-on");
+      el.setAttribute("aria-hidden", "true");
+    }, 3200);
   }
 
   function bindMotifs() {
@@ -327,25 +453,51 @@
     row.addEventListener("click", function (e) {
       var motif = e.target.closest && e.target.closest(".motif");
       if (!motif) return;
-      var icon = motif.querySelector(".i");
-      var glyph = icon && !icon.classList.contains("mist") ? (icon.textContent || "✦") : "✦";
+      var kind = motif.getAttribute("data-kind") || "star";
       motif.classList.remove("is-pop");
       void motif.offsetWidth;
       motif.classList.add("is-pop");
-      var host = document.getElementById("leaves");
-      if (!host) return;
+      motif.classList.add("is-found");
       var r = motif.getBoundingClientRect();
-      for (var i = 0; i < 5; i++) {
-        var bit = document.createElement("span");
-        bit.className = "motif-bit";
-        bit.textContent = glyph;
-        bit.style.left = r.left + r.width / 2 + "px";
-        bit.style.top = r.top + "px";
-        bit.style.setProperty("--mx", Math.round(Math.random() * 56 - 28) + "px");
-        host.appendChild(bit);
-        window.setTimeout(function (node) { node.remove(); }, 900, bit);
+      spawnBits(kind, r.left + r.width / 2, r.top + r.height / 2);
+      if (kind === "dog") {
+        var now = Date.now();
+        if (now - lastDog < 1100) {
+          var gold = goldPageIndex();
+          if (gold >= 0) {
+            if (state.view !== "album") {
+              state.page = gold;
+              open("album");
+            } else {
+              go(gold, true);
+            }
+          }
+        }
+        lastDog = now;
+      }
+      foundKinds[kind] = true;
+      if (Object.keys(foundKinds).length >= 7) {
+        window.setTimeout(showWish, 280);
       }
     });
+  }
+
+  function sprinkleStars() {
+    var root = document.getElementById("star-field");
+    if (!root || root.childNodes.length) return;
+    for (var i = 0; i < 28; i++) {
+      var el = document.createElement("span");
+      if (i % 7 === 0) {
+        el.className = "is-glyph";
+        el.textContent = "✦";
+      }
+      el.style.left = Math.random() * 100 + "%";
+      el.style.top = Math.random() * 100 + "%";
+      el.style.setProperty("--s", (1 + Math.random() * 2.4) + "px");
+      el.style.setProperty("--d", (Math.random() * 7) + "s");
+      el.style.setProperty("--dur", (2.2 + Math.random() * 3.6) + "s");
+      root.appendChild(el);
+    }
   }
 
   function sprinkleLeaves() {
@@ -391,6 +543,8 @@
     }
     bindAlbumTurn();
     bindMotifs();
+    sprinkleStars();
+    fillPageJump();
     setLang(state.lang);
     open("cover");
     window.ClaireAlbum = { open: open, go: go };
