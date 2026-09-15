@@ -72,14 +72,14 @@
   }
 
   function paintPaper(ctx) {
-    ctx.fillStyle = "#fcf9f4";
+    ctx.fillStyle = "#fefcf8";
     ctx.fillRect(0, 0, TEX_W, TEX_H);
     var g = ctx.createLinearGradient(0, 0, 56, 0);
-    g.addColorStop(0, "rgba(138,155,176,0.1)");
-    g.addColorStop(1, "rgba(252,249,244,0)");
+    g.addColorStop(0, "rgba(197,208,220,0.07)");
+    g.addColorStop(1, "rgba(254,252,248,0)");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, 56, TEX_H);
-    ctx.fillStyle = "rgba(138,155,176,0.08)";
+    ctx.fillStyle = "rgba(197,208,220,0.05)";
     ctx.fillRect(TEX_W - 18, 0, 18, TEX_H);
     ctx.save();
     ctx.globalAlpha = 0.12;
@@ -220,6 +220,7 @@
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     renderer.setClearColor(0x000000, 0);
     if (THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.NoToneMapping;
     canvas.className = "book-gl-canvas";
     canvas.setAttribute("aria-hidden", "true");
     canvas.style.pointerEvents = "none";
@@ -235,15 +236,15 @@
     var camera = new THREE.PerspectiveCamera(30, 1, 0.05, 20);
     var book = new THREE.Group();
     scene.add(book);
-    scene.add(new THREE.HemisphereLight(0xfffaf4, 0xeef1f6, 1.05));
-    scene.add(new THREE.AmbientLight(0xfff8f0, 0.85));
-    var key = new THREE.DirectionalLight(0xfffbf6, 0.92);
+    scene.add(new THREE.HemisphereLight(0xfffbf6, 0xf4f6f9, 1.35));
+    scene.add(new THREE.AmbientLight(0xfffaf4, 1.15));
+    var key = new THREE.DirectionalLight(0xffffff, 1.15);
     key.position.set(0.35, 0.95, 1.45);
     scene.add(key);
-    var fill = new THREE.DirectionalLight(0xffffff, 0.48);
+    var fill = new THREE.DirectionalLight(0xffffff, 0.72);
     fill.position.set(-0.7, 0.4, 0.95);
     scene.add(fill);
-    var curlLight = new THREE.PointLight(0xfff6ea, 0.0, 3.4, 2);
+    var curlLight = new THREE.PointLight(0xfff8f0, 0.0, 3.4, 2);
     scene.add(curlLight);
 
     var W = 1;
@@ -251,21 +252,17 @@
     var geo = new THREE.PlaneGeometry(1, 1, SEG_X, SEG_Y);
     var underGeo = new THREE.PlaneGeometry(1, 1, 1, 1);
     var paper = paperTexture(THREE);
-    var frontMat = new THREE.MeshStandardMaterial({
-      map: paper, roughness: 0.64, metalness: 0, side: THREE.FrontSide,
-      emissive: 0xfff8f0, emissiveIntensity: 0.32,
+    var frontMat = new THREE.MeshBasicMaterial({
+      map: paper, side: THREE.FrontSide, toneMapped: false,
     });
-    var backMat = new THREE.MeshStandardMaterial({
-      map: paper, roughness: 0.7, metalness: 0, side: THREE.BackSide,
-      emissive: 0xfff6ea, emissiveIntensity: 0.22,
+    var backMat = new THREE.MeshBasicMaterial({
+      color: 0xfaf6ef, side: THREE.BackSide, toneMapped: false,
     });
-    var underMat = new THREE.MeshStandardMaterial({
-      map: paper, roughness: 0.64, metalness: 0,
-      emissive: 0xfff8f0, emissiveIntensity: 0.32,
+    var underMat = new THREE.MeshBasicMaterial({
+      map: paper, toneMapped: false,
     });
-    var stackMat = new THREE.MeshStandardMaterial({
-      color: 0xf4efe6, roughness: 0.82, metalness: 0,
-      emissive: 0xfff8f0, emissiveIntensity: 0.18,
+    var stackMat = new THREE.MeshBasicMaterial({
+      color: 0xf7f3ec, toneMapped: false,
     });
     var flip = new THREE.Mesh(geo, frontMat);
     var flipBack = new THREE.Mesh(geo, backMat);
@@ -276,7 +273,7 @@
     stack.position.set(0.012, -0.01, -0.018);
     var spine = new THREE.Mesh(
       new THREE.BoxGeometry(0.03, 1, 0.04),
-      new THREE.MeshStandardMaterial({ color: 0xb7c2cf, roughness: 0.7, metalness: 0.05 })
+      new THREE.MeshBasicMaterial({ color: 0xc5d0dc, toneMapped: false })
     );
     book.add(stack);
     book.add(under);

@@ -63,10 +63,10 @@
 }
 
 .album-block {
+  min-height: 280px;
   position: relative;
   z-index: 2;
   transform-style: preserve-3d;
-  min-height: 280px;
 }
 
 #book-page.page {
@@ -93,7 +93,7 @@
       rgba(90, 108, 128, 0.28) 100%
     );
   opacity: 0;
-  mix-blend-mode: multiply;
+  mix-blend-mode: soft-light;
 }
 
 #book-page.page.is-letter {
@@ -263,7 +263,6 @@
   }
 }
 
-/* WebGL page lives in #book-gl. Canvas never captures clicks. */
 .book-gl {
   position: absolute;
   inset: 0;
