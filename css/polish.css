@@ -1,0 +1,112 @@
+/* Layout-only fixes. Do not change click handling. */
+
+.brand-title {
+  white-space: nowrap;
+}
+
+.cover-face-front {
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.cover-face-front .btn-open {
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.cover-book {
+  height: min(460px, 60vh);
+}
+
+.cover-face-front h1 {
+  font-size: clamp(1.55rem, 4.6vw, 2.1rem);
+}
+
+.avatars img {
+  width: 62px;
+  height: 62px;
+}
+
+.chapter {
+  position: relative;
+  z-index: 2;
+  max-width: 34rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.15rem 0.4rem 0.55rem;
+}
+
+.chapter p {
+  line-height: 1.7;
+  padding: 0.2rem 0.55rem;
+  border-radius: 10px;
+  background: rgba(247, 243, 236, 0.72);
+}
+
+.controls {
+  pointer-events: none;
+}
+
+.controls .ctrl,
+.controls .indicator {
+  pointer-events: auto;
+}
+
+.ctrl:disabled {
+  opacity: 0.45;
+  visibility: visible;
+}
+
+.indicator {
+  color: #6b7684;
+}
+
+html[data-screen="album"] .bloom-a,
+html[data-screen="story"] .bloom-a {
+  opacity: 0.08;
+}
+
+@media (max-width: 720px) {
+  .brand-title {
+    font-size: 1.05rem;
+  }
+  .brand-sub {
+    display: none;
+  }
+  #app.is-on {
+    padding: 0.45rem 0.8rem 5.8rem;
+  }
+  .top {
+    align-items: flex-start;
+  }
+  .cover-book {
+    width: min(320px, 86vw);
+    height: min(430px, 58vh);
+  }
+  .cover-face-front {
+    padding: 1.1rem 1rem 1rem 1.2rem;
+  }
+  .avatars img {
+    width: 54px;
+    height: 54px;
+  }
+  .bloom-a,
+  .bloom-c {
+    opacity: 0.1;
+  }
+  .motif .say {
+    top: 1.55rem;
+  }
+}
+
+@media (max-height: 720px) {
+  .cover-book {
+    height: min(400px, 56vh);
+  }
+  .cover-face-front h1 {
+    margin: 0.15rem 0 0.1rem;
+  }
+  .avatars {
+    margin: 0.45rem 0;
+  }
+}
