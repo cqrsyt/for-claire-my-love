@@ -61,9 +61,14 @@
   color: #6b7684;
 }
 
+html[data-screen="album"] .bloom,
+html[data-screen="story"] .bloom {
+  opacity: 0.06;
+}
+
 html[data-screen="album"] .bloom-a,
 html[data-screen="story"] .bloom-a {
-  opacity: 0.08;
+  opacity: 0.05;
 }
 
 @media (max-width: 720px) {
@@ -92,7 +97,7 @@ html[data-screen="story"] .bloom-a {
   }
   .bloom-a,
   .bloom-c {
-    opacity: 0.1;
+    opacity: 0.06;
   }
   .motif .say {
     top: 1.55rem;
