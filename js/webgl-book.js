@@ -82,6 +82,14 @@
     ctx.fillStyle = "rgba(197,208,220,0.05)";
     ctx.fillRect(TEX_W - 18, 0, 18, TEX_H);
     ctx.save();
+    ctx.strokeStyle = "rgba(184,195,208,0.32)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(40, 40, TEX_W - 80, TEX_H - 80);
+    ctx.strokeStyle = "rgba(184,195,208,0.16)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(48, 48, TEX_W - 96, TEX_H - 96);
+    ctx.restore();
+    ctx.save();
     ctx.globalAlpha = 0.12;
     ctx.font = '28px "Ma Shan Zheng", KaiTi, serif';
     ctx.fillStyle = "#8a97a6";
@@ -103,7 +111,15 @@
     canvas.height = TEX_H;
     var ctx = canvas.getContext("2d");
     paintPaper(ctx);
-    var ready = document.fonts && document.fonts.ready ? document.fonts.ready.catch(function () {}) : Promise.resolve();
+    var ready = Promise.resolve();
+    if (document.fonts && document.fonts.load) {
+      ready = Promise.all([
+        document.fonts.load('40px "Ma Shan Zheng"'),
+        document.fonts.load('italic 32px "Cormorant Garamond"')
+      ]).catch(function () {});
+    } else if (document.fonts && document.fonts.ready) {
+      ready = document.fonts.ready.catch(function () {});
+    }
     return ready.then(function () {
       var photos = (item && item.photos) || [];
       var pad = 78;
@@ -130,19 +146,20 @@
             var dy = y0 + Math.max(0, (maxH - dh) * 0.35);
             roundImage(ctx, img, dx, dy, dw, dh, 18);
             ctx.textAlign = "center";
+            ctx.textBaseline = "alphabetic";
             if (caption) {
               ctx.fillStyle = "#3a4450";
               ctx.font = zh
-                ? '44px "Ma Shan Zheng", KaiTi, serif'
-                : 'italic 34px "Cormorant Garamond", Georgia, serif';
-              ctx.fillText(caption, TEX_W / 2, dy + dh + 52);
+                ? '40px "Ma Shan Zheng", KaiTi, serif'
+                : 'italic 32px "Cormorant Garamond", Georgia, serif';
+              ctx.fillText(caption, TEX_W / 2, dy + dh + 50);
             }
             if (note) {
               ctx.fillStyle = "#8a97a6";
               ctx.font = zh
-                ? '28px "Ma Shan Zheng", KaiTi, serif'
-                : 'italic 24px "Cormorant Garamond", Georgia, serif';
-              wrapText(ctx, note, TEX_W / 2, dy + dh + (caption ? 92 : 56), innerW - 24, 36, 2);
+                ? '26px "Ma Shan Zheng", KaiTi, serif'
+                : 'italic 22px "Cormorant Garamond", Georgia, serif';
+              wrapText(ctx, note, TEX_W / 2, dy + dh + (caption ? 88 : 52), innerW - 24, 34, 2);
             }
           }).catch(function () {
             ctx.fillStyle = "rgba(197,208,220,0.35)";
@@ -313,16 +330,18 @@
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       W = 1;
-      H = height / width;
+      H = TEX_H / TEX_W;
       layoutGeometry();
-      var fov = 30;
-      camera.fov = fov;
-      var fit = Math.max(W, H) * 0.62;
-      var dist = fit / Math.tan((fov * 0.5 * Math.PI) / 180);
-      camera.position.set(W * 0.46, H * 0.04, dist * 0.92);
-      camera.lookAt(W * 0.42, -H * 0.01, 0);
+      camera.fov = 28;
+      var vFov = (camera.fov * Math.PI) / 180;
+      var pad = 1.05;
+      var distH = (H * 0.5 * pad) / Math.tan(vFov / 2);
+      var distW = (W * 0.5 * pad) / (Math.tan(vFov / 2) * camera.aspect);
+      var dist = Math.max(distH, distW);
+      camera.position.set(W * 0.5, 0, dist);
+      camera.lookAt(W * 0.5, 0, 0);
       camera.updateProjectionMatrix();
-      book.rotation.set(0.055, -0.09, 0);
+      book.rotation.set(0.02, -0.03, 0);
     }
 
     function renderOnce() {
@@ -372,7 +391,7 @@
         return Promise.all([texFor(current, helpers), texFor(next, helpers)]).then(function (pair) {
           if (disposed) return;
           setMaps(pair[0], pair[1]);
-          book.rotation.set(0.055, -0.09, 0);
+          book.rotation.set(0.02, -0.03, 0);
           curlLight.intensity = 0;
           renderOnce();
         });
@@ -401,8 +420,8 @@
               var e = easePaper(t);
               progress = fromP + (toP - fromP) * e;
               deform(geo, progress);
-              book.rotation.y = -0.09 + Math.sin(e * Math.PI) * rock;
-              book.rotation.x = 0.055 + Math.sin(e * Math.PI) * 0.07;
+              book.rotation.y = -0.03 + Math.sin(e * Math.PI) * rock;
+              book.rotation.x = 0.02 + Math.sin(e * Math.PI) * 0.05;
               var ridge = dir === "next" ? progress : 1 - progress;
               curlLight.intensity = 0.55 * Math.sin(ridge * Math.PI);
               curlLight.position.set(
@@ -422,7 +441,7 @@
         }).then(function (pair) {
           if (disposed) { busy = false; return; }
           setMaps(pair[0], pair[1]);
-          book.rotation.set(0.055, -0.09, 0);
+          book.rotation.set(0.02, -0.03, 0);
           curlLight.intensity = 0;
           deform(geo, 0);
           renderer.render(scene, camera);

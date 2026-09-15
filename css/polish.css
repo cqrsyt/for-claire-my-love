@@ -14,12 +14,8 @@
   flex-shrink: 0;
 }
 
-.cover-book {
-  height: min(460px, 60vh);
-}
-
 .cover-face-front h1 {
-  font-size: clamp(1.55rem, 4.6vw, 2.1rem);
+  font-size: var(--fs-display);
 }
 
 .avatars img {
@@ -73,7 +69,7 @@ html[data-screen="story"] .bloom-a {
 
 @media (max-width: 720px) {
   .brand-title {
-    font-size: 1.05rem;
+    font-size: 1.12rem;
   }
   .brand-sub {
     display: none;
@@ -85,11 +81,10 @@ html[data-screen="story"] .bloom-a {
     align-items: flex-start;
   }
   .cover-book {
-    width: min(320px, 86vw);
-    height: min(430px, 58vh);
+    width: min(300px, 82vw, calc(58vh * 5 / 7));
   }
   .cover-face-front {
-    padding: 1.1rem 1rem 1rem 1.2rem;
+    padding: 1.15rem 1rem 1rem 1.2rem;
   }
   .avatars img {
     width: 54px;
@@ -106,7 +101,7 @@ html[data-screen="story"] .bloom-a {
 
 @media (max-height: 720px) {
   .cover-book {
-    height: min(400px, 56vh);
+    width: min(280px, 70vw, calc(56vh * 5 / 7));
   }
   .cover-face-front h1 {
     margin: 0.15rem 0 0.1rem;

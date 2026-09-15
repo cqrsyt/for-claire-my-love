@@ -8,8 +8,8 @@
 
 .album-book {
   position: relative;
-  width: min(100%, 540px);
-  transform: rotateY(-6deg) rotateX(3deg);
+  width: min(100%, 440px, calc(68vh * 1024 / 1376));
+  transform: none;
   transform-style: preserve-3d;
   transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
@@ -63,18 +63,25 @@
 }
 
 .album-block {
-  min-height: 280px;
   position: relative;
   z-index: 2;
+  width: 100%;
+  aspect-ratio: 1024 / 1376;
+  min-height: 0;
   transform-style: preserve-3d;
 }
 
 #book-page.page {
   transform-origin: left center;
   background:
-    linear-gradient(90deg, rgba(138, 155, 176, 0.14), transparent 16px),
+    linear-gradient(90deg, rgba(138, 155, 176, 0.1), transparent 16px),
     var(--paper);
   overflow: hidden;
+}
+
+html.webgl-book #book-page.page {
+  position: absolute;
+  inset: 0;
 }
 
 #book-page.page::after {

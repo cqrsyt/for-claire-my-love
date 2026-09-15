@@ -142,6 +142,7 @@
       '<div class="cover-spine" aria-hidden="true"></div>' +
       '<div class="cover-leaf" id="cover-leaf">' +
       '<div class="cover-face cover-face-front">' +
+      '<div class="cover-plate" aria-hidden="true"></div>' +
       '<p class="kicker ' + n + '">' + esc(zh() ? data.meta.occasionZh : data.meta.occasionEn) + "</p>" +
       "<h1 class=\"" + n + "\">" + esc(zh() ? data.meta.titleZh : data.meta.titleEn) + "</h1>" +
       "<p class=\"cover-sub " + n + "\">" + esc(zh() ? data.meta.subtitleZh : data.meta.subtitleEn) + "</p>" +
@@ -194,7 +195,7 @@
     }).join("");
     document.getElementById("story-copy").innerHTML =
       "<h2 class=\"" + n + "\">" + esc(zh() ? data.story.titleZh : data.story.titleEn) + "</h2>" +
-      '<div class="ornament" style="margin:0.7rem auto 1.1rem;width:40px;height:1px;background:var(--gold)"></div>' +
+      '<div class="letter-rule" aria-hidden="true"></div>' +
       paras +
       "<div class=\"dedication " + n + "\">" + esc(zh() ? data.meta.dedicationZh : data.meta.dedicationEn) + "</div>";
   }
