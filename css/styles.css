@@ -730,7 +730,7 @@ body.locked .gate { display: flex; }
   background: linear-gradient(0deg, rgba(253, 250, 245, 0.97) 62%, transparent);
   z-index: 9;
 }
-html:not([data-screen="album"]):not([data-screen="story"]) .controls { display: none; }
+html:not([data-screen="album"]) .controls { display: none; }
 .ctrl { min-width: 5.2rem; height: 2.6rem; padding: 0.35rem 0.9rem; font-size: var(--fs-ui); color: var(--maple); letter-spacing: 0; }
 .ctrl:disabled { opacity: 0.35; cursor: not-allowed; }
 .indicator { min-width: 8rem; text-align: center; color: var(--muted); font-size: var(--fs-meta); letter-spacing: 0; }

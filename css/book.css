@@ -79,6 +79,41 @@
   overflow: hidden;
 }
 
+#book-page.page.is-letter {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  z-index: 5;
+  opacity: 1;
+}
+
+#book-page.page.is-letter .letter.in-book {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 1rem 0.95rem 1.15rem;
+  min-height: 100%;
+}
+
+#book-page.page.is-letter .letter.in-book::before {
+  inset: 8px;
+}
+
+#book-page.page.is-letter .letter h2 {
+  font-size: var(--fs-title);
+}
+
+#book-page.page.is-letter .letter p {
+  margin: 0.65rem 0;
+  font-size: var(--fs-caption);
+  line-height: 1.75;
+}
+
+#book-page.page.is-letter .center {
+  padding: 0.55rem 0 0.15rem;
+}
+
 html.webgl-book #book-page.page {
   position: absolute;
   inset: 0;
@@ -352,8 +387,17 @@ html.webgl-book #book-page.page {
   pointer-events: none;
 }
 
+html:not(.webgl-book) .book-gl {
+  visibility: hidden;
+  opacity: 0;
+}
+
 html.webgl-book #book-page {
   opacity: 0;
+}
+
+html.webgl-book #book-page.page.is-letter {
+  opacity: 1;
 }
 
 html.webgl-book .album-book {

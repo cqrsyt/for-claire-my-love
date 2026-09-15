@@ -14,7 +14,7 @@
   var state = {
     lang: localStorage.getItem("claire-my-love-lang") || "zh",
     view: "cover",
-    page: 0,
+    page: -1,
   };
   var glBook = null;
 
@@ -87,11 +87,9 @@
     document.querySelectorAll(".view").forEach(function (el) {
       el.classList.toggle("active", el.dataset.view === view);
     });
-    document.querySelectorAll("#nav button").forEach(function (btn) {
-      btn.classList.toggle("active", btn.dataset.view === view);
-    });
     if (view === "album") renderPage(false);
     else {
+      document.documentElement.classList.remove("webgl-book");
       document.documentElement.removeAttribute("data-chapter");
       updateBirthdayWish();
       syncControls();
@@ -129,8 +127,11 @@
     document.querySelectorAll("#nav button").forEach(function (btn, i) {
       btn.textContent = t(labels[i]);
     });
-    document.getElementById("btn-see-us").textContent = t("seeUs");
-    document.getElementById("btn-see-us").className = "btn " + n;
+    var seeUsBtn = document.getElementById("btn-see-us");
+    if (seeUsBtn) {
+      seeUsBtn.textContent = t("seeUs");
+      seeUsBtn.className = "btn " + n;
+    }
     document.title = (zh() ? data.meta.titleZh + " · " + data.meta.subtitleZh : data.meta.titleEn + " · " + data.meta.subtitleEn);
   }
 
@@ -176,8 +177,8 @@
       function enterAlbum() {
         if (entered) return;
         entered = true;
-        state.page = 0;
-        open("story");
+        state.page = -1;
+        open("album");
       }
       btn.disabled = true;
       book.classList.add("is-open");
@@ -193,6 +194,7 @@
   }
 
   function renderStory() {
+    if (!document.getElementById("story-copy")) return;
     var n = zh() ? "zh" : "en";
     var paras = data.story.paragraphs.map(function (p) {
       return "<p class=\"" + n + "\">" + esc(zh() ? p.zh : p.en) + "</p>";
@@ -204,7 +206,45 @@
       "<div class=\"dedication " + n + "\">" + esc(zh() ? data.meta.dedicationZh : data.meta.dedicationEn) + "</div>";
   }
 
+  function renderLetterPage() {
+    var n = zh() ? "zh" : "en";
+    document.getElementById("chapter-header").innerHTML =
+      "<h2 class=\"" + n + "\">" + esc(zh() ? data.story.titleZh : data.story.titleEn) + "</h2>" +
+      "<p class=\"" + n + "\">" + esc(zh() ? "翻开后的第一页。下一页，是我们。" : "The first page. Next is us.") + "</p>";
+    var box = document.getElementById("book-page");
+    box.classList.remove("is-turn-next", "is-turn-prev");
+    box.classList.add("is-letter");
+    var paras = data.story.paragraphs.map(function (p) {
+      return "<p class=\"" + n + "\">" + esc(zh() ? p.zh : p.en) + "</p>";
+    }).join("");
+    box.innerHTML =
+      '<article class="letter in-book">' +
+      "<h2 class=\"" + n + "\">" + esc(zh() ? data.story.titleZh : data.story.titleEn) + "</h2>" +
+      '<div class="letter-rule" aria-hidden="true"></div>' +
+      paras +
+      "<div class=\"dedication " + n + "\">" + esc(zh() ? data.meta.dedicationZh : data.meta.dedicationEn) + "</div>" +
+      '<p class="center"><button type="button" id="btn-see-us" class="btn ' + n + '">' + esc(t("seeUs")) + "</button></p>" +
+      "</article>";
+    var see = document.getElementById("btn-see-us");
+    if (see) {
+      see.onclick = function (ev) {
+        if (ev && ev.stopPropagation) ev.stopPropagation();
+        state.page = 0;
+        open("album");
+      };
+    }
+    document.getElementById("swipe-hint").textContent = t("swipeHint");
+    document.documentElement.classList.remove("webgl-book");
+    document.documentElement.removeAttribute("data-chapter");
+    syncControls();
+    updateBirthdayWish();
+  }
+
   function renderPage(animate) {
+    if (state.page < 0) {
+      renderLetterPage();
+      return;
+    }
     var item = pages[state.page];
     if (!item) return;
     var n = zh() ? "zh" : "en";
@@ -228,6 +268,7 @@
     document.documentElement.setAttribute("data-chapter", ch.id || "");
     updateBirthdayWish();
     if (glBook && glBook.ready) {
+      document.documentElement.classList.add("webgl-book");
       if (animate !== "gl-keep") glBook.show(item, pages[state.page + 1] || null, helpers());
       return;
     }
@@ -262,7 +303,12 @@
 
   function go(i, animate) {
     if (glBook && glBook.busy) return;
-    if (i < 0 || i >= pages.length || i === state.page) return;
+    if (i < -1 || i >= pages.length || i === state.page) return;
+    if (state.page < 0 || i < 0) {
+      state.page = i;
+      renderPage(false);
+      return;
+    }
     var dir = i < state.page ? "prev" : "next";
     var from = pages[state.page];
     var to = pages[i];
@@ -298,14 +344,19 @@
     var next = document.getElementById("btn-next");
     stage.addEventListener("click", function (e) {
       if (state.view !== "album") return;
+      if (e.target && e.target.closest && e.target.closest("button, a, select, input, label")) return;
       var r = stage.getBoundingClientRect();
       var x = e.clientX - r.left;
       if (x < r.width * 0.28) {
-        if (state.page <= 0) open("story");
-        else go(state.page - 1, true);
+        if (state.page < 0) return;
+        go(state.page - 1, true);
         return;
       }
       if (x > r.width * 0.72) {
+        if (state.page < 0) {
+          go(0, true);
+          return;
+        }
         go(state.page + 1, true);
         return;
       }
@@ -315,20 +366,10 @@
       if (item) openLightbox(item.photos[Number(img.dataset.i)]);
     });
     prev.addEventListener("click", function () {
-      if (state.view === "story") return;
-      if (state.page <= 0) {
-        open("story");
-        return;
-      }
       go(state.page - 1, true);
     });
     next.addEventListener("click", function () {
-      if (state.view === "story") {
-        state.page = 0;
-        open("album");
-        return;
-      }
-      go(state.page + 1, true);
+      go(state.page < 0 ? 0 : state.page + 1, true);
     });
     var jump = document.getElementById("page-jump");
     if (jump && !jump._bound) {
@@ -336,15 +377,16 @@
       jump.addEventListener("change", function () {
         var v = jump.value;
         if (v === "letter") {
-          open("story");
+          state.page = -1;
+          open("album");
           return;
         }
         var i = Number(v);
         if (glBook && glBook.busy) {
-          jump.value = state.view === "story" ? "letter" : String(state.page);
+          jump.value = state.page < 0 ? "letter" : String(state.page);
           return;
         }
-        if (state.view !== "album") {
+        if (state.view !== "album" || state.page < 0) {
           state.page = i;
           open("album");
           return;
@@ -381,7 +423,7 @@
   function fillPageJump() {
     var sel = document.getElementById("page-jump");
     if (!sel) return;
-    var current = state.view === "story" ? "letter" : String(state.page);
+    var current = state.page < 0 ? "letter" : String(state.page);
     if (sel.dataset.lang === state.lang && sel.options.length && sel.options[0] && sel.options[0].value === "letter") {
       sel.value = current;
       sel.className = "page-jump " + (zh() ? "zh" : "en");
@@ -421,9 +463,21 @@
     next.textContent = t("next");
     prev.className = "ctrl " + n;
     next.className = "ctrl " + n;
-    prev.disabled = state.view === "story";
+    prev.disabled = state.page < 0;
     next.disabled = state.view === "album" && state.page >= pages.length - 1;
     fillPageJump();
+    syncNav();
+  }
+
+  function syncNav() {
+    document.querySelectorAll("#nav button").forEach(function (btn) {
+      var v = btn.dataset.view;
+      var on = false;
+      if (v === "cover") on = state.view === "cover";
+      else if (v === "story") on = state.view === "album" && state.page < 0;
+      else if (v === "album") on = state.view === "album" && state.page >= 0;
+      btn.classList.toggle("active", on);
+    });
   }
 
   function spawnBits(kind, x, y, extra) {
@@ -561,14 +615,28 @@
     });
     document.querySelectorAll("#nav button").forEach(function (btn) {
       btn.onclick = function () {
-        if (btn.dataset.view === "album") state.page = Math.min(state.page, pages.length - 1);
+        if (btn.dataset.view === "story") {
+          state.page = -1;
+          open("album");
+          return;
+        }
+        if (btn.dataset.view === "album") {
+          if (state.view === "cover") state.page = -1;
+          else if (state.page < 0) state.page = 0;
+          else state.page = Math.min(state.page, pages.length - 1);
+          open("album");
+          return;
+        }
         open(btn.dataset.view);
       };
     });
-    document.getElementById("btn-see-us").onclick = function () {
-      state.page = 0;
-      open("album");
-    };
+    var seeUs = document.getElementById("btn-see-us");
+    if (seeUs) {
+      seeUs.onclick = function () {
+        state.page = 0;
+        open("album");
+      };
+    }
     document.getElementById("lightbox-close").onclick = closeLightbox;
     document.getElementById("lightbox").onclick = function (e) {
       if (e.target.id === "lightbox") closeLightbox();

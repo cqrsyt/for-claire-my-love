@@ -457,6 +457,7 @@
       },
       destroy: function () {
         disposed = true;
+        document.documentElement.classList.remove("webgl-book");
         stopLoop();
         Object.keys(cache).forEach(function (k) { cache[k].dispose(); });
         geo.dispose();
