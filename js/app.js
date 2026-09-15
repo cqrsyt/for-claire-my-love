@@ -94,6 +94,7 @@
     else {
       document.documentElement.removeAttribute("data-chapter");
       updateBirthdayWish();
+      syncControls();
     }
     if (view === "cover") {
       var book = document.getElementById("cover-book");
@@ -176,7 +177,7 @@
         if (entered) return;
         entered = true;
         state.page = 0;
-        open("album");
+        open("story");
       }
       btn.disabled = true;
       book.classList.add("is-open");
@@ -223,14 +224,8 @@
         "</article>";
     }).join("") + "</div>";
     document.getElementById("swipe-hint").textContent = t("swipeHint");
-    document.getElementById("btn-prev").textContent = t("prev");
-    document.getElementById("btn-next").textContent = t("next");
-    document.getElementById("btn-prev").className = "ctrl " + n;
-    document.getElementById("btn-next").className = "ctrl " + n;
-    document.getElementById("btn-prev").disabled = state.page <= 0;
-    document.getElementById("btn-next").disabled = state.page >= pages.length - 1;
+    syncControls();
     document.documentElement.setAttribute("data-chapter", ch.id || "");
-    fillPageJump();
     updateBirthdayWish();
     if (glBook && glBook.ready) {
       if (animate !== "gl-keep") glBook.show(item, pages[state.page + 1] || null, helpers());
@@ -306,7 +301,8 @@
       var r = stage.getBoundingClientRect();
       var x = e.clientX - r.left;
       if (x < r.width * 0.28) {
-        go(state.page - 1, true);
+        if (state.page <= 0) open("story");
+        else go(state.page - 1, true);
         return;
       }
       if (x > r.width * 0.72) {
@@ -318,15 +314,39 @@
       var item = pages[state.page];
       if (item) openLightbox(item.photos[Number(img.dataset.i)]);
     });
-    prev.addEventListener("click", function () { go(state.page - 1, true); });
-    next.addEventListener("click", function () { go(state.page + 1, true); });
+    prev.addEventListener("click", function () {
+      if (state.view === "story") return;
+      if (state.page <= 0) {
+        open("story");
+        return;
+      }
+      go(state.page - 1, true);
+    });
+    next.addEventListener("click", function () {
+      if (state.view === "story") {
+        state.page = 0;
+        open("album");
+        return;
+      }
+      go(state.page + 1, true);
+    });
     var jump = document.getElementById("page-jump");
     if (jump && !jump._bound) {
       jump._bound = true;
       jump.addEventListener("change", function () {
-        var i = Number(jump.value);
+        var v = jump.value;
+        if (v === "letter") {
+          open("story");
+          return;
+        }
+        var i = Number(v);
         if (glBook && glBook.busy) {
-          jump.value = String(state.page);
+          jump.value = state.view === "story" ? "letter" : String(state.page);
+          return;
+        }
+        if (state.view !== "album") {
+          state.page = i;
+          open("album");
           return;
         }
         go(i, true);
@@ -361,13 +381,18 @@
   function fillPageJump() {
     var sel = document.getElementById("page-jump");
     if (!sel) return;
-    var current = String(state.page);
-    if (sel.dataset.lang === state.lang && sel.options.length) {
+    var current = state.view === "story" ? "letter" : String(state.page);
+    if (sel.dataset.lang === state.lang && sel.options.length && sel.options[0] && sel.options[0].value === "letter") {
       sel.value = current;
+      sel.className = "page-jump " + (zh() ? "zh" : "en");
       return;
     }
     sel.dataset.lang = state.lang;
     sel.innerHTML = "";
+    var letter = document.createElement("option");
+    letter.value = "letter";
+    letter.textContent = zh() ? "信 · 我们的故事" : "Letter · Our Story";
+    sel.appendChild(letter);
     var idx = 0;
     data.chapters.forEach(function (ch) {
       var group = document.createElement("optgroup");
@@ -385,6 +410,20 @@
     sel.value = current;
     sel.className = "page-jump " + (zh() ? "zh" : "en");
     sel.setAttribute("aria-label", zh() ? "选页" : "Jump to page");
+  }
+
+  function syncControls() {
+    var n = zh() ? "zh" : "en";
+    var prev = document.getElementById("btn-prev");
+    var next = document.getElementById("btn-next");
+    if (!prev || !next) return;
+    prev.textContent = t("prev");
+    next.textContent = t("next");
+    prev.className = "ctrl " + n;
+    next.className = "ctrl " + n;
+    prev.disabled = state.view === "story";
+    next.disabled = state.view === "album" && state.page >= pages.length - 1;
+    fillPageJump();
   }
 
   function spawnBits(kind, x, y, extra) {
