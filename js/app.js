@@ -16,6 +16,11 @@
     view: "cover",
     page: 0,
   };
+  var glBook = null;
+
+  function helpers() {
+    return { asset: asset, zh: zh };
+  }
 
   function zh() { return state.lang !== "en"; }
   function t(key) { return data.ui[key + (zh() ? "Zh" : "En")]; }
@@ -213,10 +218,6 @@
         (note ? "<p class=\"" + n + "\">" + esc(note) + "</p>" : "") +
         "</article>";
     }).join("") + "</div>";
-    if (animate) {
-      void box.offsetWidth;
-      box.classList.add(animate === "prev" ? "is-turn-prev" : "is-turn-next");
-    }
     document.getElementById("page-indicator").textContent = t("pageOf")
       .replace("{current}", String(state.page + 1))
       .replace("{total}", String(pages.length));
@@ -228,6 +229,14 @@
     document.getElementById("btn-prev").disabled = state.page <= 0;
     document.getElementById("btn-next").disabled = state.page >= pages.length - 1;
     updateBirthdayWish();
+    if (glBook && glBook.ready) {
+      if (animate !== "gl-keep") glBook.show(item, pages[state.page + 1] || null, helpers());
+      return;
+    }
+    if (animate) {
+      void box.offsetWidth;
+      box.classList.add(animate === "prev" ? "is-turn-prev" : "is-turn-next");
+    }
   }
 
   function updateBirthdayWish() {
@@ -254,9 +263,23 @@
   }
 
   function go(i, animate) {
+    if (glBook && glBook.busy) return;
     if (i < 0 || i >= pages.length || i === state.page) return;
     var dir = i < state.page ? "prev" : "next";
+    var from = pages[state.page];
+    var to = pages[i];
     state.page = i;
+    if (glBook && glBook.ready && animate) {
+      renderPage("gl-keep");
+      glBook.flip(from, to, dir, helpers(), pages[i + 1] || null);
+      var album = document.querySelector(".album-book");
+      if (album) {
+        album.classList.remove("is-flipping-next", "is-flipping-prev");
+        void album.offsetWidth;
+        album.classList.add(dir === "prev" ? "is-flipping-prev" : "is-flipping-next");
+      }
+      return;
+    }
     renderPage(animate ? dir : false);
   }
 
@@ -361,6 +384,10 @@
     document.addEventListener("keydown", function (e) {
       if (!document.getElementById("lightbox").hidden && e.key === "Escape") closeLightbox();
     });
+    var host = document.getElementById("book-gl");
+    if (window.ClaireWebGLBook && host) {
+      glBook = window.ClaireWebGLBook.mount(host);
+    }
     bindAlbumTurn();
     bindMotifs();
     setLang(state.lang);
