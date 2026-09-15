@@ -206,7 +206,13 @@
     var THREE = root.THREE;
     if (!THREE || !container || !canWebGL()) return null;
 
+    var canvas = document.createElement("canvas");
+    var glOpts = { alpha: true, antialias: true, premultipliedAlpha: true };
+    var context = canvas.getContext("webgl2", glOpts) || canvas.getContext("webgl", glOpts);
+    if (!context) return null;
     var renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      context: context,
       alpha: true,
       antialias: true,
       powerPreference: "high-performance",
@@ -214,8 +220,6 @@
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     renderer.setClearColor(0x000000, 0);
     if (THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-    var canvas = renderer.domElement;
     canvas.className = "book-gl-canvas";
     canvas.setAttribute("aria-hidden", "true");
     canvas.style.pointerEvents = "none";
