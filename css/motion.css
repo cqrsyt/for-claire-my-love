@@ -1,0 +1,214 @@
+/* Quiet motion. Pointer events stay on the real buttons. */
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes view-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cover-glow {
+  0%, 100% { filter: none; }
+  50% { filter: drop-shadow(0 18px 24px rgba(90, 108, 128, 0.18)); }
+}
+
+@keyframes maple-turn {
+  0%, 100% { transform: translate(-50%, -50%) rotate(-10deg); }
+  50% { transform: translate(-50%, -50%) rotate(10deg); }
+}
+
+@keyframes avatar-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes heart-soft {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+
+@keyframes edge-drift {
+  from { transform: translateY(0); opacity: 0.16; }
+  to { transform: translateY(10px); opacity: 0.28; }
+}
+
+@keyframes ink-line {
+  from { transform: scaleX(0.35); opacity: 0.2; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+.gate-card {
+  animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.gate-card > * {
+  animation: rise-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.gate-card > :nth-child(1) { animation-delay: 0.04s; }
+.gate-card > :nth-child(2) { animation-delay: 0.12s; }
+.gate-card > :nth-child(3) { animation-delay: 0.2s; }
+.gate-card > :nth-child(4) { animation-delay: 0.3s; }
+.gate-card > :nth-child(5) { animation-delay: 0.38s; }
+
+#app.is-on {
+  animation: fade-in 0.55s ease both;
+}
+
+.view.active {
+  animation: view-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.cover-book:not(.is-open) {
+  animation: cover-glow 6.8s ease-in-out infinite;
+}
+
+.cover-ornament::before {
+  animation: maple-turn 7.5s ease-in-out infinite;
+}
+
+.cover .heart {
+  display: inline-block;
+  animation: heart-soft 2.4s ease-in-out infinite;
+}
+
+.avatars img:first-child {
+  animation: avatar-soft 4.8s ease-in-out infinite;
+}
+.avatars img:last-child {
+  animation: avatar-soft 4.8s ease-in-out infinite;
+  animation-delay: -2.4s;
+}
+
+.cover-ornament,
+.letter-rule {
+  transform-origin: center;
+  animation: ink-line 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.edge-left {
+  animation: edge-drift 16s ease-in-out infinite alternate;
+}
+.edge-right {
+  animation: edge-drift 18s ease-in-out infinite alternate-reverse;
+}
+
+.chapter h2 {
+  animation: rise-in 0.5s ease both;
+}
+.chapter p {
+  animation: rise-in 0.55s ease both;
+  animation-delay: 0.08s;
+}
+
+#book-page.page.is-letter .letter.in-book > * {
+  animation: rise-in 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+#book-page.page.is-letter .letter.in-book > :nth-child(1) { animation-delay: 0.04s; }
+#book-page.page.is-letter .letter.in-book > :nth-child(2) { animation-delay: 0.1s; }
+#book-page.page.is-letter .letter.in-book > :nth-child(3) { animation-delay: 0.16s; }
+#book-page.page.is-letter .letter.in-book > :nth-child(4) { animation-delay: 0.22s; }
+#book-page.page.is-letter .letter.in-book > :nth-child(5) { animation-delay: 0.28s; }
+#book-page.page.is-letter .letter.in-book > :nth-child(6) { animation-delay: 0.34s; }
+#book-page.page.is-letter .letter.in-book > :nth-child(7) { animation-delay: 0.4s; }
+#book-page.page.is-letter .letter.in-book > :nth-child(8) { animation-delay: 0.46s; }
+#book-page.page.is-letter .letter.in-book > :nth-child(9) { animation-delay: 0.52s; }
+
+.nav button,
+.lang button,
+.btn,
+.ctrl,
+.btn-open {
+  transition:
+    transform 150ms ease-out,
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    opacity 180ms ease;
+}
+
+.nav button:hover:not(.active):not(:disabled),
+.lang button:hover:not(.active):not(:disabled),
+.ctrl:hover:not(:disabled),
+.btn:hover:not(:disabled),
+.btn-open:hover:not(:disabled) {
+  border-color: rgba(138, 155, 176, 0.55);
+  box-shadow: 0 8px 18px rgba(107, 118, 132, 0.08);
+}
+
+.nav button:active:not(:disabled),
+.lang button:active:not(:disabled),
+.ctrl:active:not(:disabled),
+.btn:active:not(:disabled),
+.btn-open:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.motif {
+  transition: transform 150ms ease-out;
+}
+.motif:active {
+  transform: scale(0.96);
+}
+
+.lightbox:not([hidden]) {
+  animation: fade-in 0.28s ease both;
+}
+.lightbox:not([hidden]) img {
+  animation: rise-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html[data-screen="album"] .controls {
+  animation: fade-in 0.45s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gate-card,
+  .gate-card > *,
+  #app.is-on,
+  .view.active,
+  .cover-book,
+  .cover-ornament,
+  .cover-ornament::before,
+  .cover .heart,
+  .avatars img,
+  .letter-rule,
+  .edge-left,
+  .edge-right,
+  .chapter h2,
+  .chapter p,
+  #book-page.page.is-letter .letter.in-book > *,
+  .lightbox:not([hidden]),
+  .lightbox:not([hidden]) img,
+  html[data-screen="album"] .controls {
+    animation: none !important;
+  }
+  .nav button,
+  .lang button,
+  .btn,
+  .ctrl,
+  .btn-open,
+  .motif {
+    transition: none !important;
+  }
+}
