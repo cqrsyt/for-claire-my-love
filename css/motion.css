@@ -137,7 +137,8 @@
 .lang button,
 .btn,
 .ctrl,
-.btn-open {
+.btn-open,
+.btn-music {
   transition:
     transform 150ms ease-out,
     background-color 180ms ease,
@@ -151,7 +152,8 @@
 .lang button:hover:not(.active):not(:disabled),
 .ctrl:hover:not(:disabled),
 .btn:hover:not(:disabled),
-.btn-open:hover:not(:disabled) {
+.btn-open:hover:not(:disabled),
+.btn-music:hover:not(:disabled) {
   border-color: rgba(138, 155, 176, 0.55);
   box-shadow: 0 8px 18px rgba(107, 118, 132, 0.08);
 }
@@ -160,7 +162,8 @@
 .lang button:active:not(:disabled),
 .ctrl:active:not(:disabled),
 .btn:active:not(:disabled),
-.btn-open:active:not(:disabled) {
+.btn-open:active:not(:disabled),
+.btn-music:active:not(:disabled) {
   transform: scale(0.96);
 }
 
@@ -208,6 +211,7 @@ html[data-screen="album"] .controls {
   .btn,
   .ctrl,
   .btn-open,
+  .btn-music,
   .motif {
     transition: none !important;
   }

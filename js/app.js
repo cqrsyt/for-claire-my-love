@@ -17,6 +17,8 @@
     page: -1,
   };
   var glBook = null;
+  var musicOn = true;
+  var bgmArmed = false;
 
   function helpers() {
     return { asset: asset, zh: zh };
@@ -49,6 +51,55 @@
     catch (e) { return false; }
   }
 
+  function bgmEl() {
+    return document.getElementById("bgm");
+  }
+
+  function startBgm() {
+    var a = bgmEl();
+    if (!a || !musicOn) return;
+    a.volume = 0.38;
+    a.loop = true;
+    var p = a.play();
+    if (p && typeof p.catch === "function") {
+      p.catch(function () {
+        if (bgmArmed) return;
+        var app = document.getElementById("app");
+        if (!app) return;
+        bgmArmed = true;
+        app.addEventListener("click", function () {
+          if (musicOn) a.play().catch(function () {});
+        }, { once: true });
+      });
+    }
+  }
+
+  function syncMusicBtn() {
+    var btn = document.getElementById("btn-music");
+    if (!btn) return;
+    btn.classList.toggle("is-on", musicOn);
+    btn.setAttribute("aria-pressed", musicOn ? "true" : "false");
+    var label = musicOn ? t("musicPause") : t("musicPlay");
+    btn.setAttribute("aria-label", label);
+    btn.setAttribute("title", label);
+  }
+
+  function toggleMusic() {
+    var a = bgmEl();
+    if (musicOn && a && a.paused) {
+      a.volume = 0.38;
+      a.play().catch(function () {});
+      return;
+    }
+    musicOn = !musicOn;
+    if (a) {
+      a.volume = 0.38;
+      if (musicOn) a.play().catch(function () {});
+      else a.pause();
+    }
+    syncMusicBtn();
+  }
+
   function reveal() {
     try { sessionStorage.setItem(cfg.passwordStorageKey || "claire-my-love-unlocked", "1"); } catch (e) {}
     document.body.classList.remove("locked");
@@ -65,16 +116,31 @@
     var err = document.getElementById("password-error");
     form.addEventListener("submit", function (e) {
       e.preventDefault();
+      var a = bgmEl();
+      if (a) {
+        a.volume = 0.38;
+        a.loop = true;
+        a.play().catch(function () {});
+      }
       shaHex(input.value || "").then(function (hex) {
         if (hex === (cfg.sitePasswordHash || "")) {
           reveal();
           boot();
+          startBgm();
         } else {
+          if (a) {
+            a.pause();
+            a.currentTime = 0;
+          }
           err.hidden = false;
           input.value = "";
           input.focus();
         }
       }).catch(function () {
+        if (a) {
+          a.pause();
+          a.currentTime = 0;
+        }
         err.hidden = false;
       });
     });
@@ -133,6 +199,7 @@
       seeUsBtn.className = "btn " + n;
     }
     document.title = (zh() ? data.meta.titleZh + " · " + data.meta.subtitleZh : data.meta.titleEn + " · " + data.meta.subtitleEn);
+    syncMusicBtn();
   }
 
   function renderCover() {
@@ -613,6 +680,10 @@
     document.querySelectorAll(".lang button").forEach(function (btn) {
       btn.onclick = function () { setLang(btn.dataset.lang); };
     });
+    var musicBtn = document.getElementById("btn-music");
+    if (musicBtn) {
+      musicBtn.onclick = function () { toggleMusic(); };
+    }
     document.querySelectorAll("#nav button").forEach(function (btn) {
       btn.onclick = function () {
         if (btn.dataset.view === "story") {
@@ -661,6 +732,7 @@
   if (unlocked()) {
     reveal();
     boot();
+    startBgm();
   } else {
     bindGate();
   }

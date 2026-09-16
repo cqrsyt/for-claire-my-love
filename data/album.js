@@ -56,6 +56,10 @@ window.ALBUM_DATA = {
     pageOfEn: "Page {current} of {total}",
     swipeHintZh: "点左右两侧翻页，点照片可以放大。下方可以选页。",
     swipeHintEn: "Tap the sides to turn. Tap a photo to enlarge. Jump from the menu below.",
+    musicPauseZh: "暂停音乐",
+    musicPauseEn: "Pause music",
+    musicPlayZh: "播放音乐",
+    musicPlayEn: "Play music",
   },
   chapters: [
     {

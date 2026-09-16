@@ -8,10 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="css/styles.css?v=16" />
-    <link rel="stylesheet" href="css/book.css?v=16" />
-    <link rel="stylesheet" href="css/polish.css?v=16" />
-    <link rel="stylesheet" href="css/motion.css?v=16" />
+    <link rel="stylesheet" href="css/styles.css?v=17" />
+    <link rel="stylesheet" href="css/book.css?v=17" />
+    <link rel="stylesheet" href="css/polish.css?v=17" />
+    <link rel="stylesheet" href="css/motion.css?v=17" />
   </head>
   <body class="locked">
     <div class="paper-grain" aria-hidden="true"></div>
@@ -64,6 +64,14 @@
             <button type="button" data-lang="zh" class="active">中文</button>
             <button type="button" data-lang="en">EN</button>
           </div>
+          <button type="button" id="btn-music" class="btn-music is-on" aria-pressed="true" aria-label="暂停音乐" title="暂停音乐">
+            <svg class="music-glyph" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M10 18.5V7.2l9-1.7v11.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="8.2" cy="18.5" r="2.35" fill="currentColor" />
+              <circle cx="17.2" cy="16.8" r="2.35" fill="currentColor" />
+              <path class="music-slash" d="M4.2 5.2l15.6 14.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+            </svg>
+          </button>
         </div>
       </header>
 
@@ -141,11 +149,12 @@
       <p id="lightbox-caption"></p>
     </div>
 
+    <audio id="bgm" src="audio/wind-poem.mp3" loop preload="auto"></audio>
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
-    <script src="js/config.js?v=16"></script>
+    <script src="js/config.js?v=17"></script>
     <script src="js/sha256.js"></script>
-    <script src="data/album.js?v=16"></script>
-    <script src="js/webgl-book.js?v=16"></script>
-    <script src="js/app.js?v=16"></script>
+    <script src="data/album.js?v=17"></script>
+    <script src="js/webgl-book.js?v=17"></script>
+    <script src="js/app.js?v=17"></script>
   </body>
 </html>

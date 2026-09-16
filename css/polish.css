@@ -49,6 +49,10 @@
   pointer-events: auto;
 }
 
+.btn-music {
+  pointer-events: auto;
+}
+
 .ctrl:disabled {
   opacity: 0.45;
   visibility: visible;

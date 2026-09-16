@@ -430,7 +430,7 @@ body.locked .gate { display: flex; }
 .brand-sub { font-size: var(--fs-meta); color: var(--muted); }
 .top-actions { display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .nav, .lang { display: flex; gap: 0.2rem; }
-.nav button, .lang button, .btn, .ctrl {
+.nav button, .lang button, .btn, .ctrl, .btn-music {
   appearance: none;
   border: 1px solid rgba(138, 155, 176, 0.28);
   background: rgba(253, 250, 245, 0.94);
@@ -444,11 +444,25 @@ body.locked .gate { display: flex; }
   letter-spacing: 0;
   line-height: 1.2;
 }
-.nav button.active, .lang button.active {
+.nav button.active, .lang button.active, .btn-music.is-on {
   background: #a8b5c4;
   color: #f6f1e8;
   border-color: #a8b5c4;
 }
+.btn-music {
+  position: relative;
+  z-index: 9;
+  pointer-events: auto;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-music .music-glyph { display: block; }
+.btn-music.is-on .music-slash { display: none; }
 .btn {
   min-height: 48px;
   min-width: 12rem;
