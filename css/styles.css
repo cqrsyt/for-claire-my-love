@@ -70,6 +70,8 @@ html[data-lang="zh"] .bday-text,
 html[data-lang="zh"] .wish-text,
 html[data-lang="zh"] .page-jump,
 html[data-lang="zh"] .together,
+html[data-lang="zh"] .today-mark,
+html[data-lang="zh"] .motif-hint,
 html[data-lang="zh"] .letter-together,
 html[data-lang="zh"] .letter-place,
 html[data-lang="zh"] .letter-sign,
@@ -634,6 +636,26 @@ body.locked .gate { display: flex; }
   margin: 0.05rem 0 0.45rem;
   letter-spacing: 0;
   line-height: 1.45;
+}
+.today-mark {
+  color: var(--maple);
+  font-size: var(--fs-meta);
+  margin: -0.15rem 0 0.4rem;
+  letter-spacing: 0;
+  line-height: 1.45;
+}
+.motif-hint {
+  pointer-events: none;
+  text-align: center;
+  color: var(--muted);
+  font-size: var(--fs-meta);
+  margin: -0.05rem 0 0.35rem;
+  min-height: 1.15em;
+  letter-spacing: 0;
+  opacity: 0.8;
+}
+.motif-hint[hidden] {
+  display: none !important;
 }
 .cover-sub { font-size: var(--fs-meta); letter-spacing: 0; }
 .btn-open {

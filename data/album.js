@@ -18,6 +18,8 @@ window.ALBUM_DATA = {
   cover: {
     dateLineZh: "从二零二五年七月三十日，走到今天",
     dateLineEn: "From July 30, 2025, until today",
+    todayMarkZh: "纪念日，也是我的生日。",
+    todayMarkEn: "Our day — and my birthday.",
     hintZh: "翻开看看",
     hintEn: "Come in",
   },
@@ -66,6 +68,8 @@ window.ALBUM_DATA = {
     musicPauseEn: "Pause music",
     musicPlayZh: "播放音乐",
     musicPlayEn: "Play music",
+    motifHintZh: "小图案都可以点。",
+    motifHintEn: "The little marks can be tapped.",
   },
   end: {
     titleZh: "封底",

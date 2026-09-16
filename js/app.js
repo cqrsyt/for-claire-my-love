@@ -19,6 +19,8 @@
   var glBook = null;
   var musicOn = true;
   var bgmArmed = false;
+  var bgmFadeBound = false;
+  var bgmLastT = 0;
 
   function helpers() {
     return { asset: asset, zh: zh };
@@ -48,6 +50,10 @@
     var year = String(y).split("").map(function (c) { return digits[Number(c)]; }).join("");
     var months = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"];
     return year + "年" + months[m] + "月 · 香港";
+  }
+  function isTogetherAnniversary() {
+    var hk = new Date(Date.now() + 8 * 3600 * 1000);
+    return hk.getUTCMonth() === 6 && hk.getUTCDate() === 30;
   }
   function onEnd() { return state.view === "album" && state.page >= pages.length; }
   function onLetter() { return state.view === "album" && state.page < 0; }
@@ -85,6 +91,7 @@
     if (!a || !musicOn) return;
     a.volume = 0.38;
     a.loop = true;
+    bindBgmFade();
     var p = a.play();
     if (p && typeof p.catch === "function") {
       p.catch(function () {
@@ -133,6 +140,49 @@
     var app = document.getElementById("app");
     app.hidden = false;
     app.classList.add("is-on");
+  }
+
+  function bindBgmFade() {
+    var a = bgmEl();
+    if (!a || bgmFadeBound) return;
+    bgmFadeBound = true;
+    a.addEventListener("timeupdate", function () {
+      if (!musicOn || a.paused) return;
+      var t = a.currentTime;
+      var d = a.duration || 0;
+      if (d && bgmLastT > d * 0.72 && t < 1.1) {
+        a.volume = 0.05;
+        var start = performance.now();
+        function ramp(now) {
+          if (!musicOn || a.paused) return;
+          var k = Math.min(1, (now - start) / 520);
+          a.volume = 0.05 + (0.38 - 0.05) * k;
+          if (k < 1) requestAnimationFrame(ramp);
+        }
+        requestAnimationFrame(ramp);
+      }
+      bgmLastT = t;
+    });
+  }
+
+  function dismissHint() {
+    try { sessionStorage.setItem("claire-my-love-motif-hint", "1"); } catch (e) {}
+    var hint = document.getElementById("motif-hint");
+    if (hint) {
+      hint.hidden = true;
+      hint.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function syncMotifHint() {
+    var hint = document.getElementById("motif-hint");
+    if (!hint) return;
+    var seen = false;
+    try { seen = sessionStorage.getItem("claire-my-love-motif-hint") === "1"; } catch (e) {}
+    hint.textContent = t("motifHint");
+    hint.className = "motif-hint " + (zh() ? "zh" : "en");
+    hint.hidden = seen;
+    hint.setAttribute("aria-hidden", seen ? "true" : "false");
   }
 
   function bindGate() {
@@ -228,6 +278,7 @@
     }
     document.title = (zh() ? data.meta.titleZh + " · " + data.meta.subtitleZh : data.meta.titleEn + " · " + data.meta.subtitleEn);
     syncMusicBtn();
+    syncMotifHint();
   }
 
   function renderCover() {
@@ -255,6 +306,7 @@
       "<p class=\"names " + n + "\">" + esc(zh() ? data.meta.fromZh + " × " + data.meta.toZh : data.meta.fromEn + " × " + data.meta.toEn) + "</p>" +
       "<p class=\"date " + n + "\">" + esc(zh() ? data.cover.dateLineZh : data.cover.dateLineEn) + "</p>" +
       "<p class=\"together " + n + "\">" + esc(togetherLine()) + "</p>" +
+      (isTogetherAnniversary() ? ("<p class=\"today-mark " + n + "\">" + esc(zh() ? data.cover.todayMarkZh : data.cover.todayMarkEn) + "</p>") : "") +
       "<button type=\"button\" class=\"btn-open " + n + "\" id=\"btn-open\">" + esc(zh() ? data.cover.hintZh : data.cover.hintEn) + "</button>" +
       "</div>" +
       '<div class="cover-face cover-face-back" aria-hidden="true"></div>' +
@@ -785,6 +837,7 @@
     row.addEventListener("click", function (e) {
       var motif = e.target.closest && e.target.closest(".motif");
       if (!motif) return;
+      dismissHint();
       var kind = motif.getAttribute("data-kind") || "star";
       motif.classList.remove("is-pop");
       void motif.offsetWidth;
@@ -886,6 +939,20 @@
     document.getElementById("lightbox").onclick = function (e) {
       if (e.target.id === "lightbox") closeLightbox();
     };
+    (function () {
+      var box = document.getElementById("lightbox");
+      var startY = null;
+      box.addEventListener("touchstart", function (e) {
+        var t = e.changedTouches && e.changedTouches[0];
+        startY = t ? t.clientY : null;
+      }, { passive: true });
+      box.addEventListener("touchend", function (e) {
+        var t = e.changedTouches && e.changedTouches[0];
+        if (startY == null || !t) return;
+        if (t.clientY - startY > 72) closeLightbox();
+        startY = null;
+      }, { passive: true });
+    })();
     document.addEventListener("keydown", function (e) {
       var tag = e.target && e.target.tagName;
       if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
@@ -912,6 +979,7 @@
     sprinkleStars();
     fillPageJump();
     setLang(state.lang);
+    syncMotifHint();
     open("cover");
     window.ClaireAlbum = { open: open, go: go };
   }
