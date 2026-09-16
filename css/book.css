@@ -79,7 +79,8 @@
   overflow: hidden;
 }
 
-#book-page.page.is-letter {
+#book-page.page.is-letter,
+#book-page.page.is-end {
   position: absolute;
   inset: 0;
   overflow-y: auto;
@@ -396,7 +397,8 @@ html.webgl-book #book-page {
   opacity: 0;
 }
 
-html.webgl-book #book-page.page.is-letter {
+html.webgl-book #book-page.page.is-letter,
+html.webgl-book #book-page.page.is-end {
   opacity: 1;
 }
 

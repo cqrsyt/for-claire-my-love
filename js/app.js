@@ -26,6 +26,31 @@
 
   function zh() { return state.lang !== "en"; }
   function t(key) { return data.ui[key + (zh() ? "Zh" : "En")]; }
+  function daysTogether() {
+    var hk = new Date(Date.now() + 8 * 3600 * 1000);
+    var start = Date.UTC(2025, 6, 30);
+    var today = Date.UTC(hk.getUTCFullYear(), hk.getUTCMonth(), hk.getUTCDate());
+    return Math.max(1, Math.round((today - start) / 86400000) + 1);
+  }
+  function togetherLine() {
+    var n = daysTogether();
+    return zh() ? ("在一起第 " + n + " 天") : ("Day " + n);
+  }
+  function letterDateLine() {
+    var hk = new Date(Date.now() + 8 * 3600 * 1000);
+    var y = hk.getUTCFullYear();
+    var m = hk.getUTCMonth() + 1;
+    if (!zh()) {
+      var enMonths = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      return enMonths[hk.getUTCMonth()] + " " + y + " · Hong Kong";
+    }
+    var digits = "〇一二三四五六七八九";
+    var year = String(y).split("").map(function (c) { return digits[Number(c)]; }).join("");
+    var months = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"];
+    return year + "年" + months[m] + "月 · 香港";
+  }
+  function onEnd() { return state.view === "album" && state.page >= pages.length; }
+  function onLetter() { return state.view === "album" && state.page < 0; }
   function asset(src) {
     if (!src) return "";
     if (/^https?:/i.test(src)) return src;
@@ -189,6 +214,9 @@
     document.getElementById("brand-title").className = "brand-title " + n;
     document.getElementById("brand-sub").textContent = zh() ? data.meta.subtitleZh : data.meta.subtitleEn;
     document.getElementById("brand-sub").className = "brand-sub " + n;
+    document.querySelectorAll(".lang button").forEach(function (btn) {
+      btn.textContent = zh() ? "EN" : "中文";
+    });
     var labels = ["coverLabel", "storyLabel", "albumLabel"];
     document.querySelectorAll("#nav button").forEach(function (btn, i) {
       btn.textContent = t(labels[i]);
@@ -226,6 +254,7 @@
       "</div>" +
       "<p class=\"names " + n + "\">" + esc(zh() ? data.meta.fromZh + " × " + data.meta.toZh : data.meta.fromEn + " × " + data.meta.toEn) + "</p>" +
       "<p class=\"date " + n + "\">" + esc(zh() ? data.cover.dateLineZh : data.cover.dateLineEn) + "</p>" +
+      "<p class=\"together " + n + "\">" + esc(togetherLine()) + "</p>" +
       "<button type=\"button\" class=\"btn-open " + n + "\" id=\"btn-open\">" + esc(zh() ? data.cover.hintZh : data.cover.hintEn) + "</button>" +
       "</div>" +
       '<div class="cover-face cover-face-back" aria-hidden="true"></div>' +
@@ -279,7 +308,7 @@
       "<h2 class=\"" + n + "\">" + esc(zh() ? data.story.titleZh : data.story.titleEn) + "</h2>" +
       "<p class=\"" + n + "\">" + esc(zh() ? "翻开后的第一页。下一页，是我们。" : "The first page. Next is us.") + "</p>";
     var box = document.getElementById("book-page");
-    box.classList.remove("is-turn-next", "is-turn-prev");
+    box.classList.remove("is-turn-next", "is-turn-prev", "is-end");
     box.classList.add("is-letter");
     var paras = data.story.paragraphs.map(function (p) {
       return "<p class=\"" + n + "\">" + esc(zh() ? p.zh : p.en) + "</p>";
@@ -288,8 +317,12 @@
       '<article class="letter in-book">' +
       "<h2 class=\"" + n + "\">" + esc(zh() ? data.story.titleZh : data.story.titleEn) + "</h2>" +
       '<div class="letter-rule" aria-hidden="true"></div>' +
+      "<p class=\"letter-greet " + n + "\">" + esc(zh() ? data.story.greetingZh : data.story.greetingEn) + "</p>" +
       paras +
       "<div class=\"dedication " + n + "\">" + esc(zh() ? data.meta.dedicationZh : data.meta.dedicationEn) + "</div>" +
+      "<p class=\"letter-together " + n + "\">" + esc(togetherLine()) + "</p>" +
+      "<p class=\"letter-place " + n + "\">" + esc(letterDateLine()) + "</p>" +
+      "<p class=\"letter-sign " + n + "\">" + esc(zh() ? data.story.signZh : data.story.signEn) + "</p>" +
       '<p class="center"><button type="button" id="btn-see-us" class="btn ' + n + '">' + esc(t("seeUs")) + "</button></p>" +
       "</article>";
     var see = document.getElementById("btn-see-us");
@@ -307,9 +340,40 @@
     updateBirthdayWish();
   }
 
+  function renderEndPage() {
+    var n = zh() ? "zh" : "en";
+    var end = data.end || {};
+    document.getElementById("chapter-header").innerHTML =
+      "<h2 class=\"" + n + "\">" + esc(zh() ? end.titleZh : end.titleEn) + "</h2>" +
+      "<p class=\"" + n + "\">" + esc(zh() ? end.kickerZh : end.kickerEn) + "</p>";
+    var box = document.getElementById("book-page");
+    box.classList.remove("is-turn-next", "is-turn-prev");
+    box.classList.add("is-letter", "is-end");
+    box.innerHTML =
+      '<article class="letter in-book">' +
+      "<h2 class=\"" + n + "\">" + esc(zh() ? end.titleZh : end.titleEn) + "</h2>" +
+      '<div class="letter-rule" aria-hidden="true"></div>' +
+      "<p class=\"letter-kicker " + n + "\">" + esc(zh() ? end.kickerZh : end.kickerEn) + "</p>" +
+      "<p class=\"" + n + "\">" + esc(zh() ? end.bodyZh : end.bodyEn) + "</p>" +
+      "<div class=\"dedication " + n + "\">" + esc(zh() ? end.closeZh : end.closeEn) + "</div>" +
+      "<p class=\"letter-together " + n + "\">" + esc(togetherLine()) + "</p>" +
+      "<p class=\"letter-place " + n + "\">" + esc(letterDateLine()) + "</p>" +
+      "<p class=\"letter-sign " + n + "\">" + esc(zh() ? data.story.signZh : data.story.signEn) + "</p>" +
+      "</article>";
+    document.getElementById("swipe-hint").textContent = t("swipeHint");
+    document.documentElement.classList.remove("webgl-book");
+    document.documentElement.removeAttribute("data-chapter");
+    syncControls();
+    updateBirthdayWish();
+  }
+
   function renderPage(animate) {
     if (state.page < 0) {
       renderLetterPage();
+      return;
+    }
+    if (state.page >= pages.length) {
+      renderEndPage();
       return;
     }
     var item = pages[state.page];
@@ -320,7 +384,7 @@
       "<h2 class=\"" + n + "\">" + esc(zh() ? ch.titleZh : ch.titleEn) + "</h2>" +
       "<p class=\"" + n + "\">" + esc(zh() ? ch.introZh : ch.introEn) + "</p>";
     var box = document.getElementById("book-page");
-    box.classList.remove("is-turn-next", "is-turn-prev", "is-letter");
+    box.classList.remove("is-turn-next", "is-turn-prev", "is-letter", "is-end");
     box.innerHTML = '<div class="stack">' + item.photos.map(function (ph, i) {
       var cap = zh() ? ph.captionZh : ph.captionEn;
       var note = zh() ? ph.noteZh : ph.noteEn;
@@ -337,6 +401,10 @@
     if (glBook && glBook.ready) {
       document.documentElement.classList.add("webgl-book");
       if (animate !== "gl-keep") glBook.show(item, pages[state.page + 1] || null, helpers());
+      if (glBook.prefetch) {
+        glBook.prefetch(pages[state.page + 2] || null, helpers());
+        glBook.prefetch(pages[state.page - 1] || null, helpers());
+      }
       return;
     }
     if (animate) {
@@ -370,8 +438,8 @@
 
   function go(i, animate) {
     if (glBook && glBook.busy) return;
-    if (i < -1 || i >= pages.length || i === state.page) return;
-    if (state.page < 0 || i < 0) {
+    if (i < -1 || i > pages.length || i === state.page) return;
+    if (state.page < 0 || i < 0 || state.page >= pages.length || i >= pages.length) {
       state.page = i;
       renderPage(false);
       return;
@@ -397,8 +465,17 @@
   function openLightbox(ph) {
     if (!ph) return;
     var box = document.getElementById("lightbox");
+    var n = zh() ? "zh" : "en";
     document.getElementById("lightbox-img").src = asset(ph.src);
-    document.getElementById("lightbox-caption").textContent = zh() ? (ph.captionZh || "") : (ph.captionEn || "");
+    var cap = document.getElementById("lightbox-caption");
+    cap.textContent = zh() ? (ph.captionZh || "") : (ph.captionEn || "");
+    cap.className = n;
+    var note = document.getElementById("lightbox-note");
+    if (note) {
+      note.textContent = zh() ? (ph.noteZh || "") : (ph.noteEn || "");
+      note.className = n;
+      note.hidden = !note.textContent;
+    }
     box.hidden = false;
   }
   function closeLightbox() {
@@ -409,7 +486,34 @@
     var stage = document.getElementById("book-stage");
     var prev = document.getElementById("btn-prev");
     var next = document.getElementById("btn-next");
+    var swipe = null;
+    var skipClick = false;
+    stage.addEventListener("touchstart", function (e) {
+      var t = e.changedTouches && e.changedTouches[0];
+      if (!t) return;
+      var fromUi = e.target && e.target.closest && e.target.closest("button, a, select, input, label");
+      swipe = { x: t.clientX, y: t.clientY, fromUi: !!fromUi };
+    }, { passive: true });
+    stage.addEventListener("touchend", function (e) {
+      var start = swipe;
+      swipe = null;
+      if (!start || start.fromUi || state.view !== "album") return;
+      var t = e.changedTouches && e.changedTouches[0];
+      if (!t) return;
+      var dx = t.clientX - start.x;
+      var dy = t.clientY - start.y;
+      if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
+      skipClick = true;
+      if (dx < 0) {
+        if (state.page < 0) go(0, true);
+        else if (state.page < pages.length) go(state.page + 1, true);
+      } else {
+        if (state.page === 0) go(-1, true);
+        else go(state.page - 1, true);
+      }
+    }, { passive: true });
     stage.addEventListener("click", function (e) {
+      if (skipClick) { skipClick = false; return; }
       if (state.view !== "album") return;
       if (e.target && e.target.closest && e.target.closest("button, a, select, input, label")) return;
       var r = stage.getBoundingClientRect();
@@ -445,6 +549,11 @@
         var v = jump.value;
         if (v === "letter") {
           state.page = -1;
+          open("album");
+          return;
+        }
+        if (v === "end") {
+          state.page = pages.length;
           open("album");
           return;
         }
@@ -487,11 +596,69 @@
     return -1;
   }
 
+  function fillChapterStrip() {
+    var strip = document.getElementById("chapter-strip");
+    if (!strip) return;
+    var n = zh() ? "zh" : "en";
+    if (strip.dataset.lang !== state.lang || !strip.childNodes.length) {
+      strip.innerHTML = "";
+      strip.dataset.lang = state.lang;
+      function chip(label, key) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chapter-chip";
+        btn.dataset.key = key;
+        btn.textContent = label;
+        btn.onclick = function () {
+          if (key === "letter") {
+            state.page = -1;
+            open("album");
+            return;
+          }
+          if (key === "end") {
+            state.page = pages.length;
+            open("album");
+            return;
+          }
+          var i = Number(key);
+          if (state.view !== "album" || state.page < 0 || state.page >= pages.length) {
+            state.page = i;
+            open("album");
+            return;
+          }
+          go(i, true);
+        };
+        strip.appendChild(btn);
+      }
+      chip(zh() ? "信" : "Letter", "letter");
+      var idx = 0;
+      data.chapters.forEach(function (ch) {
+        chip(zh() ? ch.titleZh : ch.titleEn, String(idx));
+        idx += (ch.pages || []).length;
+      });
+      chip(zh() ? "封底" : "End", "end");
+    }
+    var active = "letter";
+    if (state.page >= pages.length) active = "end";
+    else if (state.page >= 0) {
+      var start = 0;
+      data.chapters.forEach(function (ch) {
+        var count = (ch.pages || []).length;
+        if (state.page >= start && state.page < start + count) active = String(start);
+        start += count;
+      });
+    }
+    strip.querySelectorAll(".chapter-chip").forEach(function (btn) {
+      btn.classList.toggle("is-on", btn.dataset.key === active);
+      btn.className = "chapter-chip" + (btn.dataset.key === active ? " is-on" : "") + " " + n;
+    });
+  }
+
   function fillPageJump() {
     var sel = document.getElementById("page-jump");
     if (!sel) return;
-    var current = state.page < 0 ? "letter" : String(state.page);
-    if (sel.dataset.lang === state.lang && sel.options.length && sel.options[0] && sel.options[0].value === "letter") {
+    var current = state.page < 0 ? "letter" : (state.page >= pages.length ? "end" : String(state.page));
+    if (sel.dataset.lang === state.lang && sel.options.length && sel.options[0] && sel.options[0].value === "letter" && sel.options[sel.options.length - 1].value === "end") {
       sel.value = current;
       sel.className = "page-jump " + (zh() ? "zh" : "en");
       return;
@@ -516,6 +683,10 @@
       });
       sel.appendChild(group);
     });
+    var endOpt = document.createElement("option");
+    endOpt.value = "end";
+    endOpt.textContent = zh() ? "封底" : "The last page";
+    sel.appendChild(endOpt);
     sel.value = current;
     sel.className = "page-jump " + (zh() ? "zh" : "en");
     sel.setAttribute("aria-label", zh() ? "选页" : "Jump to page");
@@ -531,8 +702,9 @@
     prev.className = "ctrl " + n;
     next.className = "ctrl " + n;
     prev.disabled = state.page < 0;
-    next.disabled = state.view === "album" && state.page >= pages.length - 1;
+    next.disabled = onEnd();
     fillPageJump();
+    fillChapterStrip();
     syncNav();
   }
 
@@ -542,7 +714,7 @@
       var on = false;
       if (v === "cover") on = state.view === "cover";
       else if (v === "story") on = state.view === "album" && state.page < 0;
-      else if (v === "album") on = state.view === "album" && state.page >= 0;
+      else if (v === "album") on = state.view === "album" && state.page >= 0 && state.page < pages.length;
       btn.classList.toggle("active", on);
     });
   }
@@ -677,9 +849,10 @@
   }
 
   function boot() {
-    document.querySelectorAll(".lang button").forEach(function (btn) {
-      btn.onclick = function () { setLang(btn.dataset.lang); };
-    });
+    var langBtn = document.getElementById("btn-lang");
+    if (langBtn) {
+      langBtn.onclick = function () { setLang(zh() ? "en" : "zh"); };
+    }
     var musicBtn = document.getElementById("btn-music");
     if (musicBtn) {
       musicBtn.onclick = function () { toggleMusic(); };
@@ -694,6 +867,7 @@
         if (btn.dataset.view === "album") {
           if (state.view === "cover") state.page = -1;
           else if (state.page < 0) state.page = 0;
+          else if (state.page >= pages.length) state.page = pages.length - 1;
           else state.page = Math.min(state.page, pages.length - 1);
           open("album");
           return;
@@ -713,7 +887,21 @@
       if (e.target.id === "lightbox") closeLightbox();
     };
     document.addEventListener("keydown", function (e) {
-      if (!document.getElementById("lightbox").hidden && e.key === "Escape") closeLightbox();
+      var tag = e.target && e.target.tagName;
+      if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+      if (!document.getElementById("lightbox").hidden) {
+        if (e.key === "Escape") closeLightbox();
+        return;
+      }
+      if (state.view !== "album") return;
+      if (e.key === "ArrowLeft") {
+        if (state.page === 0) go(-1, true);
+        else go(state.page - 1, true);
+      }
+      if (e.key === "ArrowRight") {
+        if (state.page < 0) go(0, true);
+        else if (state.page < pages.length) go(state.page + 1, true);
+      }
     });
     var host = document.getElementById("book-gl");
     if (window.ClaireWebGLBook && host) {

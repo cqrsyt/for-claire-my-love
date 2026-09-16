@@ -45,7 +45,9 @@
 
 .controls .ctrl,
 .controls .indicator,
-.controls .page-jump {
+.controls .page-jump,
+.controls .chapter-strip,
+.controls .chapter-chip {
   pointer-events: auto;
 }
 
@@ -80,7 +82,7 @@ html[data-screen="story"] .bloom-a {
     display: none;
   }
   #app.is-on {
-    padding: 0.45rem 0.8rem 5.8rem;
+    padding: 0.45rem 0.8rem 8.2rem;
   }
   .top {
     align-items: flex-start;

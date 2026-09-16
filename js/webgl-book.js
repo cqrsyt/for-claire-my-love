@@ -360,7 +360,7 @@
       return composePage(THREE, item, helpers).then(function (made) {
         cache[k] = made;
         cacheOrder.push(k);
-        if (cacheOrder.length > 10) {
+        if (cacheOrder.length > 18) {
           var first = cacheOrder.shift();
           if (first && first !== k && cache[first]) {
             cache[first].dispose();
@@ -454,6 +454,10 @@
         if (disposed) return;
         frameCamera();
         renderOnce();
+      },
+      prefetch: function (item, helpers) {
+        if (disposed || !item) return;
+        texFor(item, helpers);
       },
       destroy: function () {
         disposed = true;

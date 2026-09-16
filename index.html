@@ -8,10 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="css/styles.css?v=17" />
-    <link rel="stylesheet" href="css/book.css?v=17" />
-    <link rel="stylesheet" href="css/polish.css?v=17" />
-    <link rel="stylesheet" href="css/motion.css?v=17" />
+    <link rel="stylesheet" href="css/styles.css?v=18" />
+    <link rel="stylesheet" href="css/book.css?v=18" />
+    <link rel="stylesheet" href="css/polish.css?v=18" />
+    <link rel="stylesheet" href="css/motion.css?v=18" />
   </head>
   <body class="locked">
     <div class="paper-grain" aria-hidden="true"></div>
@@ -61,8 +61,7 @@
             <button type="button" data-view="album">相册</button>
           </nav>
           <div class="lang">
-            <button type="button" data-lang="zh" class="active">中文</button>
-            <button type="button" data-lang="en">EN</button>
+            <button type="button" id="btn-lang">EN</button>
           </div>
           <button type="button" id="btn-music" class="btn-music is-on" aria-pressed="true" aria-label="暂停音乐" title="暂停音乐">
             <svg class="music-glyph" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -137,9 +136,12 @@
         <p id="swipe-hint" class="hint"></p>
       </section>
         <div class="controls">
-          <button type="button" id="btn-prev" class="ctrl">上一页</button>
-          <select id="page-jump" class="page-jump" aria-label="选页"></select>
-          <button type="button" id="btn-next" class="ctrl">下一页</button>
+          <div id="chapter-strip" class="chapter-strip" role="navigation" aria-label="章节"></div>
+          <div class="controls-row">
+            <button type="button" id="btn-prev" class="ctrl">上一页</button>
+            <select id="page-jump" class="page-jump" aria-label="选页"></select>
+            <button type="button" id="btn-next" class="ctrl">下一页</button>
+          </div>
         </div>
     </div>
 
@@ -147,14 +149,15 @@
       <button type="button" id="lightbox-close" class="lightbox-close" aria-label="Close">×</button>
       <img id="lightbox-img" alt="" />
       <p id="lightbox-caption"></p>
+      <p id="lightbox-note"></p>
     </div>
 
     <audio id="bgm" src="audio/wind-poem.mp3" loop preload="auto"></audio>
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
-    <script src="js/config.js?v=17"></script>
+    <script src="js/config.js?v=18"></script>
     <script src="js/sha256.js"></script>
-    <script src="data/album.js?v=17"></script>
-    <script src="js/webgl-book.js?v=17"></script>
-    <script src="js/app.js?v=17"></script>
+    <script src="data/album.js?v=18"></script>
+    <script src="js/webgl-book.js?v=18"></script>
+    <script src="js/app.js?v=18"></script>
   </body>
 </html>

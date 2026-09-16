@@ -68,7 +68,14 @@ html[data-lang="zh"] .indicator,
 html[data-lang="zh"] .say,
 html[data-lang="zh"] .bday-text,
 html[data-lang="zh"] .wish-text,
-html[data-lang="zh"] .page-jump {
+html[data-lang="zh"] .page-jump,
+html[data-lang="zh"] .together,
+html[data-lang="zh"] .letter-together,
+html[data-lang="zh"] .letter-place,
+html[data-lang="zh"] .letter-sign,
+html[data-lang="zh"] .chapter-chip,
+html[data-lang="zh"] #lightbox-caption,
+html[data-lang="zh"] #lightbox-note {
   font-family: var(--font-zh);
   letter-spacing: 0;
   font-weight: 400;
@@ -372,7 +379,7 @@ html[data-chapter="stars-and-gold"] .chapter h2::after {
 
 body.locked #app { display: none !important; }
 #app { display: none; }
-#app.is-on { display: block; position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0.8rem 1.1rem 5.5rem; }
+#app.is-on { display: block; position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0.8rem 1.1rem 7.4rem; }
 
 .gate {
   display: none;
@@ -621,6 +628,13 @@ body.locked .gate { display: flex; }
 .avatars img { width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 1px solid #c5d0dc; }
 .heart { color: #8a9bb0; }
 .names, .date { margin-bottom: 0.3rem; font-size: var(--fs-meta); letter-spacing: 0; line-height: 1.5; }
+.together {
+  color: var(--maple);
+  font-size: var(--fs-meta);
+  margin: 0.05rem 0 0.45rem;
+  letter-spacing: 0;
+  line-height: 1.45;
+}
 .cover-sub { font-size: var(--fs-meta); letter-spacing: 0; }
 .btn-open {
   appearance: none;
@@ -668,6 +682,19 @@ body.locked .gate { display: flex; }
 }
 .letter p { margin: 0.95rem 0; line-height: 1.95; font-size: var(--fs-body); text-wrap: pretty; }
 .dedication { text-align: center; color: var(--ink); border-top: 1px dashed #c5d0dc; padding-top: 1rem; }
+.letter-greet { margin-top: 0.15rem; }
+.letter-kicker { text-align: center; color: var(--maple); }
+.letter-together,
+.letter-place,
+.letter-sign {
+  text-align: right;
+  margin: 0.15rem 0.9rem 0;
+  font-size: var(--fs-meta);
+  line-height: 1.55;
+}
+.letter-together { color: var(--maple); margin-top: 0.85rem; }
+.letter-place { color: var(--muted); }
+.letter-sign { color: var(--ink); font-size: var(--fs-caption); margin-bottom: 0.2rem; }
 .center { text-align: center; padding: 1.2rem 0 0.4rem; }
 
 .chapter { text-align: center; margin: 0.3rem 0 1rem; }
@@ -737,12 +764,52 @@ body.locked .gate { display: flex; }
   position: fixed;
   left: 0; right: 0; bottom: 0;
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.32rem;
+  padding: 0.45rem 1rem calc(0.7rem + env(safe-area-inset-bottom));
+  background: linear-gradient(0deg, rgba(253, 250, 245, 0.97) 62%, transparent);
+  z-index: 9;
+}
+.controls-row {
+  display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.7rem;
-  padding: 0.7rem 1rem calc(0.8rem + env(safe-area-inset-bottom));
-  background: linear-gradient(0deg, rgba(253, 250, 245, 0.97) 62%, transparent);
-  z-index: 9;
+}
+.chapter-strip {
+  pointer-events: auto;
+  display: flex;
+  gap: 0.28rem;
+  max-width: min(100%, 42rem);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  padding: 0.12rem 0.35rem 0.18rem;
+  scrollbar-width: thin;
+}
+.chapter-chip {
+  appearance: none;
+  pointer-events: auto;
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0.28rem 0.72rem;
+  border: 1px solid rgba(138, 155, 176, 0.28);
+  border-radius: 999px;
+  background: rgba(253, 250, 245, 0.94);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--fs-meta);
+  letter-spacing: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.chapter-chip.is-on {
+  background: #a8b5c4;
+  color: #f6f1e8;
+  border-color: #a8b5c4;
 }
 html:not([data-screen="album"]) .controls { display: none; }
 .ctrl { min-width: 5.2rem; height: 2.6rem; padding: 0.35rem 0.9rem; font-size: var(--fs-ui); color: var(--maple); letter-spacing: 0; }
@@ -798,4 +865,12 @@ html:not([data-screen="album"]) .controls { display: none; }
   font-size: 2rem;
   cursor: pointer;
 }
-#lightbox-caption { color: #f3e6da; margin-top: 0.7rem; text-align: center; }
+#lightbox-caption { color: #f3e6da; margin-top: 0.7rem; text-align: center; font-size: var(--fs-caption); line-height: 1.5; }
+#lightbox-note {
+  color: #d5c8bb;
+  margin-top: 0.35rem;
+  text-align: center;
+  font-size: 1.12rem;
+  line-height: 1.7;
+  max-width: 28rem;
+}

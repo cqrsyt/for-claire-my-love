@@ -24,6 +24,12 @@ window.ALBUM_DATA = {
   story: {
     titleZh: "我们的故事",
     titleEn: "Our Story",
+    greetingZh: "大宝：",
+    greetingEn: "Da Bao,",
+    placeZh: "写于香港",
+    placeEn: "Written in Hong Kong",
+    signZh: "孙郁桐",
+    signEn: "Jeffrey",
     paragraphs: [
       {
         zh: "我们是南开大学附属小学的同学。后来你留在南开读大学，我去了北京，再到香港。离得远了，想你的时候，反而更近。",
@@ -54,12 +60,22 @@ window.ALBUM_DATA = {
     nextEn: "Next",
     pageOfZh: "第 {current} 页 · 共 {total} 页",
     pageOfEn: "Page {current} of {total}",
-    swipeHintZh: "点左右两侧翻页，点照片可以放大。下方可以选页。",
-    swipeHintEn: "Tap the sides to turn. Tap a photo to enlarge. Jump from the menu below.",
+    swipeHintZh: "左右滑，或点两侧翻页。点照片可以放大。下方可以选章节和页。",
+    swipeHintEn: "Swipe or tap the sides to turn. Tap a photo to enlarge. Jump from the menu below.",
     musicPauseZh: "暂停音乐",
     musicPauseEn: "Pause music",
     musicPlayZh: "播放音乐",
     musicPlayEn: "Play music",
+  },
+  end: {
+    titleZh: "封底",
+    titleEn: "The last page",
+    kickerZh: "日子还在走。",
+    kickerEn: "The days are still going.",
+    bodyZh: "两个小朋友，也是彼此的狗狗。下一个一百天，也想这样慢慢来。",
+    bodyEn: "Two little ones — and each other's puppies. May the next hundred days come just as gently.",
+    closeZh: "我在。",
+    closeEn: "I am here.",
   },
   chapters: [
     {
