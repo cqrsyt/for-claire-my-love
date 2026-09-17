@@ -95,6 +95,29 @@
     return document.getElementById("bgm");
   }
 
+  function bootGl() {
+    if (glBook) return;
+    var host = document.getElementById("book-gl");
+    if (!host || !window.ClaireWebGLBook || !window.THREE) return;
+    glBook = window.ClaireWebGLBook.mount(host);
+    if (glBook && state.view === "album" && state.page >= 0 && state.page < pages.length) {
+      renderPage("gl-keep");
+    }
+  }
+
+  function loadThree() {
+    if (window.THREE) {
+      bootGl();
+      return;
+    }
+    if (document.getElementById("three-src")) return;
+    var s = document.createElement("script");
+    s.id = "three-src";
+    s.src = "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js";
+    s.onload = bootGl;
+    document.head.appendChild(s);
+  }
+
   function startBgm() {
     var a = bgmEl();
     if (!a || !musicOn) return;
@@ -494,11 +517,13 @@
       "<p class=\"" + n + "\">" + esc(zh() ? ch.introZh : ch.introEn) + "</p>";
     var box = document.getElementById("book-page");
     box.classList.remove("is-turn-next", "is-turn-prev", "is-letter", "is-end");
-    box.innerHTML = '<div class="stack">' + item.photos.map(function (ph, i) {
+    box.innerHTML = (glBook && glBook.ready)
+      ? '<div class="stack"></div>'
+      : '<div class="stack">' + item.photos.map(function (ph, i) {
       var cap = zh() ? ph.captionZh : ph.captionEn;
       var note = zh() ? ph.noteZh : ph.noteEn;
       return '<article class="card">' +
-        '<img src="' + esc(asset(ph.src)) + '" alt="' + esc(cap) + '" data-i="' + i + '" />' +
+        '<img src="' + esc(asset(ph.src)) + '" alt="' + esc(cap) + '" data-i="' + i + '" decoding="async" />' +
         (cap ? "<h3 class=\"" + n + "\">" + esc(cap) + "</h3>" : "") +
         (note ? "<p class=\"" + n + "\">" + esc(note) + "</p>" : "") +
         "</article>";
@@ -978,7 +1003,8 @@
   function sprinkleStars() {
     var root = document.getElementById("star-field");
     if (!root || root.childNodes.length) return;
-    for (var i = 0; i < 28; i++) {
+    var n = window.innerWidth < 720 ? 14 : 28;
+    for (var i = 0; i < n; i++) {
       var el = document.createElement("span");
       if (i % 7 === 0) {
         el.className = "is-glyph";
@@ -996,7 +1022,8 @@
   function sprinkleLeaves() {
     var root = document.getElementById("leaves");
     var glyphs = ["🍁", "🍂", "🌸", "✿", "❀", "🌼"];
-    for (var i = 0; i < 16; i++) {
+    var count = window.innerWidth < 720 ? 8 : 16;
+    for (var i = 0; i < count; i++) {
       var el = document.createElement("span");
       el.className = "leaf";
       el.textContent = glyphs[i % glyphs.length];
@@ -1100,12 +1127,13 @@
         else if (state.page < pages.length) go(state.page + 1, true);
       }
     });
-    var host = document.getElementById("book-gl");
-    if (window.ClaireWebGLBook && host) {
-      glBook = window.ClaireWebGLBook.mount(host);
-    }
+    document.addEventListener("visibilitychange", function () {
+      document.documentElement.classList.toggle("is-quiet", document.hidden);
+    });
+    loadThree();
     bindAlbumTurn();
     bindMotifs();
+    sprinkleLeaves();
     sprinkleStars();
     fillPageJump();
     setLang(state.lang);
@@ -1114,7 +1142,6 @@
     window.ClaireAlbum = { open: open, go: go };
   }
 
-  sprinkleLeaves();
   if (unlocked()) {
     reveal();
     boot();

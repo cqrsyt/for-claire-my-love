@@ -5,7 +5,17 @@
   var TEX_H = 1376;
   var SEG_X = 42;
   var SEG_Y = 28;
+  var CACHE_MAX = 16;
   var DURATION = 1.08;
+
+  function applyQuality() {
+    var mobile = window.innerWidth < 720;
+    TEX_W = mobile ? 768 : 1024;
+    TEX_H = mobile ? 1032 : 1376;
+    SEG_X = mobile ? 28 : 42;
+    SEG_Y = mobile ? 18 : 28;
+    CACHE_MAX = mobile ? 10 : 16;
+  }
 
   function easePaper(t) {
     var x = Math.min(1, Math.max(0, t));
@@ -31,6 +41,7 @@
       img.crossOrigin = "anonymous";
       img.onload = function () { resolve(img); };
       img.onerror = function () { reject(new Error("img")); };
+      img.decoding = "async";
       img.src = src;
     });
   }
@@ -222,6 +233,7 @@
   function mount(container) {
     var THREE = root.THREE;
     if (!THREE || !container || !canWebGL()) return null;
+    applyQuality();
 
     var canvas = document.createElement("canvas");
     var glOpts = { alpha: true, antialias: true, premultipliedAlpha: true };
@@ -234,7 +246,7 @@
       antialias: true,
       powerPreference: "high-performance",
     });
-    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.setPixelRatio(Math.min(window.innerWidth < 720 ? 1.25 : 1.5, window.devicePixelRatio || 1));
     renderer.setClearColor(0x000000, 0);
     if (THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.NoToneMapping;
@@ -360,7 +372,7 @@
       return composePage(THREE, item, helpers).then(function (made) {
         cache[k] = made;
         cacheOrder.push(k);
-        if (cacheOrder.length > 18) {
+        if (cacheOrder.length > CACHE_MAX) {
           var first = cacheOrder.shift();
           if (first && first !== k && cache[first]) {
             cache[first].dispose();
