@@ -1033,8 +1033,6 @@ body.locked #leaves {
   padding: 1.2rem 1.35rem 1.4rem;
   box-shadow: 4px 8px 18px var(--shadow);
   min-height: 280px;
-  transform-origin: center;
-  transform-style: preserve-3d;
 }
 .page.is-turn-next { animation: turn-next 0.5s ease; }
 .page.is-turn-prev { animation: turn-prev 0.5s ease; }
@@ -1059,6 +1057,7 @@ body.locked #leaves {
   border-radius: 8px;
   background: #fefcf8;
   cursor: zoom-in;
+  image-rendering: auto;
 }
 .card h3 { margin-top: 0.55rem; font-size: var(--fs-caption); line-height: 1.45; letter-spacing: 0; }
 .card p { color: var(--muted); font-size: var(--fs-meta); line-height: 1.65; padding: 0.2rem 0.4rem 0; letter-spacing: 0; }
@@ -1258,9 +1257,7 @@ html.is-quiet .star-field span {
   position: relative;
   width: min(100%, 420px, calc((100dvh - 15.8rem) * 1024 / 1376));
   max-height: calc(100dvh - 15.2rem);
-  transform: rotateY(-6deg) rotateX(3deg);
-  transform-style: preserve-3d;
-  transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transform: none;
   filter: none;
 }
 
@@ -1275,7 +1272,7 @@ html.is-quiet .star-field span {
   }
   to {
     opacity: 1;
-    transform: rotateY(-6deg) rotateX(3deg) translateY(0);
+    transform: none;
   }
 }
 
@@ -1288,17 +1285,17 @@ html.is-quiet .star-field span {
 }
 
 @keyframes book-rock-next {
-  0% { transform: rotateY(-6deg) rotateX(3deg); }
+  0% { transform: none; }
   28% { transform: rotateY(-14deg) rotateX(7deg) translateZ(8px); }
   62% { transform: rotateY(4deg) rotateX(5deg); }
-  100% { transform: rotateY(-6deg) rotateX(3deg); }
+  100% { transform: none; }
 }
 
 @keyframes book-rock-prev {
-  0% { transform: rotateY(-6deg) rotateX(3deg); }
+  0% { transform: none; }
   28% { transform: rotateY(4deg) rotateX(7deg) translateZ(8px); }
   62% { transform: rotateY(-14deg) rotateX(5deg); }
-  100% { transform: rotateY(-6deg) rotateX(3deg); }
+  100% { transform: none; }
 }
 
 .album-spine,
@@ -1345,7 +1342,7 @@ html.is-quiet .star-field span {
   width: 100%;
   aspect-ratio: 1024 / 1376;
   min-height: 0;
-  transform-style: preserve-3d;
+}
 }
 
 #book-page.page {
@@ -1688,13 +1685,7 @@ html.webgl-book .album-book {
 }
 
 html.webgl-book .album-spine,
-html.webgl-book .album-stack,
-.album-book:has(.book-gl-canvas) .album-spine,
-.album-book:has(.book-gl-canvas) .album-stack {
-  opacity: 0;
-}
-
-.album-book:has(.book-gl-canvas) #book-page:not(.is-letter):not(.is-end) {
+html.webgl-book .album-stack {
   opacity: 0;
 }
 

@@ -648,7 +648,6 @@ var ClaireWebGLNS = (() => {
     }
     api.show = async (current, next, helpers) => {
       if (disposed) return;
-      document.documentElement.classList.add("webgl-book");
       stopLoop();
       api.busy = false;
       progress = 0;
@@ -754,6 +753,7 @@ var ClaireWebGLNS = (() => {
         }
       } finally {
         api.busy = false;
+        if (!disposed) document.documentElement.classList.remove("webgl-book");
       }
     };
     api.peek = (amount) => {
