@@ -279,6 +279,7 @@
     document.title = (zh() ? data.meta.titleZh + " · " + data.meta.subtitleZh : data.meta.titleEn + " · " + data.meta.subtitleEn);
     syncMusicBtn();
     syncMotifHint();
+    syncTurnHint();
   }
 
   function renderCover() {
@@ -386,6 +387,7 @@
       };
     }
     document.getElementById("swipe-hint").textContent = t("swipeHint");
+    syncTurnHint();
     document.documentElement.classList.remove("webgl-book");
     document.documentElement.removeAttribute("data-chapter");
     syncControls();
@@ -404,7 +406,12 @@
     box.innerHTML =
       '<article class="letter in-book">' +
       "<h2 class=\"" + n + "\">" + esc(zh() ? end.titleZh : end.titleEn) + "</h2>" +
-      '<div class="letter-rule" aria-hidden="true"></div>' +
+      "<div class=\"letter-rule\" aria-hidden=\"true\"></div>" +
+      "<div class=\"end-avatars\" aria-hidden=\"true\">" +
+      (data.meta.avatarHim ? "<img src=\"" + esc(asset(data.meta.avatarHim)) + "\" alt=\"\" />" : "") +
+      "<span class=\"heart\">♥</span>" +
+      (data.meta.avatarHer ? "<img src=\"" + esc(asset(data.meta.avatarHer)) + "\" alt=\"\" />" : "") +
+      "</div>" +
       "<p class=\"letter-kicker " + n + "\">" + esc(zh() ? end.kickerZh : end.kickerEn) + "</p>" +
       "<p class=\"" + n + "\">" + esc(zh() ? end.bodyZh : end.bodyEn) + "</p>" +
       "<div class=\"dedication " + n + "\">" + esc(zh() ? end.closeZh : end.closeEn) + "</div>" +
@@ -413,6 +420,7 @@
       "<p class=\"letter-sign " + n + "\">" + esc(zh() ? data.story.signZh : data.story.signEn) + "</p>" +
       "</article>";
     document.getElementById("swipe-hint").textContent = t("swipeHint");
+    syncTurnHint();
     document.documentElement.classList.remove("webgl-book");
     document.documentElement.removeAttribute("data-chapter");
     syncControls();
@@ -424,6 +432,7 @@
       renderLetterPage();
       return;
     }
+    markTurned();
     if (state.page >= pages.length) {
       renderEndPage();
       return;
@@ -447,6 +456,7 @@
         "</article>";
     }).join("") + "</div>";
     document.getElementById("swipe-hint").textContent = t("swipeHint");
+    syncTurnHint();
     syncControls();
     document.documentElement.setAttribute("data-chapter", ch.id || "");
     updateBirthdayWish();
@@ -486,6 +496,20 @@
       text.textContent = zh() ? "祝大宝生日快乐" : "Happy birthday, Da Bao";
       text.className = "bday-text " + (zh() ? "zh" : "en");
     }
+  }
+
+  function syncTurnHint() {
+    var el = document.getElementById("swipe-hint");
+    if (!el) return;
+    var seen = false;
+    try { seen = sessionStorage.getItem("claire-my-love-turned") === "1"; } catch (e) {}
+    el.hidden = seen;
+    el.setAttribute("aria-hidden", seen ? "true" : "false");
+  }
+
+  function markTurned() {
+    try { sessionStorage.setItem("claire-my-love-turned", "1"); } catch (e) {}
+    syncTurnHint();
   }
 
   function go(i, animate) {
@@ -704,6 +728,10 @@
       btn.classList.toggle("is-on", btn.dataset.key === active);
       btn.className = "chapter-chip" + (btn.dataset.key === active ? " is-on" : "") + " " + n;
     });
+    var onChip = strip.querySelector(".chapter-chip.is-on");
+    if (onChip && onChip.scrollIntoView) {
+      onChip.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+    }
   }
 
   function fillPageJump() {

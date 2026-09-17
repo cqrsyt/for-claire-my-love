@@ -782,6 +782,23 @@ body.locked .gate { display: flex; }
 .card h3 { margin-top: 0.55rem; font-size: var(--fs-caption); line-height: 1.45; letter-spacing: 0; }
 .card p { color: var(--muted); font-size: var(--fs-meta); line-height: 1.65; padding: 0.2rem 0.4rem 0; letter-spacing: 0; }
 .hint { text-align: center; color: var(--muted); font-size: var(--fs-meta); margin: 0.7rem 0; letter-spacing: 0; }
+.hint[hidden] { display: none !important; }
+.end-avatars {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.35rem 0 0.7rem;
+  pointer-events: none;
+}
+.end-avatars img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #c5d0dc;
+}
+.end-avatars .heart { color: #8a9bb0; font-size: 0.85rem; }
 .controls {
   position: fixed;
   left: 0; right: 0; bottom: 0;
