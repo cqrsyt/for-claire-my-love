@@ -36,13 +36,26 @@
   }
 
   function loadImage(src) {
-    return new Promise(function (resolve, reject) {
-      var img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = function () { resolve(img); };
-      img.onerror = function () { reject(new Error("img")); };
-      img.decoding = "async";
-      img.src = src;
+    return fetch(src).then(function (res) { return res.blob(); }).then(function (blob) {
+      if (typeof createImageBitmap === "function") {
+        return createImageBitmap(blob, { resizeWidth: TEX_W, resizeQuality: "medium" });
+      }
+      return new Promise(function (resolve, reject) {
+        var url = URL.createObjectURL(blob);
+        var img = new Image();
+        img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+        img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("img")); };
+        img.src = url;
+      });
+    }).catch(function () {
+      return new Promise(function (resolve, reject) {
+        var img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = function () { resolve(img); };
+        img.onerror = function () { reject(new Error("img")); };
+        img.decoding = "async";
+        img.src = src;
+      });
     });
   }
 
@@ -156,6 +169,7 @@
             var dx = (TEX_W - dw) / 2;
             var dy = y0 + Math.max(0, (maxH - dh) * 0.35);
             roundImage(ctx, img, dx, dy, dw, dh, 18);
+            if (img && img.close) img.close();
             ctx.textAlign = "center";
             ctx.textBaseline = "alphabetic";
             if (caption) {
@@ -234,16 +248,17 @@
     var THREE = root.THREE;
     if (!THREE || !container || !canWebGL()) return null;
     applyQuality();
+    var mobile = window.innerWidth < 720;
 
     var canvas = document.createElement("canvas");
-    var glOpts = { alpha: true, antialias: true, premultipliedAlpha: true };
+    var glOpts = { alpha: true, antialias: !mobile, premultipliedAlpha: true };
     var context = canvas.getContext("webgl2", glOpts) || canvas.getContext("webgl", glOpts);
     if (!context) return null;
     var renderer = new THREE.WebGLRenderer({
       canvas: canvas,
       context: context,
       alpha: true,
-      antialias: true,
+      antialias: !mobile,
       powerPreference: "high-performance",
     });
     renderer.setPixelRatio(Math.min(window.innerWidth < 720 ? 1.25 : 1.5, window.devicePixelRatio || 1));
@@ -397,6 +412,7 @@
       get busy() { return busy; },
       show: function (current, next, helpers) {
         if (disposed) return Promise.resolve();
+        document.documentElement.classList.add("webgl-book");
         stopLoop();
         busy = false;
         progress = 0;
@@ -410,6 +426,7 @@
       },
       flip: function (from, to, dir, helpers, underPage) {
         if (disposed) return Promise.resolve();
+        document.documentElement.classList.add("webgl-book");
         if (reducedMotion()) return api.show(to, underPage, helpers);
         busy = true;
         var reveal = dir === "next" ? to : from;
@@ -503,7 +520,6 @@
       else window.removeEventListener("resize", api.resize);
       originalDestroy();
     };
-    document.documentElement.classList.add("webgl-book");
     return api;
   }
 

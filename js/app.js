@@ -456,6 +456,10 @@
     idxs.forEach(function (i) {
       var item = pages[i];
       if (!item) return;
+      if (glBook && glBook.prefetch) {
+        glBook.prefetch(item, helpers());
+        return;
+      }
       (item.photos || []).forEach(function (ph) {
         if (!ph || !ph.src) return;
         var im = new Image();

@@ -112,6 +112,12 @@ html[data-screen="story"] .bloom-a {
   .music-vol {
     width: 3.8rem;
   }
+  body {
+    background-attachment: scroll;
+  }
+  .paper-grain {
+    display: none;
+  }
 }
 
 @media (max-height: 720px) {
