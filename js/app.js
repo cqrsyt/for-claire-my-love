@@ -113,14 +113,14 @@
     if (document.getElementById("three-src")) return;
     var s = document.createElement("script");
     s.id = "three-src";
-    s.src = "js/three.min.js?v=46";
+    s.src = "js/three.min.js?v=47";
     s.onload = function () {
       if (window.ClaireWebGLBook) {
         bootGl();
         return;
       }
       var w = document.createElement("script");
-      w.src = "js/webgl-book.js?v=46";
+      w.src = "js/webgl-book.js?v=47";
       w.onload = bootGl;
       document.head.appendChild(w);
     };

@@ -59,11 +59,11 @@ var ClaireWebGLNS = (() => {
   var REST_Z = 8e-3;
   function applyQuality() {
     const mobile = typeof window !== "undefined" && window.innerWidth < 720;
-    TEX_W = mobile ? 768 : 1024;
-    TEX_H = mobile ? 1032 : 1376;
+    TEX_W = mobile ? 1024 : 1536;
+    TEX_H = mobile ? 1376 : 2064;
     SEG_X = mobile ? 28 : 36;
     SEG_Y = mobile ? 18 : 24;
-    CACHE_MAX = mobile ? 14 : 18;
+    CACHE_MAX = mobile ? 10 : 12;
   }
   function easePaper(t) {
     const x = Math.min(1, Math.max(0, t));
@@ -77,14 +77,7 @@ var ClaireWebGLNS = (() => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.decoding = "async";
-      img.onload = () => {
-        const mobile = window.innerWidth < 720;
-        if (!mobile && typeof createImageBitmap === "function") {
-          void createImageBitmap(img, { resizeWidth: TEX_W, resizeQuality: "medium" }).then(resolve, () => resolve(img));
-          return;
-        }
-        resolve(img);
-      };
+      img.onload = () => resolve(img);
       img.onerror = () => reject(new Error("img"));
       img.src = src;
     });
@@ -97,6 +90,8 @@ var ClaireWebGLNS = (() => {
     c.height = ih;
     const x = c.getContext("2d", { willReadFrequently: true });
     if (!x) return c;
+    x.imageSmoothingEnabled = true;
+    x.imageSmoothingQuality = "high";
     x.drawImage(img, 0, 0, iw, ih);
     if (typeof window !== "undefined" && window.innerWidth < 720) return c;
     if (iw * ih > 12e5) return c;
@@ -135,9 +130,9 @@ var ClaireWebGLNS = (() => {
     ctx.arcTo(x, y, x + w, y, r);
     ctx.closePath();
     ctx.clip();
-    ctx.filter = "brightness(1.08) contrast(1.04)";
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(img, x, y, w, h);
-    ctx.filter = "none";
     ctx.restore();
   }
   function wrapText(ctx, text, x, y, maxW, lineH, maxLines) {
@@ -159,6 +154,15 @@ var ClaireWebGLNS = (() => {
       }
     }
     if (line) ctx.fillText(line, x, y + n * lineH);
+  }
+  function sharpMap(tex) {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.generateMipmaps = false;
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.anisotropy = 1;
+    tex.needsUpdate = true;
+    return tex;
   }
   function paintPaper(ctx) {
     ctx.fillStyle = "#fffefb";
@@ -198,6 +202,8 @@ var ClaireWebGLNS = (() => {
     canvas.height = TEX_H;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("2d");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     paintPaper(ctx);
     try {
       if (document.fonts?.load) {
@@ -213,56 +219,60 @@ var ClaireWebGLNS = (() => {
     } catch {
     }
     const photos = item?.photos ?? [];
-    const pad = 78;
+    const scale = TEX_W / 1024;
+    const pad = Math.round(64 * scale);
     const innerW = TEX_W - pad * 2;
-    const top = 88;
-    const bottom = 90;
+    const top = Math.round(72 * scale);
+    const bottom = Math.round(78 * scale);
     const available = TEX_H - top - bottom;
     const n = Math.max(1, photos.length);
-    const gap = 32;
-    const slotH = n === 1 ? available * 0.86 : (available - gap * (n - 1)) / n;
+    const gap = Math.round(28 * scale);
+    const slotH = n === 1 ? available * 0.9 : (available - gap * (n - 1)) / n;
     const zh = helpers.zh();
     for (let i = 0; i < photos.length; i++) {
       const ph = photos[i];
       const y0 = top + i * (slotH + gap);
       const caption = zh ? ph.captionZh : ph.captionEn;
       const note = zh ? ph.noteZh : ph.noteEn;
-      const textH = caption || note ? note ? 118 : 64 : 18;
-      const maxH = Math.max(160, slotH - textH);
+      const textH = caption || note ? note ? Math.round(118 * scale) : Math.round(64 * scale) : Math.round(18 * scale);
+      const maxH = Math.max(Math.round(160 * scale), slotH - textH);
       try {
         const raw = await loadImage(helpers.asset(ph.src));
         const img = liftPhoto(raw);
-        if (typeof ImageBitmap !== "undefined" && raw instanceof ImageBitmap) raw.close();
         const iw = "width" in img ? Number(img.width) : TEX_W;
         const ih = "height" in img ? Number(img.height) : TEX_H;
         const s = Math.min(innerW / iw, maxH / ih);
         const dw = iw * s;
         const dh = ih * s;
         const dx = (TEX_W - dw) / 2;
-        const dy = y0 + Math.max(0, (maxH - dh) * 0.35);
-        roundImage(ctx, img, dx, dy, dw, dh, 18);
+        const dy = y0 + Math.max(0, (maxH - dh) * 0.28);
+        roundImage(ctx, img, dx, dy, dw, dh, Math.round(16 * scale));
         ctx.textAlign = "center";
         ctx.textBaseline = "alphabetic";
         if (caption) {
           ctx.fillStyle = "#5a6570";
-          ctx.font = zh ? '40px "Ma Shan Zheng", KaiTi, serif' : 'italic 32px "Cormorant Garamond", Georgia, serif';
-          ctx.fillText(caption, TEX_W / 2, dy + dh + 50);
+          ctx.font = zh ? `${Math.round(40 * scale)}px "Ma Shan Zheng", KaiTi, serif` : `italic ${Math.round(32 * scale)}px "Cormorant Garamond", Georgia, serif`;
+          ctx.fillText(caption, TEX_W / 2, dy + dh + Math.round(50 * scale));
         }
         if (note) {
           ctx.fillStyle = "#8a97a6";
-          ctx.font = zh ? '26px "Ma Shan Zheng", KaiTi, serif' : 'italic 22px "Cormorant Garamond", Georgia, serif';
-          wrapText(ctx, note, TEX_W / 2, dy + dh + (caption ? 88 : 52), innerW - 24, 34, 2);
+          ctx.font = zh ? `${Math.round(26 * scale)}px "Ma Shan Zheng", KaiTi, serif` : `italic ${Math.round(22 * scale)}px "Cormorant Garamond", Georgia, serif`;
+          wrapText(
+            ctx,
+            note,
+            TEX_W / 2,
+            dy + dh + (caption ? Math.round(88 * scale) : Math.round(52 * scale)),
+            innerW - Math.round(24 * scale),
+            Math.round(34 * scale),
+            2
+          );
         }
       } catch {
         ctx.fillStyle = "rgba(197,208,220,0.35)";
         ctx.fillRect(pad, y0, innerW, maxH);
       }
     }
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.anisotropy = typeof window !== "undefined" && window.innerWidth < 720 ? 2 : 4;
-    tex.needsUpdate = true;
-    return tex;
+    return sharpMap(new THREE.CanvasTexture(canvas));
   }
   function paperTexture() {
     const canvas = document.createElement("canvas");
@@ -277,10 +287,7 @@ var ClaireWebGLNS = (() => {
     ctx.textAlign = "center";
     ctx.fillText("\u5199\u7ED9\u79CB\u7136", TEX_W / 2, TEX_H / 2);
     ctx.restore();
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.needsUpdate = true;
-    return tex;
+    return sharpMap(new THREE.CanvasTexture(canvas));
   }
   function shadowTexture() {
     const canvas = document.createElement("canvas");
@@ -322,10 +329,7 @@ var ClaireWebGLNS = (() => {
       ctx.fillStyle = x % 2 === 0 ? "#e8edf3" : "#f6f2ea";
       ctx.fillRect(x, 0, 1, 256);
     }
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.needsUpdate = true;
-    return tex;
+    return sharpMap(new THREE.CanvasTexture(canvas));
   }
   function backFrom(front) {
     const canvas = document.createElement("canvas");
@@ -341,17 +345,14 @@ var ClaireWebGLNS = (() => {
       ctx.globalAlpha = 0.14;
       ctx.translate(TEX_W, 0);
       ctx.scale(-1, 1);
-      ctx.filter = "grayscale(0.25) contrast(0.9)";
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       ctx.drawImage(src, 0, 0, TEX_W, TEX_H);
       ctx.restore();
     }
     ctx.fillStyle = "rgba(197, 208, 220, 0.12)";
     ctx.fillRect(0, 0, 28, TEX_H);
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.anisotropy = 4;
-    tex.needsUpdate = true;
-    return tex;
+    return sharpMap(new THREE.CanvasTexture(canvas));
   }
   function deform(geo, progress) {
     const pos = geo.attributes.position;
@@ -379,19 +380,18 @@ var ClaireWebGLNS = (() => {
   function mountWebGLBook(container) {
     if (typeof window === "undefined") return null;
     applyQuality();
-    const mobile = window.innerWidth < 720;
     const canvas = document.createElement("canvas");
-    const glOpts = { alpha: true, antialias: !mobile, premultipliedAlpha: true };
+    const glOpts = { alpha: true, antialias: true, premultipliedAlpha: true };
     const context = canvas.getContext("webgl2", glOpts) || canvas.getContext("webgl", glOpts);
     if (!context) return null;
     const renderer = new THREE.WebGLRenderer({
       canvas,
       context,
       alpha: true,
-      antialias: !mobile,
+      antialias: true,
       powerPreference: "high-performance"
     });
-    renderer.setPixelRatio(Math.min(window.innerWidth < 720 ? 1.25 : 1.5, window.devicePixelRatio || 1));
+    renderer.setPixelRatio(Math.min(2.25, window.devicePixelRatio || 1));
     renderer.setClearColor(16644853, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.NoToneMapping;
