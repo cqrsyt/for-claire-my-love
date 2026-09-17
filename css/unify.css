@@ -1,0 +1,104 @@
+/* v28 — unified fonts + soft page emerge (overrides app.css) */
+:root {
+  --font-display: "Ma Shan Zheng", "KaiTi", "STKaiti", cursive, serif;
+  --font-zh: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", "Heiti SC", sans-serif;
+  --font-en: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+}
+
+.zh {
+  font-family: var(--font-zh) !important;
+  letter-spacing: 0.02em;
+  font-weight: 400;
+  font-synthesis: none;
+}
+
+html[data-lang="zh"] body,
+html[data-lang="zh"] button,
+html[data-lang="zh"] input,
+html[data-lang="zh"] select,
+html[data-lang="zh"] .hint,
+html[data-lang="zh"] .indicator,
+html[data-lang="zh"] .say,
+html[data-lang="zh"] .bday-text,
+html[data-lang="zh"] .wish-text,
+html[data-lang="zh"] .page-jump,
+html[data-lang="zh"] .together,
+html[data-lang="zh"] .today-mark,
+html[data-lang="zh"] .motif-hint,
+html[data-lang="zh"] .letter-together,
+html[data-lang="zh"] .letter-place,
+html[data-lang="zh"] .letter-sign,
+html[data-lang="zh"] .chapter-chip,
+html[data-lang="zh"] #lightbox-caption,
+html[data-lang="zh"] #lightbox-note,
+html[data-lang="zh"] .card h3,
+html[data-lang="zh"] .card p,
+html[data-lang="zh"] .chapter p,
+html[data-lang="zh"] .letter p {
+  font-family: var(--font-zh) !important;
+  letter-spacing: 0.02em;
+  font-weight: 400;
+  font-synthesis: none;
+}
+
+.brand-title,
+.gate-card h1,
+.cover-face-front h1,
+.letter h2,
+.chapter h2,
+#book-page.page.is-letter h2 {
+  font-family: var(--font-display) !important;
+  letter-spacing: 0.04em;
+  font-weight: 400;
+}
+
+.en {
+  font-family: var(--font-en) !important;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+html[data-lang="en"] body,
+html[data-lang="en"] button,
+html[data-lang="en"] input,
+html[data-lang="en"] select {
+  font-family: var(--font-en);
+  font-style: normal;
+}
+
+/* Soft emerge instead of hard flip + curl stripes */
+.page.is-turn-next,
+.page.is-turn-prev,
+#book-page.page.is-turn-next,
+#book-page.page.is-turn-prev {
+  animation: page-emerge 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+}
+
+#book-page.page.is-turn-next::after,
+#book-page.page.is-turn-prev::after {
+  animation: none !important;
+  opacity: 0 !important;
+  display: none !important;
+}
+
+#book-page.page {
+  background: var(--paper) !important;
+}
+
+.album-book.is-flipping-next,
+.album-book.is-flipping-prev {
+  animation: none !important;
+}
+
+@keyframes page-emerge {
+  0% { opacity: 0; transform: translateY(10px) scale(0.985); filter: none; }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: none; }
+}
+
+@keyframes book-turn-next { from { opacity: 0; } to { opacity: 1; } }
+@keyframes book-turn-prev { from { opacity: 0; } to { opacity: 1; } }
+@keyframes curl-light { from { opacity: 0; } to { opacity: 0; } }
+@keyframes curl-light-rev { from { opacity: 0; } to { opacity: 0; } }
+@keyframes turn-next { from { opacity: 0; } to { opacity: 1; } }
+@keyframes turn-prev { from { opacity: 0; } to { opacity: 1; } }
