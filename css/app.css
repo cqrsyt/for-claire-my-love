@@ -1663,11 +1663,17 @@ html.webgl-book #book-page.page {
   inset: 0;
   z-index: 4;
   pointer-events: none;
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html:not(.webgl-book) .book-gl {
   visibility: hidden;
   opacity: 0;
+}
+
+html.webgl-book .book-gl {
+  visibility: visible;
+  opacity: 1;
 }
 
 html.webgl-book #book-page:not(.is-letter):not(.is-end) {
@@ -2140,11 +2146,19 @@ html[data-lang="zh"] .btn {
 }
 
 .chapter h2 {
-  animation: rise-in 0.5s ease both;
+  animation: rise-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .chapter p {
-  animation: rise-in 0.55s ease both;
+  animation: rise-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: 0.08s;
+}
+
+.album-block {
+  transition: background-color 0.4s ease;
+}
+
+.gate {
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 #book-page.page.is-letter .letter.in-book > * {
@@ -2247,6 +2261,8 @@ html[data-screen="album"] .controls {
   .lightbox:not([hidden]),
   .lightbox-frame,
   .album-book.is-entering,
+  .book-gl,
+  .book-gl-canvas,
   html[data-screen="album"] .controls {
     animation: none !important;
   }

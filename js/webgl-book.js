@@ -53,7 +53,7 @@ var ClaireWebGLNS = (() => {
   var SEG_X = 42;
   var SEG_Y = 28;
   var CACHE_MAX = 16;
-  var DURATION = 1.16;
+  var DURATION = 1.28;
   var REST_X = 0.03;
   var REST_Y = -0.06;
   var REST_Z = 4e-3;
@@ -405,6 +405,8 @@ var ClaireWebGLNS = (() => {
     canvas.style.height = "100%";
     canvas.style.zIndex = "4";
     canvas.style.display = "block";
+    canvas.style.opacity = "0";
+    canvas.style.transition = "opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1)";
     container.appendChild(canvas);
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 20);
@@ -485,7 +487,17 @@ var ClaireWebGLNS = (() => {
     const ground = new THREE.Mesh(new THREE.CircleGeometry(0.72, 40), groundMat);
     ground.rotation.x = -Math.PI / 2;
     ground.position.set(0.52, -0.7, 0.01);
-    book.add(stack, under, shade, flipBack, flip, spine, edge);
+    const fadeMat = new THREE.MeshBasicMaterial({
+      map: paper,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      toneMapped: false
+    });
+    const fadeMesh = new THREE.Mesh(underGeo, fadeMat);
+    fadeMesh.position.z = 2e-3;
+    fadeMesh.visible = false;
+    book.add(stack, under, shade, flipBack, flip, fadeMesh, spine, edge);
     const cache = /* @__PURE__ */ new Map();
     const backCache = /* @__PURE__ */ new Map();
     let disposed = false;
@@ -647,6 +659,28 @@ var ClaireWebGLNS = (() => {
       renderer.render(scene, camera);
       raf = requestAnimationFrame(tickPeek);
     }
+    function fadeIn(from, to, ms) {
+      return new Promise((resolve) => {
+        fadeMesh.visible = true;
+        const start = performance.now();
+        const tick = (now) => {
+          if (disposed) {
+            resolve();
+            return;
+          }
+          const k = Math.min(1, (now - start) / ms);
+          const s = 1 - (1 - k) * (1 - k);
+          fadeMat.opacity = from + (to - from) * s;
+          renderer.render(scene, camera);
+          if (k < 1) raf = requestAnimationFrame(tick);
+          else {
+            raf = 0;
+            resolve();
+          }
+        };
+        raf = requestAnimationFrame(tick);
+      });
+    }
     api.show = async (current, next, helpers) => {
       if (disposed) return;
       document.documentElement.classList.add("webgl-book");
@@ -660,16 +694,32 @@ var ClaireWebGLNS = (() => {
       progress = 0;
       peekTarget = 0;
       peekCurrent = 0;
-      setMaps(front, underTex, pageKey(current, helpers.zh()));
-      applyShade(0);
-      if (wantArrive && !reducedMotion()) {
-        wantArrive = false;
-        book.rotation.set(REST_X + 0.06, REST_Y - 0.1, REST_Z);
-        renderOnce();
-        await lerpRest(book.rotation.x, book.rotation.y, 720);
-      } else {
+      const hadPage = frontMat.map != null && frontMat.map !== paper;
+      if (hadPage && !reducedMotion()) {
+        fadeMat.map = front;
+        fadeMat.needsUpdate = true;
+        fadeMat.opacity = 0;
+        await fadeIn(0, 1, 420);
+        if (disposed) return;
+        setMaps(front, underTex, pageKey(current, helpers.zh()));
+        fadeMat.opacity = 0;
+        fadeMesh.visible = false;
+        applyShade(0);
         restPose();
         renderOnce();
+      } else {
+        setMaps(front, underTex, pageKey(current, helpers.zh()));
+        applyShade(0);
+        canvas.style.opacity = "1";
+        if (wantArrive && !reducedMotion()) {
+          wantArrive = false;
+          book.rotation.set(REST_X + 0.06, REST_Y - 0.1, REST_Z);
+          renderOnce();
+          await lerpRest(book.rotation.x, book.rotation.y, 720);
+        } else {
+          restPose();
+          renderOnce();
+        }
       }
     };
     api.flip = async (from, to, dir, helpers, underPage) => {
@@ -737,7 +787,8 @@ var ClaireWebGLNS = (() => {
         const x0 = book.rotation.x;
         applyShade(0);
         deform(geo, 0);
-        await lerpRest(x0, y0, 180);
+        canvas.style.opacity = "1";
+        await lerpRest(x0, y0, 280);
         restPose();
         renderer.render(scene, camera);
       } catch {
@@ -787,6 +838,7 @@ var ClaireWebGLNS = (() => {
       stackMat.dispose();
       shadowMat.dispose();
       edgeMat.dispose();
+      fadeMat.dispose();
       groundMat.dispose();
       paper.dispose();
       renderer.dispose();
