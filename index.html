@@ -7,8 +7,8 @@
     <title>For Claire My Love · 写给秋然</title>
     <link rel="preload" href="fonts/mashanzheng.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="fonts/cormorant-italic.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="css/app.css?v=35" />
-    <link rel="stylesheet" href="css/unify.css?v=35" />
+    <link rel="stylesheet" href="css/app.css?v=36" />
+    <link rel="stylesheet" href="css/unify.css?v=36" />
   </head>
   <body class="locked">
     <div class="paper-grain" aria-hidden="true"></div>
@@ -128,7 +128,7 @@
       <p id="lightbox-note"></p>
     </div>
     <audio id="bgm" src="audio/wind-poem.mp3" loop preload="none"></audio>
-    <script src="js/config.js?v=35"></script>
+    <script src="js/config.js?v=36"></script>
     <script src="js/sha256.js"></script>
     <script>
       (function () {
@@ -138,21 +138,20 @@
         var form = document.getElementById("password-form");
         var input = document.getElementById("password-input");
         var err = document.getElementById("password-error");
-        function remembered() {
-          try { if (sessionStorage.getItem(key) === "1") return true; } catch (e) {}
-          try { if (localStorage.getItem(key) === "1") return true; } catch (e) {}
-          return false;
-        }
-        function remember() {
-          try { sessionStorage.setItem(key, "1"); } catch (e) {}
-          try { localStorage.setItem(key, "1"); } catch (e) {}
+        try { sessionStorage.removeItem(key); } catch (e) {}
+        try { localStorage.removeItem(key); } catch (e) {}
+        document.body.classList.add("locked");
+        var gate = document.getElementById("password-gate");
+        if (gate) gate.removeAttribute("hidden");
+        var app = document.getElementById("app");
+        if (app) {
+          app.hidden = true;
+          app.classList.remove("is-on");
         }
         function reveal() {
-          remember();
+          try { sessionStorage.setItem(key, "1"); } catch (e) {}
           document.body.classList.remove("locked");
-          var gate = document.getElementById("password-gate");
           if (gate) gate.setAttribute("hidden", "");
-          var app = document.getElementById("app");
           if (app) {
             app.hidden = false;
             app.classList.add("is-on");
@@ -181,11 +180,10 @@
             });
           });
         }
-        if (remembered()) reveal();
       })();
     </script>
-    <script src="data/album.js?v=35"></script>
-    <script src="js/phone.js?v=35"></script>
-    <script src="js/app.js?v=35"></script>
+    <script src="data/album.js?v=36"></script>
+    <script src="js/phone.js?v=36"></script>
+    <script src="js/app.js?v=36"></script>
   </body>
 </html>
