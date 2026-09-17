@@ -1,4 +1,4 @@
-/* v28 — unified fonts + soft page emerge (overrides app.css) */
+/* v31 — fonts + soft page + pale garden */
 :root {
   --font-display: "Ma Shan Zheng", "KaiTi", "STKaiti", cursive, serif;
   --font-zh: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", "Heiti SC", sans-serif;
@@ -67,7 +67,6 @@ html[data-lang="en"] select {
   font-style: normal;
 }
 
-/* Soft emerge instead of hard flip + curl stripes */
 .page.is-turn-next,
 .page.is-turn-prev,
 #book-page.page.is-turn-next,
@@ -102,3 +101,119 @@ html[data-lang="en"] select {
 @keyframes curl-light-rev { from { opacity: 0; } to { opacity: 0; } }
 @keyframes turn-next { from { opacity: 0; } to { opacity: 1; } }
 @keyframes turn-prev { from { opacity: 0; } to { opacity: 1; } }
+
+.garden {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  contain: strict;
+}
+
+.garden .petal,
+.garden .sprig {
+  position: absolute;
+  line-height: 1;
+  user-select: none;
+  opacity: 0.22;
+  color: #c9b8b0;
+  text-shadow: 0 0 12px rgba(253, 246, 240, 0.8);
+  animation: petal-drift 18s ease-in-out infinite alternate;
+}
+
+.garden .petal.p1 { left: 6%; top: 12%; font-size: 1.35rem; color: #d8c4bc; animation-delay: -2s; }
+.garden .petal.p2 { left: 18%; top: 78%; font-size: 1.1rem; color: #c9d0d8; animation-delay: -7s; }
+.garden .petal.p3 { right: 8%; top: 18%; font-size: 1.5rem; color: #dcc8c0; animation-delay: -4s; }
+.garden .petal.p4 { right: 16%; top: 72%; font-size: 1.15rem; color: #c4cdd6; animation-delay: -11s; }
+.garden .petal.p5 { left: 48%; top: 6%; font-size: 0.95rem; color: #d3c6be; animation-delay: -5s; }
+.garden .petal.p6 { left: 72%; top: 86%; font-size: 1.2rem; color: #d7c2bb; animation-delay: -9s; }
+.garden .petal.p7 { left: 8%; top: 46%; font-size: 0.85rem; color: #bec8d2; animation-delay: -13s; }
+.garden .petal.p8 { right: 6%; top: 48%; font-size: 0.9rem; color: #d9cdc4; animation-delay: -1s; }
+
+.garden .sprig.s1 { left: 3%; bottom: 10%; font-size: 1.6rem; opacity: 0.16; color: #c5b7ae; }
+.garden .sprig.s2 { right: 4%; bottom: 14%; font-size: 1.45rem; opacity: 0.15; color: #c8b8b2; animation-delay: -6s; }
+
+.garden .vine {
+  position: absolute;
+  width: 72px;
+  height: 42vh;
+  opacity: 0.14;
+  background:
+    radial-gradient(circle at 18px 24px, rgba(214, 196, 188, 0.55) 3px, transparent 4px),
+    radial-gradient(circle at 48px 70px, rgba(197, 208, 220, 0.45) 2.5px, transparent 3.5px),
+    radial-gradient(circle at 22px 120px, rgba(232, 214, 214, 0.5) 3px, transparent 4px),
+    radial-gradient(circle at 52px 176px, rgba(214, 196, 188, 0.4) 2px, transparent 3px);
+  background-size: 72px 200px;
+}
+
+.garden .vine-l {
+  left: 0;
+  top: 18%;
+  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+.garden .vine-r {
+  right: 0;
+  top: 22%;
+  transform: scaleX(-1);
+  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+.garden .lace-bloom {
+  position: absolute;
+  left: 50%;
+  width: min(420px, 70vw);
+  height: 56px;
+  transform: translateX(-50%);
+  opacity: 0.18;
+  background:
+    radial-gradient(circle at 20% 70%, rgba(224, 204, 196, 0.7) 4px, transparent 5px),
+    radial-gradient(circle at 40% 40%, rgba(197, 208, 220, 0.55) 3px, transparent 4px),
+    radial-gradient(circle at 60% 65%, rgba(232, 214, 214, 0.65) 4px, transparent 5px),
+    radial-gradient(circle at 80% 38%, rgba(214, 196, 188, 0.5) 3px, transparent 4px);
+}
+
+.garden .lace-bloom.top { top: 8px; }
+.garden .lace-bloom.bot { bottom: 8px; transform: translateX(-50%) scaleY(-1); }
+
+@keyframes petal-drift {
+  from { transform: translate3d(0, 0, 0) rotate(-8deg); }
+  to { transform: translate3d(8px, -10px, 0) rotate(10deg); }
+}
+
+.gate-card {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 248, 244, 0.9), transparent 46%),
+    var(--paper, #fefcf8);
+}
+
+.gate-card::after {
+  content: "❀";
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  color: #c9b8b0;
+  opacity: 0.45;
+}
+
+@media (max-width: 720px) {
+  .garden .petal.p5,
+  .garden .petal.p7,
+  .garden .vine {
+    display: none;
+  }
+  .garden .petal {
+    opacity: 0.16;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .garden .petal,
+  .garden .sprig {
+    animation: none;
+  }
+}
