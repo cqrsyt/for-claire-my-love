@@ -650,19 +650,16 @@ var ClaireWebGLNS = (() => {
     api.show = async (current, next, helpers) => {
       if (disposed) return;
       document.documentElement.classList.add("webgl-book");
-      stopLoop();
-      api.busy = false;
-      progress = 0;
-      peekTarget = 0;
-      peekCurrent = 0;
-      restPose();
-      applyShade(0);
-      renderOnce();
+      if (api.busy) return;
       const [front, underTex] = await Promise.all([
         texFor(current, helpers),
         texFor(next, helpers)
       ]);
       if (disposed) return;
+      stopLoop();
+      progress = 0;
+      peekTarget = 0;
+      peekCurrent = 0;
       setMaps(front, underTex, pageKey(current, helpers.zh()));
       applyShade(0);
       if (wantArrive && !reducedMotion()) {

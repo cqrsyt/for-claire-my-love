@@ -113,14 +113,14 @@
     if (document.getElementById("three-src")) return;
     var s = document.createElement("script");
     s.id = "three-src";
-    s.src = "js/three.min.js?v=49";
+    s.src = "js/three.min.js?v=50";
     s.onload = function () {
       if (window.ClaireWebGLBook) {
         bootGl();
         return;
       }
       var w = document.createElement("script");
-      w.src = "js/webgl-book.js?v=49";
+      w.src = "js/webgl-book.js?v=50";
       w.onload = bootGl;
       document.head.appendChild(w);
     };
@@ -286,12 +286,13 @@
   function open(view) {
     state.view = view;
     document.documentElement.setAttribute("data-screen", view);
-    if (view === "album") loadThree();
     document.querySelectorAll(".view").forEach(function (el) {
       el.classList.toggle("active", el.dataset.view === view);
     });
-    if (view === "album") renderPage(false);
-    else {
+    if (view === "album") {
+      loadThree();
+      renderPage(false);
+    } else {
       document.documentElement.classList.remove("webgl-book");
       document.documentElement.removeAttribute("data-chapter");
       updateBirthdayWish();
@@ -530,9 +531,24 @@
       "<p class=\"" + n + "\">" + esc(zh() ? ch.introZh : ch.introEn) + "</p>";
     var box = document.getElementById("book-page");
     box.classList.remove("is-turn-next", "is-turn-prev", "is-letter", "is-end");
-    box.innerHTML = (glBook && glBook.ready)
-      ? '<div class="stack"></div>'
-      : '<div class="stack">' + item.photos.map(function (ph, i) {
+    if (!glBook && window.ClaireWebGLBook && window.THREE) bootGl();
+    if (glBook && glBook.ready) {
+      box.innerHTML = '<div class="stack"></div>';
+      document.documentElement.classList.add("webgl-book");
+      if (animate !== "gl-keep") glBook.show(item, pages[state.page + 1] || null, helpers());
+      if (glBook.prefetch) {
+        glBook.prefetch(pages[state.page + 2] || null, helpers());
+        glBook.prefetch(pages[state.page - 1] || null, helpers());
+      }
+      document.getElementById("swipe-hint").textContent = t("swipeHint");
+      syncTurnHint();
+      syncControls();
+      document.documentElement.setAttribute("data-chapter", ch.id || "");
+      updateBirthdayWish();
+      warmNearby();
+      return;
+    }
+    box.innerHTML = '<div class="stack">' + item.photos.map(function (ph, i) {
       var cap = zh() ? ph.captionZh : ph.captionEn;
       var note = zh() ? ph.noteZh : ph.noteEn;
       return '<article class="card">' +
@@ -1044,6 +1060,7 @@
   }
 
   function boot() {
+    loadThree();
     var langBtn = document.getElementById("btn-lang");
     if (langBtn) {
       langBtn.onclick = function () { setLang(zh() ? "en" : "zh"); };

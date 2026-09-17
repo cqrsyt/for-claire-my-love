@@ -1342,6 +1342,7 @@ html.is-quiet .star-field span {
   width: 100%;
   aspect-ratio: 1024 / 1376;
   min-height: 0;
+  background: #fffefb;
 }
 }
 
@@ -1669,6 +1670,11 @@ html:not(.webgl-book) .book-gl {
   opacity: 0;
 }
 
+html.webgl-book #book-page:not(.is-letter):not(.is-end) {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
 html.webgl-book #book-page {
   opacity: 0;
 }
@@ -1676,6 +1682,7 @@ html.webgl-book #book-page {
 html.webgl-book #book-page.page.is-letter,
 html.webgl-book #book-page.page.is-end {
   opacity: 1;
+  visibility: visible;
 }
 
 html.webgl-book .album-book {
