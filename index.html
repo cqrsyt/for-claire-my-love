@@ -7,10 +7,10 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta name="theme-color" content="#fdfaf5" />
     <title>For Claire My Love · 写给秋然</title>
-    <link rel="preload" href="fonts/mashanzheng.woff2?v=42" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="fonts/cormorant-italic.woff2?v=42" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="css/app.css?v=42" />
-    <link rel="stylesheet" href="css/unify.css?v=42" />
+    <link rel="preload" href="fonts/mashanzheng.woff2?v=43" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/cormorant-italic.woff2?v=43" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/app.css?v=43" />
+    <link rel="stylesheet" href="css/unify.css?v=43" />
     <style>
       body.locked #password-gate.gate {
         display: flex !important;
@@ -159,8 +159,8 @@
       <p id="lightbox-note"></p>
     </div>
     <audio id="bgm" src="audio/wind-poem.mp3" loop preload="none"></audio>
-    <script src="js/config.js?v=42"></script>
-    <script src="js/sha256.js?v=42"></script>
+    <script src="js/config.js?v=43"></script>
+    <script src="js/sha256.js?v=43"></script>
     <script>
       (function () {
         var cfg = window.SITE_CONFIG || {};
@@ -191,7 +191,7 @@
         var appendHead = document.head.appendChild.bind(document.head);
         document.head.appendChild = function (node) {
           if (node && node.src && /webgl-book\.js/.test(node.src || "")) {
-            node.src = "js/webgl-book.js?v=42";
+            node.src = "js/webgl-book.js?v=43";
           }
           return appendHead(node);
         };
@@ -210,9 +210,9 @@
         function loadRest() {
           if (started) return;
           started = true;
-          loadScript("data/album.js?v=42")
-            .then(function () { return loadScript("js/phone.js?v=42"); })
-            .then(function () { return loadScript("js/app.js?v=42"); });
+          loadScript("data/album.js?v=43")
+            .then(function () { return loadScript("js/phone.js?v=43"); })
+            .then(function () { return loadScript("js/app.js?v=43"); });
         }
 
         function reveal() {

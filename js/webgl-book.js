@@ -122,7 +122,7 @@ var ClaireWebGLNS = (() => {
     if (line) ctx.fillText(line, x, y + n * lineH);
   }
   function paintPaper(ctx) {
-    ctx.fillStyle = "#fefcf8";
+    ctx.fillStyle = "#fffefb";
     ctx.fillRect(0, 0, TEX_W, TEX_H);
     const g = ctx.createLinearGradient(0, 0, 56, 0);
     g.addColorStop(0, "rgba(197,208,220,0.07)");
@@ -204,7 +204,7 @@ var ClaireWebGLNS = (() => {
         ctx.textAlign = "center";
         ctx.textBaseline = "alphabetic";
         if (caption) {
-          ctx.fillStyle = "#3a4450";
+          ctx.fillStyle = "#5a6570";
           ctx.font = zh ? '40px "Ma Shan Zheng", KaiTi, serif' : 'italic 32px "Cormorant Garamond", Georgia, serif';
           ctx.fillText(caption, TEX_W / 2, dy + dh + 50);
         }
@@ -352,7 +352,7 @@ var ClaireWebGLNS = (() => {
       powerPreference: "high-performance"
     });
     renderer.setPixelRatio(Math.min(window.innerWidth < 720 ? 1.25 : 1.5, window.devicePixelRatio || 1));
-    renderer.setClearColor(0, 0);
+    renderer.setClearColor(16644853, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.NoToneMapping;
     canvas.className = "book-gl-canvas";
@@ -388,23 +388,23 @@ var ClaireWebGLNS = (() => {
     const underGeo = new THREE.PlaneGeometry(1, 1, 1, 1);
     const backGeo = new THREE.PlaneGeometry(1, 1, SEG_X, SEG_Y);
     const paper = paperTexture();
-    const frontMat = new THREE.MeshLambertMaterial({
+    const frontMat = new THREE.MeshBasicMaterial({
       map: paper,
       side: THREE.FrontSide,
       toneMapped: false
     });
-    const backMat = new THREE.MeshLambertMaterial({
+    const backMat = new THREE.MeshBasicMaterial({
       map: paper,
-      color: 15920870,
+      color: 16776697,
       side: THREE.BackSide,
       toneMapped: false
     });
-    const underMat = new THREE.MeshLambertMaterial({
+    const underMat = new THREE.MeshBasicMaterial({
       map: paper,
       toneMapped: false
     });
-    const stackMat = new THREE.MeshLambertMaterial({
-      color: 16052456,
+    const stackMat = new THREE.MeshBasicMaterial({
+      color: 16776697,
       toneMapped: false
     });
     const shadowMat = new THREE.MeshBasicMaterial({
@@ -414,7 +414,7 @@ var ClaireWebGLNS = (() => {
       depthWrite: false,
       toneMapped: false
     });
-    const edgeMat = new THREE.MeshLambertMaterial({
+    const edgeMat = new THREE.MeshBasicMaterial({
       map: edgeTexture(),
       toneMapped: false
     });
@@ -428,8 +428,8 @@ var ClaireWebGLNS = (() => {
     stack.position.set(0.012, -0.01, -0.018);
     const spine = new THREE.Mesh(
       new THREE.BoxGeometry(0.03, 1, 0.04),
-      new THREE.MeshLambertMaterial({
-        color: 12964060,
+      new THREE.MeshBasicMaterial({
+        color: 14147303,
         toneMapped: false
       })
     );
@@ -437,7 +437,7 @@ var ClaireWebGLNS = (() => {
     const groundMat = new THREE.MeshBasicMaterial({
       map: groundTexture(),
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.22,
       depthWrite: false,
       toneMapped: false
     });
