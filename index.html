@@ -6,21 +6,22 @@
     <meta name="theme-color" content="#fdfaf5" />
     <title>For Claire My Love · 写给秋然</title>
     <link rel="preload" href="fonts/mashanzheng.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="css/app.css?v=33" />
-    <link rel="stylesheet" href="css/unify.css?v=33" />
+    <link rel="preload" href="fonts/cormorant-italic.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/app.css?v=34" />
+    <link rel="stylesheet" href="css/unify.css?v=34" />
   </head>
   <body class="locked">
     <div class="paper-grain" aria-hidden="true"></div>
     <div class="garden" aria-hidden="true">
       <span class="vine vine-l"></span>
       <span class="vine vine-r"></span>
-      <span class="petal p1">❀</span>
+      <span class="petal p1">✿</span>
       <span class="petal p2">✿</span>
-      <span class="petal p3">❀</span>
+      <span class="petal p3">✿</span>
       <span class="petal p4">🌸</span>
       <span class="petal p5">✦</span>
       <span class="petal p6">✿</span>
-      <span class="petal p7">❀</span>
+      <span class="petal p7">✿</span>
       <span class="petal p8">🌸</span>
       <span class="sprig s1">🌿</span>
       <span class="sprig s2">🌿</span>
@@ -49,11 +50,11 @@
         <p class="kicker zh">写给秋然</p>
         <h1 class="zh">请输入密码</h1>
         <p class="sub en">For Claire My Love</p>
-        <form id="password-form">
+        <form id="password-form" action="javascript:void(0)" method="post" onsubmit="return false;">
           <input type="password" id="password-input" placeholder="密码 / password" required autocomplete="off" />
           <button type="submit" class="btn zh">进入</button>
         </form>
-        <p id="password-error" class="error" hidden>密码不对，再试一次</p>
+        <p id="password-error" class="error zh" hidden>密码不对，再试一次</p>
       </div>
     </div>
     <div id="app" hidden>
@@ -127,10 +128,65 @@
       <p id="lightbox-note"></p>
     </div>
     <audio id="bgm" src="audio/wind-poem.mp3" loop preload="none"></audio>
-    <script src="js/config.js?v=33"></script>
+    <script src="js/config.js?v=34"></script>
     <script src="js/sha256.js"></script>
-    <script src="data/album.js?v=33"></script>
-    <script src="js/phone.js?v=33"></script>
-    <script src="js/app.js?v=33"></script>
+    <script>
+      (function () {
+        var cfg = window.SITE_CONFIG || {};
+        var key = cfg.passwordStorageKey || "claire-my-love-unlocked";
+        var hash = cfg.sitePasswordHash || "310f089018032ba50b85d43ed54f70c81cf8e8a4846b26bc2037274e56f1acd1";
+        var form = document.getElementById("password-form");
+        var input = document.getElementById("password-input");
+        var err = document.getElementById("password-error");
+        function remembered() {
+          try { if (sessionStorage.getItem(key) === "1") return true; } catch (e) {}
+          try { if (localStorage.getItem(key) === "1") return true; } catch (e) {}
+          return false;
+        }
+        function remember() {
+          try { sessionStorage.setItem(key, "1"); } catch (e) {}
+          try { localStorage.setItem(key, "1"); } catch (e) {}
+          return;
+        }
+        function reveal() {
+          remember();
+          document.body.classList.remove("locked");
+          var gate = document.getElementById("password-gate");
+          if (gate) gate.setAttribute("hidden", "");
+          var app = document.getElementById("app");
+          if (app) {
+            app.hidden = false;
+            app.classList.add("is-on");
+          }
+        }
+        function digest(val) {
+          if (window.ClaireSha256) return Promise.resolve(window.ClaireSha256(val));
+          if (window.crypto && crypto.subtle && crypto.subtle.digest) {
+            return crypto.subtle.digest("SHA-256", new TextEncoder().encode(val)).then(function (buf) {
+              return Array.from(new Uint8Array(buf)).map(function (x) {
+                return x.toString(16).padStart(2, "0");
+              }).join("");
+            });
+          }
+          return Promise.reject(new Error("no-hash"));
+        }
+        if (form) {
+          form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            digest((input && input.value) || "").then(function (hex) {
+              if (hex === hash) reveal();
+              else if (err) err.hidden = false;
+            }).catch(function () {
+              if (err) err.hidden = false;
+            });
+          });
+        }
+        if (remembered()) reveal();
+      })();
+    </script>
+    <script src="data/album.js?v=34"></script>
+    <script src="js/phone.js?v=34"></script>
+    <script src="js/app.js?v=34"></script>
   </body>
 </html>
