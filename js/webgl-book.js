@@ -1,64 +1,107 @@
-(function (root) {
-  "use strict";
+"use strict";
+var ClaireWebGLNS = (() => {
+  var __create = Object.create;
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __getProtoOf = Object.getPrototypeOf;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __commonJS = (cb, mod) => function __require() {
+    try {
+      return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+    } catch (e) {
+      throw mod = 0, e;
+    }
+  };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+    // If the importer is in node compatibility mode or this is not an ESM
+    // file that has been converted to a CommonJS file using a Babel-
+    // compatible transform (i.e. "__esModule" has not been set), then set
+    // "default" to the CommonJS "module.exports" for node compatibility.
+    isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+    mod
+  ));
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
+  // ../tmp/three-shim.cjs
+  var require_three_shim = __commonJS({
+    "../tmp/three-shim.cjs"(exports, module) {
+      module.exports = window.THREE;
+    }
+  });
+
+  // src/lib/webgl-book.ts
+  var webgl_book_exports = {};
+  __export(webgl_book_exports, {
+    mountWebGLBook: () => mountWebGLBook
+  });
+  var THREE = __toESM(require_three_shim(), 1);
   var TEX_W = 1024;
   var TEX_H = 1376;
-  var SEG_X = 24;
-  var SEG_Y = 16;
+  var SEG_X = 42;
+  var SEG_Y = 28;
   var CACHE_MAX = 16;
-  var DURATION = 0.72;
-
+  var DURATION = 1.16;
+  var REST_X = 0.055;
+  var REST_Y = -0.11;
+  var REST_Z = 8e-3;
   function applyQuality() {
-    var mobile = window.innerWidth < 720;
+    const mobile = typeof window !== "undefined" && window.innerWidth < 720;
     TEX_W = mobile ? 768 : 1024;
     TEX_H = mobile ? 1032 : 1376;
-    SEG_X = mobile ? 18 : 24;
-    SEG_Y = mobile ? 12 : 16;
+    SEG_X = mobile ? 28 : 42;
+    SEG_Y = mobile ? 18 : 28;
     CACHE_MAX = mobile ? 6 : 16;
   }
-
   function easePaper(t) {
-    var x = Math.min(1, Math.max(0, t));
-    return x * x * (3 - 2 * x) * (1 - 0.12 * Math.sin(x * Math.PI));
+    const x = Math.min(1, Math.max(0, t));
+    const s = x * x * (3 - 2 * x);
+    return s * (1 - 0.1 * Math.sin(x * Math.PI));
   }
-
   function reducedMotion() {
-    return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   }
-
-  function canWebGL() {
-    try {
-      var c = document.createElement("canvas");
-      return !!(c.getContext("webgl2") || c.getContext("webgl"));
-    } catch (e) {
-      return false;
-    }
-  }
-
   function loadImage(src) {
-    return fetch(src).then(function (res) { return res.blob(); }).then(function (blob) {
-      if (typeof createImageBitmap === "function") {
-        return createImageBitmap(blob, { resizeWidth: TEX_W, resizeQuality: "medium" });
+    return (async () => {
+      try {
+        const res = await fetch(src);
+        const blob = await res.blob();
+        if (typeof createImageBitmap === "function") {
+          return await createImageBitmap(blob, { resizeWidth: TEX_W, resizeQuality: "medium" });
+        }
+        const url = URL.createObjectURL(blob);
+        const img = await new Promise((resolve, reject) => {
+          const el = new Image();
+          el.onload = () => resolve(el);
+          el.onerror = () => reject(new Error("img"));
+          el.src = url;
+        });
+        URL.revokeObjectURL(url);
+        return img;
+      } catch {
+        return await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error("img"));
+          img.decoding = "async";
+          img.src = src;
+        });
       }
-      return new Promise(function (resolve, reject) {
-        var url = URL.createObjectURL(blob);
-        var img = new Image();
-        img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
-        img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("img")); };
-        img.src = url;
-      });
-    }).catch(function () {
-      return new Promise(function (resolve, reject) {
-        var img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = function () { resolve(img); };
-        img.onerror = function () { reject(new Error("img")); };
-        img.decoding = "async";
-        img.src = src;
-      });
-    });
+    })();
   }
-
   function roundImage(ctx, img, x, y, w, h, r) {
     ctx.save();
     ctx.beginPath();
@@ -72,20 +115,18 @@
     ctx.drawImage(img, x, y, w, h);
     ctx.restore();
   }
-
   function wrapText(ctx, text, x, y, maxW, lineH, maxLines) {
-    var chars = String(text);
-    var line = "";
-    var n = 0;
-    var i;
-    for (i = 0; i < chars.length; i++) {
-      var test = line + chars[i];
+    const chars = String(text);
+    let line = "";
+    let n = 0;
+    for (let i = 0; i < chars.length; i++) {
+      const test = line + chars[i];
       if (ctx.measureText(test).width > maxW && line) {
         ctx.fillText(line, x, y + n * lineH);
         line = chars[i];
         n += 1;
         if (n >= maxLines) {
-          ctx.fillText("…", x, y + n * lineH);
+          ctx.fillText("\u2026", x, y + n * lineH);
           return;
         }
       } else {
@@ -94,11 +135,10 @@
     }
     if (line) ctx.fillText(line, x, y + n * lineH);
   }
-
   function paintPaper(ctx) {
     ctx.fillStyle = "#fefcf8";
     ctx.fillRect(0, 0, TEX_W, TEX_H);
-    var g = ctx.createLinearGradient(0, 0, 56, 0);
+    const g = ctx.createLinearGradient(0, 0, 56, 0);
     g.addColorStop(0, "rgba(197,208,220,0.07)");
     g.addColorStop(1, "rgba(254,252,248,0)");
     ctx.fillStyle = g;
@@ -117,157 +157,202 @@
     ctx.globalAlpha = 0.12;
     ctx.font = '28px "Ma Shan Zheng", KaiTi, serif';
     ctx.fillStyle = "#8a97a6";
-    ctx.fillText("🍅", 36, 64);
-    ctx.fillText("🍁", TEX_W - 70, 70);
-    ctx.fillText("🐕", 40, TEX_H - 48);
-    ctx.fillText("🌸", TEX_W - 72, TEX_H - 52);
+    ctx.fillText("\u{1F345}", 36, 64);
+    ctx.fillText("\u{1F341}", TEX_W - 70, 70);
+    ctx.fillText("\u{1F415}", 40, TEX_H - 48);
+    ctx.fillText("\u{1F338}", TEX_W - 72, TEX_H - 52);
     ctx.restore();
   }
-
   function pageKey(item, zh) {
-    if (!item || !item.photos || !item.photos.length) return zh ? "paper-zh" : "paper-en";
-    return (zh ? "zh|" : "en|") + item.photos.map(function (p) { return p.src; }).join(",");
+    if (!item || !item.photos.length) return zh ? "paper-zh" : "paper-en";
+    return (zh ? "zh|" : "en|") + item.photos.map((p) => p.src).join(",");
   }
-
-  function composePage(THREE, item, helpers) {
-    var canvas = document.createElement("canvas");
+  async function composePage(item, helpers) {
+    const canvas = document.createElement("canvas");
     canvas.width = TEX_W;
     canvas.height = TEX_H;
-    var ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("2d");
     paintPaper(ctx);
-    var ready = Promise.resolve();
-    if (document.fonts && document.fonts.load) {
-      var sample = "写给秋然 Claire";
-      ready = Promise.race([
-        Promise.all([
-          document.fonts.load('40px "Ma Shan Zheng"', sample),
-          document.fonts.load('24px "Ma Shan Zheng"', sample),
-          document.fonts.load('italic 30px "Cormorant Garamond"', sample)
-        ]).catch(function () {}),
-        new Promise(function (resolve) { setTimeout(resolve, 2200); })
-      ]);
+    try {
+      if (document.fonts?.load) {
+        const sample = "\u5199\u7ED9\u79CB\u7136 Claire";
+        await Promise.race([
+          Promise.all([
+            document.fonts.load('40px "Ma Shan Zheng"', sample),
+            document.fonts.load('italic 32px "Cormorant Garamond"', sample)
+          ]),
+          new Promise((resolve) => window.setTimeout(resolve, 280))
+        ]);
+      }
+    } catch {
     }
-    return ready.then(function () {
-      var photos = (item && item.photos) || [];
-      var pad = 78;
-      var innerW = TEX_W - pad * 2;
-      var top = 88;
-      var available = TEX_H - top - 90;
-      var n = Math.max(1, photos.length);
-      var gap = 32;
-      var slotH = n === 1 ? available * 0.86 : (available - gap * (n - 1)) / n;
-      var zh = helpers.zh();
-      var chain = Promise.resolve();
-      photos.forEach(function (ph, i) {
-        chain = chain.then(function () {
-          var y0 = top + i * (slotH + gap);
-          var caption = zh ? ph.captionZh : ph.captionEn;
-          var note = zh ? ph.noteZh : ph.noteEn;
-          var textH = caption || note ? (note ? 118 : 64) : 18;
-          var maxH = Math.max(160, slotH - textH);
-          return loadImage(helpers.asset(ph.src)).then(function (img) {
-            var s = Math.min(innerW / img.width, maxH / img.height);
-            var dw = img.width * s;
-            var dh = img.height * s;
-            var dx = (TEX_W - dw) / 2;
-            var dy = y0 + Math.max(0, (maxH - dh) * 0.35);
-            roundImage(ctx, img, dx, dy, dw, dh, 18);
-            if (img && img.close) img.close();
-            ctx.textAlign = "center";
-            ctx.textBaseline = "alphabetic";
-            if (caption) {
-              ctx.fillStyle = "#3a4450";
-              ctx.font = zh
-                ? '36px "Ma Shan Zheng", KaiTi, STKaiti, serif'
-                : 'italic 30px "Cormorant Garamond", Georgia, serif';
-              ctx.fillText(caption, TEX_W / 2, dy + dh + 50);
-            }
-            if (note) {
-              ctx.fillStyle = "#8a97a6";
-              ctx.font = zh
-                ? '24px "Ma Shan Zheng", KaiTi, STKaiti, serif'
-                : 'italic 20px "Cormorant Garamond", Georgia, serif';
-              wrapText(ctx, note, TEX_W / 2, dy + dh + (caption ? 88 : 52), innerW - 24, 34, 2);
-            }
-          }).catch(function () {
-            ctx.fillStyle = "rgba(197,208,220,0.35)";
-            ctx.fillRect(pad, y0, innerW, maxH);
-          });
-        });
-      });
-      return chain;
-    }).then(function () {
-      var tex = new THREE.CanvasTexture(canvas);
-      if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
-      tex.anisotropy = 8;
-      tex.needsUpdate = true;
-      return tex;
-    });
+    const photos = item?.photos ?? [];
+    const pad = 78;
+    const innerW = TEX_W - pad * 2;
+    const top = 88;
+    const bottom = 90;
+    const available = TEX_H - top - bottom;
+    const n = Math.max(1, photos.length);
+    const gap = 32;
+    const slotH = n === 1 ? available * 0.86 : (available - gap * (n - 1)) / n;
+    const zh = helpers.zh();
+    for (let i = 0; i < photos.length; i++) {
+      const ph = photos[i];
+      const y0 = top + i * (slotH + gap);
+      const caption = zh ? ph.captionZh : ph.captionEn;
+      const note = zh ? ph.noteZh : ph.noteEn;
+      const textH = caption || note ? note ? 118 : 64 : 18;
+      const maxH = Math.max(160, slotH - textH);
+      try {
+        const img = await loadImage(helpers.asset(ph.src));
+        const iw = "width" in img ? Number(img.width) : TEX_W;
+        const ih = "height" in img ? Number(img.height) : TEX_H;
+        const s = Math.min(innerW / iw, maxH / ih);
+        const dw = iw * s;
+        const dh = ih * s;
+        const dx = (TEX_W - dw) / 2;
+        const dy = y0 + Math.max(0, (maxH - dh) * 0.35);
+        roundImage(ctx, img, dx, dy, dw, dh, 18);
+        if (typeof ImageBitmap !== "undefined" && img instanceof ImageBitmap) img.close();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "alphabetic";
+        if (caption) {
+          ctx.fillStyle = "#3a4450";
+          ctx.font = zh ? '40px "Ma Shan Zheng", KaiTi, serif' : 'italic 32px "Cormorant Garamond", Georgia, serif';
+          ctx.fillText(caption, TEX_W / 2, dy + dh + 50);
+        }
+        if (note) {
+          ctx.fillStyle = "#8a97a6";
+          ctx.font = zh ? '26px "Ma Shan Zheng", KaiTi, serif' : 'italic 22px "Cormorant Garamond", Georgia, serif';
+          wrapText(ctx, note, TEX_W / 2, dy + dh + (caption ? 88 : 52), innerW - 24, 34, 2);
+        }
+      } catch {
+        ctx.fillStyle = "rgba(197,208,220,0.35)";
+        ctx.fillRect(pad, y0, innerW, maxH);
+      }
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
+    tex.needsUpdate = true;
+    return tex;
   }
-
-  function paperTexture(THREE) {
-    var canvas = document.createElement("canvas");
+  function paperTexture() {
+    const canvas = document.createElement("canvas");
     canvas.width = TEX_W;
     canvas.height = TEX_H;
-    var ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d");
     paintPaper(ctx);
     ctx.save();
     ctx.globalAlpha = 0.2;
     ctx.fillStyle = "#9aa8b8";
     ctx.font = '36px "Ma Shan Zheng", KaiTi, serif';
     ctx.textAlign = "center";
-    ctx.fillText("写给秋然", TEX_W / 2, TEX_H / 2);
+    ctx.fillText("\u5199\u7ED9\u79CB\u7136", TEX_W / 2, TEX_H / 2);
     ctx.restore();
-    var tex = new THREE.CanvasTexture(canvas);
-    if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
     tex.needsUpdate = true;
     return tex;
   }
-
+  function shadowTexture() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 64;
+    const ctx = canvas.getContext("2d");
+    const g = ctx.createLinearGradient(0, 0, 256, 0);
+    g.addColorStop(0, "rgba(58, 68, 80, 0.62)");
+    g.addColorStop(0.28, "rgba(58, 68, 80, 0.28)");
+    g.addColorStop(0.7, "rgba(58, 68, 80, 0.08)");
+    g.addColorStop(1, "rgba(58, 68, 80, 0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 256, 64);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.needsUpdate = true;
+    return tex;
+  }
+  function edgeTexture() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 24;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d");
+    for (let x = 0; x < 24; x++) {
+      ctx.fillStyle = x % 2 === 0 ? "#e8edf3" : "#f6f2ea";
+      ctx.fillRect(x, 0, 1, 256);
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.needsUpdate = true;
+    return tex;
+  }
+  function backFrom(front) {
+    const canvas = document.createElement("canvas");
+    canvas.width = TEX_W;
+    canvas.height = TEX_H;
+    const ctx = canvas.getContext("2d");
+    paintPaper(ctx);
+    ctx.fillStyle = "rgba(90, 108, 128, 0.1)";
+    ctx.fillRect(0, 0, TEX_W, TEX_H);
+    const src = front.image;
+    if (src) {
+      ctx.save();
+      ctx.globalAlpha = 0.14;
+      ctx.translate(TEX_W, 0);
+      ctx.scale(-1, 1);
+      ctx.filter = "grayscale(0.25) contrast(0.9)";
+      ctx.drawImage(src, 0, 0, TEX_W, TEX_H);
+      ctx.restore();
+    }
+    ctx.fillStyle = "rgba(197, 208, 220, 0.12)";
+    ctx.fillRect(0, 0, 28, TEX_H);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    tex.needsUpdate = true;
+    return tex;
+  }
   function deform(geo, progress) {
-    var pos = geo.attributes.position;
-    var orig = geo.userData.orig;
-    var W = geo.userData.W;
-    var H = geo.userData.H;
-    var t = Math.min(1, Math.max(0, progress));
-    var thetaMax = t * Math.PI * 0.92;
-    var bulge = Math.sin(t * Math.PI);
-    var halfH = H * 0.5;
-    var i, ox, oy, u, theta, lift, soft;
-    for (i = 0; i < pos.count; i++) {
-      ox = orig[i * 3];
-      oy = orig[i * 3 + 1];
-      u = Math.min(1, Math.max(0, ox / W));
-      soft = u * u * (3 - 2 * u);
-      theta = thetaMax * Math.pow(soft, 0.85);
-      theta *= 1 + 0.04 * bulge * (oy / halfH);
-      lift = bulge * 0.02 * W * Math.sin(soft * Math.PI);
-      pos.setXYZ(i, ox * Math.cos(theta), oy, ox * Math.sin(theta) + lift);
+    const pos = geo.attributes.position;
+    const orig = geo.userData.orig;
+    const W = geo.userData.W;
+    const H = geo.userData.H;
+    const t = Math.min(1.08, Math.max(0, progress));
+    const fold = Math.min(1, t);
+    const thetaMax = fold * Math.PI;
+    const bulge = Math.sin(fold * Math.PI);
+    const halfH = H * 0.5;
+    for (let i = 0; i < pos.count; i++) {
+      const ox = orig[i * 3];
+      const oy = orig[i * 3 + 1];
+      const u = Math.min(1, Math.max(0, ox / W));
+      let theta = thetaMax * Math.pow(u, 0.64);
+      theta *= 1 + 0.22 * bulge * (oy / halfH);
+      const lift = bulge * 0.078 * W * Math.sin(u * Math.PI);
+      const wave = bulge * 0.012 * W * Math.sin(oy / halfH * Math.PI) * Math.sin(u * Math.PI);
+      pos.setXYZ(i, ox * Math.cos(theta), oy, ox * Math.sin(theta) + lift + wave);
     }
     pos.needsUpdate = true;
     geo.computeVertexNormals();
   }
-
-  function mount(container) {
-    var THREE = root.THREE;
-    if (!THREE || !container || !canWebGL()) return null;
+  function mountWebGLBook(container) {
+    if (typeof window === "undefined") return null;
     applyQuality();
-    var mobile = window.innerWidth < 720;
-
-    var canvas = document.createElement("canvas");
-    var glOpts = { alpha: true, antialias: !mobile, premultipliedAlpha: true };
-    var context = canvas.getContext("webgl2", glOpts) || canvas.getContext("webgl", glOpts);
+    const mobile = window.innerWidth < 720;
+    const canvas = document.createElement("canvas");
+    const glOpts = { alpha: true, antialias: !mobile, premultipliedAlpha: true };
+    const context = canvas.getContext("webgl2", glOpts) || canvas.getContext("webgl", glOpts);
     if (!context) return null;
-    var renderer = new THREE.WebGLRenderer({
-      canvas: canvas,
-      context: context,
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      context,
       alpha: true,
       antialias: !mobile,
-      powerPreference: "high-performance",
+      powerPreference: "high-performance"
     });
     renderer.setPixelRatio(Math.min(window.innerWidth < 720 ? 1.25 : 1.5, window.devicePixelRatio || 1));
-    renderer.setClearColor(0x000000, 0);
-    if (THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setClearColor(0, 0);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.NoToneMapping;
     canvas.className = "book-gl-canvas";
     canvas.setAttribute("aria-hidden", "true");
@@ -279,68 +364,104 @@
     canvas.style.zIndex = "4";
     canvas.style.display = "block";
     container.appendChild(canvas);
-
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(30, 1, 0.05, 20);
-    var book = new THREE.Group();
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 20);
+    const book = new THREE.Group();
     scene.add(book);
-    scene.add(new THREE.HemisphereLight(0xfffbf6, 0xf4f6f9, 1.35));
-    scene.add(new THREE.AmbientLight(0xfffaf4, 1.15));
-    var key = new THREE.DirectionalLight(0xffffff, 1.15);
-    key.position.set(0.35, 0.95, 1.45);
+    scene.add(new THREE.HemisphereLight(16776182, 12964060, 0.42));
+    scene.add(new THREE.AmbientLight(16775924, 0.48));
+    const key = new THREE.DirectionalLight(16775408, 0.42);
+    key.position.set(0.55, 0.9, 1.15);
     scene.add(key);
-    var fill = new THREE.DirectionalLight(0xffffff, 0.72);
-    fill.position.set(-0.7, 0.4, 0.95);
+    const fill = new THREE.DirectionalLight(15002353, 0.18);
+    fill.position.set(-0.85, 0.28, 0.75);
     scene.add(fill);
-    var curlLight = new THREE.PointLight(0xfff8f0, 0.0, 3.4, 2);
+    const rim = new THREE.DirectionalLight(16777215, 0.1);
+    rim.position.set(-0.15, 0.35, -1.05);
+    scene.add(rim);
+    const curlLight = new THREE.PointLight(16774890, 0, 2.8, 1.7);
     scene.add(curlLight);
-
-    var W = 1;
-    var H = 1.28;
-    var geo = new THREE.PlaneGeometry(1, 1, SEG_X, SEG_Y);
-    var underGeo = new THREE.PlaneGeometry(1, 1, 1, 1);
-    var paper = paperTexture(THREE);
-    var frontMat = new THREE.MeshBasicMaterial({
-      map: paper, side: THREE.FrontSide, toneMapped: false,
+    let W = 1;
+    let H = 1.28;
+    const geo = new THREE.PlaneGeometry(1, 1, SEG_X, SEG_Y);
+    const underGeo = new THREE.PlaneGeometry(1, 1, 1, 1);
+    const backGeo = new THREE.PlaneGeometry(1, 1, SEG_X, SEG_Y);
+    const paper = paperTexture();
+    const frontMat = new THREE.MeshLambertMaterial({
+      map: paper,
+      side: THREE.FrontSide,
+      toneMapped: false
     });
-    var backMat = new THREE.MeshBasicMaterial({
-      color: 0xfaf6ef, side: THREE.BackSide, toneMapped: false,
+    const backMat = new THREE.MeshLambertMaterial({
+      map: paper,
+      color: 15920870,
+      side: THREE.BackSide,
+      toneMapped: false
     });
-    var underMat = new THREE.MeshBasicMaterial({
-      map: paper, toneMapped: false,
+    const underMat = new THREE.MeshLambertMaterial({
+      map: paper,
+      toneMapped: false
     });
-    var stackMat = new THREE.MeshBasicMaterial({
-      color: 0xf7f3ec, toneMapped: false,
+    const stackMat = new THREE.MeshLambertMaterial({
+      color: 16052456,
+      toneMapped: false
     });
-    var flip = new THREE.Mesh(geo, frontMat);
-    var flipBack = new THREE.Mesh(geo, backMat);
-    var under = new THREE.Mesh(underGeo, underMat);
-    under.position.z = -0.006;
-    var stackGeo = new THREE.PlaneGeometry(1, 1, 1, 1);
-    var stack = new THREE.Mesh(stackGeo, stackMat);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      map: shadowTexture(),
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      toneMapped: false
+    });
+    const edgeMat = new THREE.MeshLambertMaterial({
+      map: edgeTexture(),
+      toneMapped: false
+    });
+    const flip = new THREE.Mesh(geo, frontMat);
+    const flipBack = new THREE.Mesh(geo, backMat);
+    const under = new THREE.Mesh(underGeo, underMat);
+    under.position.z = -6e-3;
+    const shade = new THREE.Mesh(underGeo, shadowMat);
+    shade.position.z = -28e-4;
+    const stack = new THREE.Mesh(backGeo.clone(), stackMat);
     stack.position.set(0.012, -0.01, -0.018);
-    var spine = new THREE.Mesh(
+    const spine = new THREE.Mesh(
       new THREE.BoxGeometry(0.03, 1, 0.04),
-      new THREE.MeshBasicMaterial({ color: 0xc5d0dc, toneMapped: false })
+      new THREE.MeshLambertMaterial({
+        color: 12964060,
+        toneMapped: false
+      })
     );
-    book.add(stack);
-    book.add(under);
-    book.add(flipBack);
-    book.add(flip);
-    book.add(spine);
-
-    var cache = {};
-    var cacheOrder = [];
-    var disposed = false;
-    var busy = false;
-    var raf = 0;
-    var progress = 0;
-    var last = 0;
-
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(0.015, 1, 0.05), edgeMat);
+    const groundMat = new THREE.MeshBasicMaterial({
+      color: 7042692,
+      transparent: true,
+      opacity: 0.15,
+      depthWrite: false,
+      toneMapped: false
+    });
+    const ground = new THREE.Mesh(new THREE.CircleGeometry(0.72, 40), groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.set(0.52, -0.7, 0.01);
+    book.add(stack, under, shade, flipBack, flip, spine, edge, ground);
+    const cache = /* @__PURE__ */ new Map();
+    const backCache = /* @__PURE__ */ new Map();
+    let disposed = false;
+    let raf = 0;
+    let progress = 0;
+    let last = 0;
+    let peekTarget = 0;
+    let peekCurrent = 0;
+    let wantArrive = false;
+    const api = {
+      ready: true,
+      busy: false
+    };
     function layoutGeometry() {
       geo.copy(new THREE.PlaneGeometry(W, H, SEG_X, SEG_Y));
       geo.translate(W / 2, 0, 0);
-      geo.userData.orig = geo.attributes.position.array.slice(0);
+      const orig = geo.attributes.position.array.slice(0);
+      geo.userData.orig = orig;
       geo.userData.W = W;
       geo.userData.H = H;
       underGeo.copy(new THREE.PlaneGeometry(W, H, 1, 1));
@@ -348,178 +469,290 @@
       stack.geometry.dispose();
       stack.geometry = new THREE.PlaneGeometry(W, H, 1, 1);
       stack.geometry.translate(W / 2, 0, 0);
+      stack.position.set(0.01, -0.012, -0.02);
       spine.geometry.dispose();
       spine.geometry = new THREE.BoxGeometry(0.028, H * 0.96, 0.05);
       spine.position.set(-0.012, 0, -0.01);
+      edge.geometry.dispose();
+      edge.geometry = new THREE.BoxGeometry(0.016, H * 0.97, 0.052);
+      edge.position.set(W + 8e-3, -4e-3, -0.024);
+      ground.position.set(W * 0.52, -H * 0.52, 0.02);
+      ground.scale.set(W * 1.08, 1, 0.42);
       deform(geo, progress);
     }
-
     function frameCamera() {
-      var rect = container.getBoundingClientRect();
-      var width = Math.max(1, rect.width);
-      var height = Math.max(1, rect.height);
+      const rect = container.getBoundingClientRect();
+      const width = Math.max(1, rect.width);
+      const height = Math.max(1, rect.height);
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       W = 1;
       H = TEX_H / TEX_W;
       layoutGeometry();
-      camera.fov = 28;
-      var vFov = (camera.fov * Math.PI) / 180;
-      var pad = 1.05;
-      var distH = (H * 0.5 * pad) / Math.tan(vFov / 2);
-      var distW = (W * 0.5 * pad) / (Math.tan(vFov / 2) * camera.aspect);
-      var dist = Math.max(distH, distW);
-      camera.position.set(W * 0.5, 0, dist);
-      camera.lookAt(W * 0.5, 0, 0);
+      camera.fov = 30;
+      const vFov = camera.fov * Math.PI / 180;
+      const pad = 1.12;
+      const distH = H * 0.5 * pad / Math.tan(vFov / 2);
+      const distW = W * 0.5 * pad / (Math.tan(vFov / 2) * camera.aspect);
+      const dist = Math.max(distH, distW);
+      camera.position.set(W * 0.46, 0.08, dist);
+      camera.lookAt(W * 0.5, -0.02, 0);
       camera.updateProjectionMatrix();
-      book.rotation.set(0.02, -0.03, 0);
+      if (!api.busy) book.rotation.set(REST_X, REST_Y, REST_Z);
     }
-
     function renderOnce() {
       deform(geo, progress);
       renderer.render(scene, camera);
     }
-
     function stopLoop() {
       if (raf) cancelAnimationFrame(raf);
       raf = 0;
     }
-
-    function texFor(item, helpers) {
-      var k = pageKey(item, helpers.zh());
-      if (cache[k]) return Promise.resolve(cache[k]);
-      return composePage(THREE, item, helpers).then(function (made) {
-        cache[k] = made;
-        cacheOrder.push(k);
-        if (cacheOrder.length > CACHE_MAX) {
-          var first = cacheOrder.shift();
-          if (first && first !== k && cache[first]) {
-            cache[first].dispose();
-            delete cache[first];
-          }
-        }
-        return made;
-      });
+    function applyShade(ridge) {
+      const k = Math.sin(Math.min(1, Math.max(0, ridge)) * Math.PI);
+      shadowMat.opacity = 0.58 * k;
+      shade.scale.set(0.22 + 0.78 * k, 1, 1);
+      curlLight.intensity = 0.85 * k;
+      curlLight.position.set(
+        W * Math.cos(ridge * Math.PI) * 0.58,
+        H * 0.12,
+        W * Math.sin(ridge * Math.PI) * 0.72
+      );
     }
-
-    function setMaps(front, underMap) {
+    async function texFor(item, helpers) {
+      const k = pageKey(item, helpers.zh());
+      const hit = cache.get(k);
+      if (hit) return hit;
+      const made = await composePage(item, helpers);
+      cache.set(k, made);
+      if (cache.size > CACHE_MAX) {
+        const first = cache.keys().next().value;
+        if (first && first !== k) {
+          cache.get(first)?.dispose();
+          cache.delete(first);
+          const bk = "back|" + first;
+          backCache.get(bk)?.dispose();
+          backCache.delete(bk);
+        }
+      }
+      return made;
+    }
+    function setMaps(front, underMap, frontKey) {
       frontMat.map = front;
       frontMat.needsUpdate = true;
       underMat.map = underMap;
       underMat.needsUpdate = true;
-      backMat.map = paper;
+      const bk = "back|" + frontKey;
+      let back = backCache.get(bk);
+      if (!back) {
+        back = backFrom(front);
+        backCache.set(bk, back);
+      }
+      backMat.map = back;
       backMat.needsUpdate = true;
     }
-
-    var api = {
-      ready: true,
-      get busy() { return busy; },
-      show: function (current, next, helpers) {
-        if (disposed) return Promise.resolve();
-        document.documentElement.classList.add("webgl-book");
-        stopLoop();
-        busy = false;
-        progress = 0;
-        return Promise.all([texFor(current, helpers), texFor(next, helpers)]).then(function (pair) {
-          if (disposed) return;
-          setMaps(pair[0], pair[1]);
-          book.rotation.set(0.02, -0.03, 0);
-          curlLight.intensity = 0;
-          renderOnce();
-        });
-      },
-      flip: function (from, to, dir, helpers, underPage) {
-        if (disposed) return Promise.resolve();
-        document.documentElement.classList.add("webgl-book");
-        if (reducedMotion()) return api.show(to, underPage, helpers);
-        busy = true;
-        var reveal = dir === "next" ? to : from;
-        var sheet = dir === "next" ? from : to;
-        return Promise.all([texFor(sheet, helpers), texFor(reveal, helpers)]).then(function (pair) {
-          if (disposed) { busy = false; return; }
-          setMaps(pair[0], pair[1]);
-          var fromP = dir === "next" ? 0 : 1;
-          var toP = dir === "next" ? 1 : 0;
-          progress = fromP;
-          deform(geo, progress);
-          last = performance.now();
-          var start = last;
-          var rock = dir === "next" ? -0.16 : 0.14;
-          return new Promise(function (resolve) {
-            function tick(now) {
-              if (disposed) { resolve(); return; }
-              last = now;
-              var t = Math.min(1, (now - start) / (DURATION * 1000));
-              var e = easePaper(t);
-              progress = fromP + (toP - fromP) * e;
-              deform(geo, progress);
-              book.rotation.y = -0.03 + Math.sin(e * Math.PI) * rock;
-              book.rotation.x = 0.02 + Math.sin(e * Math.PI) * 0.05;
-              curlLight.intensity = 0;
-              renderer.render(scene, camera);
-              if (t < 1) raf = requestAnimationFrame(tick);
-              else { raf = 0; resolve(); }
-            }
-            raf = requestAnimationFrame(tick);
-          });
-        }).then(function () {
-          progress = 0;
-          return Promise.all([texFor(to, helpers), texFor(underPage, helpers)]);
-        }).then(function (pair) {
-          if (disposed) { busy = false; return; }
-          setMaps(pair[0], pair[1]);
-          book.rotation.set(0.02, -0.03, 0);
-          curlLight.intensity = 0;
-          deform(geo, 0);
+    function restPose() {
+      book.rotation.set(REST_X, REST_Y, REST_Z);
+      curlLight.intensity = 0;
+      shadowMat.opacity = 0;
+      shade.scale.set(1, 1, 1);
+    }
+    function lerpRest(fromX, fromY, ms) {
+      return new Promise((resolve) => {
+        const start = performance.now();
+        const tick = (now) => {
+          if (disposed) {
+            resolve();
+            return;
+          }
+          const k = Math.min(1, (now - start) / ms);
+          const s = 1 - (1 - k) * (1 - k);
+          book.rotation.x = fromX + (REST_X - fromX) * s;
+          book.rotation.y = fromY + (REST_Y - fromY) * s;
           renderer.render(scene, camera);
-          busy = false;
-        }).catch(function () {
-          busy = false;
-        });
-      },
-      resize: function () {
-        if (disposed) return;
-        frameCamera();
+          if (k < 1) raf = requestAnimationFrame(tick);
+          else {
+            raf = 0;
+            resolve();
+          }
+        };
+        raf = requestAnimationFrame(tick);
+      });
+    }
+    function tickPeek() {
+      if (disposed || api.busy) {
+        raf = 0;
+        return;
+      }
+      peekCurrent += (peekTarget - peekCurrent) * 0.2;
+      if (Math.abs(peekTarget - peekCurrent) < 2e-3) peekCurrent = peekTarget;
+      progress = peekCurrent;
+      deform(geo, progress);
+      const k = Math.min(1, progress / 0.16);
+      shadowMat.opacity = 0.32 * k;
+      shade.scale.set(0.35 + 0.4 * k, 1, 1);
+      curlLight.intensity = 0.7 * k;
+      curlLight.position.set(W * 0.78, H * 0.1, 0.14);
+      if (progress < 2e-3) {
+        progress = 0;
+        restPose();
+        deform(geo, 0);
+        renderer.render(scene, camera);
+        raf = 0;
+        return;
+      }
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(tickPeek);
+    }
+    api.show = async (current, next, helpers) => {
+      if (disposed) return;
+      document.documentElement.classList.add("webgl-book");
+      stopLoop();
+      api.busy = false;
+      progress = 0;
+      peekTarget = 0;
+      peekCurrent = 0;
+      const [front, underTex] = await Promise.all([
+        texFor(current, helpers),
+        texFor(next, helpers)
+      ]);
+      if (disposed) return;
+      setMaps(front, underTex, pageKey(current, helpers.zh()));
+      applyShade(0);
+      if (wantArrive && !reducedMotion()) {
+        wantArrive = false;
+        book.rotation.set(REST_X + 0.06, REST_Y - 0.1, REST_Z);
         renderOnce();
-      },
-      prefetch: function (item, helpers) {
-        if (disposed || !item) return;
-        texFor(item, helpers);
-      },
-      destroy: function () {
-        disposed = true;
-        document.documentElement.classList.remove("webgl-book");
-        stopLoop();
-        Object.keys(cache).forEach(function (k) { cache[k].dispose(); });
-        geo.dispose();
-        underGeo.dispose();
-        frontMat.dispose();
-        backMat.dispose();
-        underMat.dispose();
-        stackMat.dispose();
-        paper.dispose();
-        renderer.dispose();
-        canvas.remove();
-      },
+        await lerpRest(book.rotation.x, book.rotation.y, 720);
+      } else {
+        restPose();
+        renderOnce();
+      }
     };
-
+    api.flip = async (from, to, dir, helpers, underPage) => {
+      if (disposed) return;
+      document.documentElement.classList.add("webgl-book");
+      if (reducedMotion()) {
+        await api.show(to, underPage, helpers);
+        return;
+      }
+      api.busy = true;
+      peekTarget = 0;
+      peekCurrent = 0;
+      const reveal = dir === "next" ? to : from;
+      const frontItem = dir === "next" ? from : to;
+      const [front, underTex] = await Promise.all([
+        texFor(frontItem, helpers),
+        texFor(reveal, helpers)
+      ]);
+      if (disposed) {
+        api.busy = false;
+        return;
+      }
+      setMaps(front, underTex, pageKey(frontItem, helpers.zh()));
+      const fromP = dir === "next" ? 0 : 1;
+      const toP = dir === "next" ? 1 : 0;
+      progress = fromP;
+      deform(geo, progress);
+      last = performance.now();
+      const start = last;
+      const rock = dir === "next" ? -0.22 : 0.2;
+      await new Promise((resolve) => {
+        const tick = (now) => {
+          if (disposed) {
+            resolve();
+            return;
+          }
+          const dt = Math.min(0.1, (now - last) / 1e3);
+          last = now;
+          const t = Math.min(1, (now - start) / (DURATION * 1e3) || dt);
+          const e = easePaper(t);
+          progress = fromP + (toP - fromP) * e;
+          deform(geo, progress);
+          const bounce = Math.sin(e * Math.PI);
+          const kick = Math.sin(e * Math.PI * 2) * 0.035;
+          book.rotation.y = REST_Y + bounce * rock + kick;
+          book.rotation.x = REST_X + bounce * 0.085;
+          const ridge = dir === "next" ? Math.min(1, progress) : Math.min(1, 1 - progress);
+          applyShade(ridge);
+          renderer.render(scene, camera);
+          if (t < 1) {
+            raf = requestAnimationFrame(tick);
+          } else {
+            raf = 0;
+            resolve();
+          }
+        };
+        raf = requestAnimationFrame(tick);
+      });
+      progress = 0;
+      const [restFront, restUnder] = await Promise.all([
+        texFor(to, helpers),
+        texFor(underPage, helpers)
+      ]);
+      if (disposed) {
+        api.busy = false;
+        return;
+      }
+      setMaps(restFront, restUnder, pageKey(to, helpers.zh()));
+      const y0 = book.rotation.y;
+      const x0 = book.rotation.x;
+      applyShade(0);
+      deform(geo, 0);
+      await lerpRest(x0, y0, 180);
+      restPose();
+      renderer.render(scene, camera);
+      api.busy = false;
+    };
+    api.peek = (amount) => {
+      if (disposed || api.busy || reducedMotion()) return;
+      peekTarget = Math.max(0, Math.min(0.16, amount));
+      if (!raf) raf = requestAnimationFrame(tickPeek);
+    };
+    api.arrive = () => {
+      wantArrive = true;
+    };
+    api.resize = () => {
+      if (disposed) return;
+      frameCamera();
+      renderOnce();
+    };
+    api.prefetch = (item, helpers) => {
+      if (disposed || !item) return;
+      void texFor(item, helpers);
+    };
+    api.destroy = () => {
+      disposed = true;
+      document.documentElement.classList.remove("webgl-book");
+      stopLoop();
+      cache.forEach((tex) => tex.dispose());
+      cache.clear();
+      backCache.forEach((tex) => tex.dispose());
+      backCache.clear();
+      geo.dispose();
+      underGeo.dispose();
+      frontMat.dispose();
+      backMat.dispose();
+      underMat.dispose();
+      stackMat.dispose();
+      shadowMat.dispose();
+      edgeMat.dispose();
+      groundMat.dispose();
+      paper.dispose();
+      renderer.dispose();
+      canvas.remove();
+    };
     frameCamera();
     renderOnce();
-    var ro = null;
-    if (window.ResizeObserver) {
-      ro = new ResizeObserver(function () { api.resize(); });
-      ro.observe(container);
-    } else {
-      window.addEventListener("resize", api.resize);
-    }
-    var originalDestroy = api.destroy;
-    api.destroy = function () {
-      if (ro) ro.disconnect();
-      else window.removeEventListener("resize", api.resize);
+    const ro = new ResizeObserver(() => api.resize());
+    ro.observe(container);
+    const originalDestroy = api.destroy;
+    api.destroy = () => {
+      ro.disconnect();
       originalDestroy();
     };
     return api;
   }
-
-  root.ClaireWebGLBook = { mount: mount };
-})(window);
+  return __toCommonJS(webgl_book_exports);
+})();
+window.ClaireWebGLBook={mount:function(el){return ClaireWebGLNS.mountWebGLBook(el);}};
