@@ -1,4 +1,4 @@
-/* v34 — 行楷 for all Chinese, italic for all English; keep garden + turn tweaks */
+/* v35 — fonts + garden only. Do not override page-turn animations. */
 :root {
   --font-display: "Ma Shan Zheng", "KaiTi", "STKaiti", cursive, serif;
   --font-zh: "Ma Shan Zheng", "KaiTi", "STKaiti", cursive, serif;
@@ -81,28 +81,6 @@ html[data-lang="en"] .btn,
   font-style: italic !important;
   font-weight: 400;
   letter-spacing: 0.02em;
-}
-
-.page.is-turn-next,
-.page.is-turn-prev,
-#book-page.page.is-turn-next,
-#book-page.page.is-turn-prev {
-  animation: page-emerge 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) !important;
-}
-
-#book-page.page.is-turn-next::after,
-#book-page.page.is-turn-prev::after {
-  display: none !important;
-}
-
-.album-book.is-flipping-next,
-.album-book.is-flipping-prev {
-  animation: none !important;
-}
-
-@keyframes page-emerge {
-  0% { opacity: 0; transform: translateY(10px) scale(0.985); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .garden {
