@@ -277,6 +277,7 @@
   function open(view) {
     state.view = view;
     document.documentElement.setAttribute("data-screen", view);
+    if (view === "album") loadThree();
     document.querySelectorAll(".view").forEach(function (el) {
       el.classList.toggle("active", el.dataset.view === view);
     });
@@ -365,7 +366,6 @@
       '<div class="cover-face cover-face-back" aria-hidden="true"></div>' +
       "</div></div></div></div>";
     bindCoverOpen();
-    warmNearby();
   }
 
   function bindCoverOpen() {
@@ -1134,7 +1134,6 @@
     document.addEventListener("visibilitychange", function () {
       document.documentElement.classList.toggle("is-quiet", document.hidden);
     });
-    loadThree();
     bindAlbumTurn();
     bindMotifs();
     sprinkleLeaves();

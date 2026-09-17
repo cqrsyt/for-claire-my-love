@@ -14,7 +14,7 @@
     TEX_H = mobile ? 1032 : 1376;
     SEG_X = mobile ? 28 : 42;
     SEG_Y = mobile ? 18 : 28;
-    CACHE_MAX = mobile ? 10 : 16;
+    CACHE_MAX = mobile ? 6 : 16;
   }
 
   function easePaper(t) {
@@ -137,12 +137,14 @@
     paintPaper(ctx);
     var ready = Promise.resolve();
     if (document.fonts && document.fonts.load) {
-      ready = Promise.all([
-        document.fonts.load('40px "Ma Shan Zheng"'),
-        document.fonts.load('italic 32px "Cormorant Garamond"')
-      ]).catch(function () {});
-    } else if (document.fonts && document.fonts.ready) {
-      ready = document.fonts.ready.catch(function () {});
+      var sample = "写给秋然 Claire";
+      ready = Promise.race([
+        Promise.all([
+          document.fonts.load('40px "Ma Shan Zheng"', sample),
+          document.fonts.load('italic 32px "Cormorant Garamond"', sample)
+        ]).catch(function () {}),
+        new Promise(function (resolve) { setTimeout(resolve, 280); })
+      ]);
     }
     return ready.then(function () {
       var photos = (item && item.photos) || [];
