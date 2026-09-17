@@ -72,7 +72,7 @@
     return base + String(src).replace(/^\//, "");
   }
   function esc(s) {
-    return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    return String(s || "").replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">").replace(/"/g, """);
   }
 
   function shaHex(val) {
@@ -113,14 +113,14 @@
     if (document.getElementById("three-src")) return;
     var s = document.createElement("script");
     s.id = "three-src";
-    s.src = "js/three.min.js?v=26";
+    s.src = "js/three.min.js?v=28";
     s.onload = function () {
       if (window.ClaireWebGLBook) {
         bootGl();
         return;
       }
       var w = document.createElement("script");
-      w.src = "js/webgl-book.js?v=26";
+      w.src = "js/webgl-book.js?v=28";
       w.onload = bootGl;
       document.head.appendChild(w);
     };
