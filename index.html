@@ -6,16 +6,14 @@
     <meta name="theme-color" content="#fdfaf5" />
     <title>For Claire My Love · 写给秋然</title>
     <link rel="preload" href="fonts/mashanzheng.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="css/app.css?v=31" />
-    <link rel="stylesheet" href="css/unify.css?v=31" />
+    <link rel="stylesheet" href="css/app.css?v=32" />
+    <link rel="stylesheet" href="css/unify.css?v=32" />
   </head>
   <body class="locked">
     <div class="paper-grain" aria-hidden="true"></div>
     <div class="garden" aria-hidden="true">
       <span class="vine vine-l"></span>
       <span class="vine vine-r"></span>
-      <span class="lace-bloom top"></span>
-      <span class="lace-bloom bot"></span>
       <span class="petal p1">❀</span>
       <span class="petal p2">✿</span>
       <span class="petal p3">❀</span>
@@ -51,7 +49,7 @@
       <div class="gate-card">
         <p class="kicker zh">写给秋然</p>
         <h1 class="zh">请输入密码</h1>
-        <p class="sub zh">For Claire My Love</p>
+        <p class="sub en">For Claire My Love</p>
         <form id="password-form">
           <input type="password" id="password-input" placeholder="密码 / password" required autocomplete="off" />
           <button type="submit" class="btn zh">进入</button>
@@ -70,7 +68,7 @@
           <nav id="nav" class="nav">
             <button type="button" data-view="cover" class="active">封面</button>
             <button type="button" data-view="story">信</button>
-            <button type="button" data-view="album" class="">相册</button>
+            <button type="button" data-view="album">相册</button>
           </nav>
           <div class="lang">
             <button type="button" id="btn-lang">EN</button>
@@ -92,53 +90,17 @@
       </header>
 
       <div id="motif-row" class="motif-row">
-        <label class="motif m1" data-kind="tomato">
-          <input type="radio" name="motif" />
-          <span class="i" aria-hidden="true">🍅</span>
-          <span class="spark" aria-hidden="true"></span>
-          <span class="say">红着</span>
-        </label>
-        <label class="motif m2" data-kind="pepper">
-          <input type="radio" name="motif" />
-          <span class="i" aria-hidden="true">🫑</span>
-          <span class="spark" aria-hidden="true"></span>
-          <span class="say">青着</span>
-        </label>
-        <label class="motif m3" data-kind="eggplant">
-          <input type="radio" name="motif" />
-          <span class="i" aria-hidden="true">🍆</span>
-          <span class="spark" aria-hidden="true"></span>
-          <span class="say">静静的</span>
-        </label>
-        <label class="motif m4" data-kind="dog">
-          <input type="radio" name="motif" />
-          <span class="i" aria-hidden="true">🐕</span>
-          <span class="spark" aria-hidden="true"></span>
-          <span class="say">小狗</span>
-        </label>
-        <label class="motif m5" data-kind="maple">
-          <input type="radio" name="motif" />
-          <span class="i" aria-hidden="true">🍁</span>
-          <span class="spark" aria-hidden="true"></span>
-          <span class="say">秋</span>
-        </label>
-        <label class="motif m6" data-kind="flower">
-          <input type="radio" name="motif" />
-          <span class="i" aria-hidden="true">🌸</span>
-          <span class="spark" aria-hidden="true"></span>
-          <span class="say">花开</span>
-        </label>
-        <label class="motif m7" data-kind="mist">
-          <input type="radio" name="motif" />
-          <span class="i mist" aria-hidden="true"></span>
-          <span class="spark" aria-hidden="true"></span>
-          <span class="say">淡淡的</span>
-        </label>
+        <label class="motif m1" data-kind="tomato"><input type="radio" name="motif" /><span class="i" aria-hidden="true">🍅</span><span class="spark" aria-hidden="true"></span><span class="say">红着</span></label>
+        <label class="motif m2" data-kind="pepper"><input type="radio" name="motif" /><span class="i" aria-hidden="true">🫑</span><span class="spark" aria-hidden="true"></span><span class="say">青着</span></label>
+        <label class="motif m3" data-kind="eggplant"><input type="radio" name="motif" /><span class="i" aria-hidden="true">🍆</span><span class="spark" aria-hidden="true"></span><span class="say">静静的</span></label>
+        <label class="motif m4" data-kind="dog"><input type="radio" name="motif" /><span class="i" aria-hidden="true">🐕</span><span class="spark" aria-hidden="true"></span><span class="say">小狗</span></label>
+        <label class="motif m5" data-kind="maple"><input type="radio" name="motif" /><span class="i" aria-hidden="true">🍁</span><span class="spark" aria-hidden="true"></span><span class="say">秋</span></label>
+        <label class="motif m6" data-kind="flower"><input type="radio" name="motif" /><span class="i" aria-hidden="true">🌸</span><span class="spark" aria-hidden="true"></span><span class="say">花开</span></label>
+        <label class="motif m7" data-kind="mist"><input type="radio" name="motif" /><span class="i mist" aria-hidden="true"></span><span class="spark" aria-hidden="true"></span><span class="say">淡淡的</span></label>
       </div>
       <p id="motif-hint" class="motif-hint zh">小图案都可以点。</p>
 
       <section id="view-cover" class="view active" data-view="cover"></section>
-
       <section id="view-album" class="view" data-view="album">
         <div id="chapter-header" class="chapter"></div>
         <div id="book-stage" class="book-stage">
@@ -153,14 +115,14 @@
         </div>
         <p id="swipe-hint" class="hint"></p>
       </section>
-        <div class="controls">
-          <div id="chapter-strip" class="chapter-strip" role="navigation" aria-label="章节"></div>
-          <div class="controls-row">
-            <button type="button" id="btn-prev" class="ctrl">上一页</button>
-            <select id="page-jump" class="page-jump" aria-label="选页"></select>
-            <button type="button" id="btn-next" class="ctrl">下一页</button>
-          </div>
+      <div class="controls">
+        <div id="chapter-strip" class="chapter-strip" role="navigation" aria-label="章节"></div>
+        <div class="controls-row">
+          <button type="button" id="btn-prev" class="ctrl">上一页</button>
+          <select id="page-jump" class="page-jump" aria-label="选页"></select>
+          <button type="button" id="btn-next" class="ctrl">下一页</button>
         </div>
+      </div>
     </div>
 
     <div id="lightbox" class="lightbox" hidden>
@@ -173,10 +135,10 @@
     </div>
 
     <audio id="bgm" src="audio/wind-poem.mp3" loop preload="none"></audio>
-    <script src="js/config.js?v=31"></script>
+    <script src="js/config.js?v=32"></script>
     <script src="js/sha256.js"></script>
-    <script src="data/album.js?v=31"></script>
-    <script src="js/phone.js?v=31"></script>
-    <script src="js/app.js?v=31"></script>
+    <script src="data/album.js?v=32"></script>
+    <script src="js/phone.js?v=32"></script>
+    <script src="https://raw.githubusercontent.com/cqrsyt/for-claire-my-love/7aad0d602fda7812033b2bced3fb661b03b09df1/js/app.js"></script>
   </body>
 </html>
