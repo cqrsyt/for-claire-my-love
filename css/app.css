@@ -1684,6 +1684,10 @@ html.webgl-book .album-book {
   filter: none;
 }
 
+html.webgl-book .book-stage {
+  perspective: none;
+}
+
 html.webgl-book .album-spine,
 html.webgl-book .album-stack {
   opacity: 0;

@@ -54,16 +54,16 @@ var ClaireWebGLNS = (() => {
   var SEG_Y = 28;
   var CACHE_MAX = 16;
   var DURATION = 1.16;
-  var REST_X = 0.055;
-  var REST_Y = -0.11;
-  var REST_Z = 8e-3;
+  var REST_X = 0.03;
+  var REST_Y = -0.06;
+  var REST_Z = 4e-3;
   function applyQuality() {
     const mobile = typeof window !== "undefined" && window.innerWidth < 720;
-    TEX_W = mobile ? 1024 : 1536;
-    TEX_H = mobile ? 1376 : 2064;
+    TEX_W = mobile ? 1280 : 1536;
+    TEX_H = mobile ? 1720 : 2064;
     SEG_X = mobile ? 28 : 36;
     SEG_Y = mobile ? 18 : 24;
-    CACHE_MAX = mobile ? 10 : 12;
+    CACHE_MAX = mobile ? 8 : 10;
   }
   function easePaper(t) {
     const x = Math.min(1, Math.max(0, t));
@@ -210,10 +210,11 @@ var ClaireWebGLNS = (() => {
         const sample = "\u5199\u7ED9\u79CB\u7136 Claire";
         await Promise.race([
           Promise.all([
-            document.fonts.load('40px "Ma Shan Zheng"', sample),
-            document.fonts.load('italic 32px "Cormorant Garamond"', sample)
+            document.fonts.load('64px "Ma Shan Zheng"', sample),
+            document.fonts.load('italic 48px "Cormorant Garamond"', sample),
+            document.fonts.ready
           ]),
-          new Promise((resolve) => window.setTimeout(resolve, 280))
+          new Promise((resolve) => window.setTimeout(resolve, 1200))
         ]);
       }
     } catch {
@@ -532,7 +533,7 @@ var ClaireWebGLNS = (() => {
       layoutGeometry();
       camera.fov = 30;
       const vFov = camera.fov * Math.PI / 180;
-      const pad = 1.12;
+      const pad = 1.06;
       const distH = H * 0.5 * pad / Math.tan(vFov / 2);
       const distW = W * 0.5 * pad / (Math.tan(vFov / 2) * camera.aspect);
       const dist = Math.max(distH, distW);
@@ -648,6 +649,7 @@ var ClaireWebGLNS = (() => {
     }
     api.show = async (current, next, helpers) => {
       if (disposed) return;
+      document.documentElement.classList.add("webgl-book");
       stopLoop();
       api.busy = false;
       progress = 0;
@@ -753,7 +755,6 @@ var ClaireWebGLNS = (() => {
         }
       } finally {
         api.busy = false;
-        if (!disposed) document.documentElement.classList.remove("webgl-book");
       }
     };
     api.peek = (amount) => {

@@ -113,14 +113,14 @@
     if (document.getElementById("three-src")) return;
     var s = document.createElement("script");
     s.id = "three-src";
-    s.src = "js/three.min.js?v=48";
+    s.src = "js/three.min.js?v=49";
     s.onload = function () {
       if (window.ClaireWebGLBook) {
         bootGl();
         return;
       }
       var w = document.createElement("script");
-      w.src = "js/webgl-book.js?v=48";
+      w.src = "js/webgl-book.js?v=49";
       w.onload = bootGl;
       document.head.appendChild(w);
     };
@@ -530,7 +530,9 @@
       "<p class=\"" + n + "\">" + esc(zh() ? ch.introZh : ch.introEn) + "</p>";
     var box = document.getElementById("book-page");
     box.classList.remove("is-turn-next", "is-turn-prev", "is-letter", "is-end");
-    box.innerHTML = '<div class="stack">' + item.photos.map(function (ph, i) {
+    box.innerHTML = (glBook && glBook.ready)
+      ? '<div class="stack"></div>'
+      : '<div class="stack">' + item.photos.map(function (ph, i) {
       var cap = zh() ? ph.captionZh : ph.captionEn;
       var note = zh() ? ph.noteZh : ph.noteEn;
       return '<article class="card">' +
@@ -546,11 +548,13 @@
     updateBirthdayWish();
     warmNearby();
     if (glBook && glBook.ready) {
+      document.documentElement.classList.add("webgl-book");
       if (animate !== "gl-keep") glBook.show(item, pages[state.page + 1] || null, helpers());
       if (glBook.prefetch) {
         glBook.prefetch(pages[state.page + 2] || null, helpers());
         glBook.prefetch(pages[state.page - 1] || null, helpers());
       }
+      return;
     }
     if (animate && animate !== "gl-keep") {
       void box.offsetWidth;
@@ -608,10 +612,8 @@
     var to = pages[i];
     state.page = i;
     if (glBook && glBook.ready && animate) {
-      Promise.resolve(glBook.flip(from, to, dir, helpers(), pages[i + 1] || null)).finally(function () {
-        document.documentElement.classList.remove("webgl-book");
-        renderPage(false);
-      });
+      document.documentElement.classList.add("webgl-book");
+      glBook.flip(from, to, dir, helpers(), pages[i + 1] || null);
       return;
     }
     renderPage(animate ? dir : false);
