@@ -927,7 +927,7 @@ body.locked .paper-grain {
   border: 1px solid rgba(138, 155, 176, 0.22);
   border-radius: 4px 14px 14px 4px;
   padding: 1.2rem 1.35rem 1.4rem;
-  box-shadow: 8px 14px 32px var(--shadow);
+  box-shadow: 4px 8px 18px var(--shadow);
   min-height: 280px;
   transform-origin: center;
   transform-style: preserve-3d;
@@ -1157,7 +1157,7 @@ html.is-quiet .star-field span {
   transform: rotateY(-6deg) rotateX(3deg);
   transform-style: preserve-3d;
   transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
-  filter: drop-shadow(6px 12px 16px rgba(90, 108, 128, 0.08));
+  filter: none;
 }
 
 .album-book.is-entering {
@@ -1209,30 +1209,30 @@ html.is-quiet .star-field span {
   bottom: 10px;
   width: 11px;
   border-radius: 3px 0 0 3px;
-  background: linear-gradient(90deg, #9aa8b8, #c5d0dc 55%, #b7c2cf);
+  background: linear-gradient(90deg, #b7c2cf, #d5dde6 55%, #c5d0dc);
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.35);
   z-index: 3;
 }
 
 .album-stack {
   position: absolute;
-  inset: 12px -7px 12px 4px;
-  border-radius: 2px 10px 10px 2px;
-  background: repeating-linear-gradient(90deg, #d7dee7 0 1px, #f4f1ea 1px 3px);
-  box-shadow: 6px 10px 18px rgba(90, 108, 128, 0.06);
+  inset: 16px -4px 16px 8px;
+  border-radius: 2px 8px 8px 2px;
+  background: repeating-linear-gradient(90deg, #eef2f6 0 1px, #fbf8f3 1px 3px);
+  box-shadow: 2px 8px 14px rgba(168, 181, 196, 0.07);
   z-index: 0;
 }
 .album-stack::after {
   content: "";
   pointer-events: none;
   position: absolute;
-  top: 8px;
-  right: -6px;
-  bottom: 8px;
-  width: 7px;
+  top: 10px;
+  right: -4px;
+  bottom: 10px;
+  width: 5px;
   border-radius: 0 2px 2px 0;
-  background: repeating-linear-gradient(to right, #d7dee7 0 1px, #f6f2ea 1px 2px);
-  box-shadow: 2px 0 8px rgba(58, 68, 80, 0.1);
+  background: repeating-linear-gradient(to right, #e8edf3 0 1px, #fbf8f3 1px 2px);
+  box-shadow: none;
 }
 
 .album-block {
@@ -1580,7 +1580,7 @@ html.webgl-book #book-page.page.is-end {
 html.webgl-book .album-book {
   transform: none;
   animation: none;
-  filter: drop-shadow(8px 14px 18px rgba(90, 108, 128, 0.09));
+  filter: none;
 }
 
 html.webgl-book .album-spine,

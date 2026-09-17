@@ -248,12 +248,27 @@ var ClaireWebGLNS = (() => {
     canvas.height = 64;
     const ctx = canvas.getContext("2d");
     const g = ctx.createLinearGradient(0, 0, 256, 0);
-    g.addColorStop(0, "rgba(58, 68, 80, 0.62)");
-    g.addColorStop(0.28, "rgba(58, 68, 80, 0.28)");
-    g.addColorStop(0.7, "rgba(58, 68, 80, 0.08)");
-    g.addColorStop(1, "rgba(58, 68, 80, 0)");
+    g.addColorStop(0, "rgba(138, 155, 176, 0.28)");
+    g.addColorStop(0.32, "rgba(138, 155, 176, 0.1)");
+    g.addColorStop(0.72, "rgba(138, 155, 176, 0.03)");
+    g.addColorStop(1, "rgba(138, 155, 176, 0)");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, 256, 64);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.needsUpdate = true;
+    return tex;
+  }
+  function groundTexture() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d");
+    const g = ctx.createRadialGradient(128, 128, 8, 128, 128, 118);
+    g.addColorStop(0, "rgba(168, 181, 196, 0.16)");
+    g.addColorStop(0.4, "rgba(168, 181, 196, 0.06)");
+    g.addColorStop(1, "rgba(168, 181, 196, 0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 256, 256);
     const tex = new THREE.CanvasTexture(canvas);
     tex.needsUpdate = true;
     return tex;
@@ -354,9 +369,9 @@ var ClaireWebGLNS = (() => {
     const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 20);
     const book = new THREE.Group();
     scene.add(book);
-    scene.add(new THREE.HemisphereLight(16776182, 12964060, 0.42));
-    scene.add(new THREE.AmbientLight(16775924, 0.48));
-    const key = new THREE.DirectionalLight(16775408, 0.42);
+    scene.add(new THREE.HemisphereLight(16776182, 14147303, 0.52));
+    scene.add(new THREE.AmbientLight(16775924, 0.58));
+    const key = new THREE.DirectionalLight(16775408, 0.36);
     key.position.set(0.55, 0.9, 1.15);
     scene.add(key);
     const fill = new THREE.DirectionalLight(15002353, 0.18);
@@ -420,9 +435,9 @@ var ClaireWebGLNS = (() => {
     );
     const edge = new THREE.Mesh(new THREE.BoxGeometry(0.015, 1, 0.05), edgeMat);
     const groundMat = new THREE.MeshBasicMaterial({
-      color: 9082790,
+      map: groundTexture(),
       transparent: true,
-      opacity: 0.055,
+      opacity: 0.45,
       depthWrite: false,
       toneMapped: false
     });
@@ -496,7 +511,7 @@ var ClaireWebGLNS = (() => {
     }
     function applyShade(ridge) {
       const k = Math.sin(Math.min(1, Math.max(0, ridge)) * Math.PI);
-      shadowMat.opacity = 0.58 * k;
+      shadowMat.opacity = 0.26 * k;
       shade.scale.set(0.22 + 0.78 * k, 1, 1);
       curlLight.intensity = 0.85 * k;
       curlLight.position.set(
@@ -575,7 +590,7 @@ var ClaireWebGLNS = (() => {
       progress = peekCurrent;
       deform(geo, progress);
       const k = Math.min(1, progress / 0.16);
-      shadowMat.opacity = 0.32 * k;
+      shadowMat.opacity = 0.14 * k;
       shade.scale.set(0.35 + 0.4 * k, 1, 1);
       curlLight.intensity = 0.7 * k;
       curlLight.position.set(W * 0.78, H * 0.1, 0.14);
