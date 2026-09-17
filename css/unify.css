@@ -1,15 +1,23 @@
-/* v32 — 行楷 for Chinese, italic for English */
+/* v34 — 行楷 for all Chinese, italic for all English; keep garden + turn tweaks */
 :root {
   --font-display: "Ma Shan Zheng", "KaiTi", "STKaiti", cursive, serif;
   --font-zh: "Ma Shan Zheng", "KaiTi", "STKaiti", cursive, serif;
   --font-en: "Cormorant Garamond", Georgia, "Times New Roman", serif;
 }
 
-.zh,
 html[data-lang="zh"] body,
 html[data-lang="zh"] button,
 html[data-lang="zh"] input,
 html[data-lang="zh"] select,
+html[data-lang="zh"] textarea,
+html[data-lang="zh"] h1,
+html[data-lang="zh"] h2,
+html[data-lang="zh"] h3,
+html[data-lang="zh"] p,
+html[data-lang="zh"] span,
+html[data-lang="zh"] label,
+html[data-lang="zh"] a,
+html[data-lang="zh"] li,
 html[data-lang="zh"] .hint,
 html[data-lang="zh"] .indicator,
 html[data-lang="zh"] .say,
@@ -32,6 +40,7 @@ html[data-lang="zh"] .letter p,
 html[data-lang="zh"] .kicker,
 html[data-lang="zh"] .ctrl,
 html[data-lang="zh"] .btn,
+.zh,
 .brand-title,
 .gate-card h1,
 .cover-face-front h1,
@@ -41,23 +50,35 @@ html[data-lang="zh"] .btn,
   font-family: var(--font-zh) !important;
   letter-spacing: 0.02em;
   font-weight: 400;
-  font-style: normal;
+  font-style: normal !important;
   font-synthesis: none;
 }
 
-.en,
-.sub.en,
 html[data-lang="en"] body,
 html[data-lang="en"] button,
 html[data-lang="en"] input,
 html[data-lang="en"] select,
+html[data-lang="en"] textarea,
+html[data-lang="en"] h1,
+html[data-lang="en"] h2,
+html[data-lang="en"] h3,
+html[data-lang="en"] p,
+html[data-lang="en"] span,
+html[data-lang="en"] label,
+html[data-lang="en"] a,
 html[data-lang="en"] .hint,
 html[data-lang="en"] .chapter-chip,
 html[data-lang="en"] .page-jump,
 html[data-lang="en"] .ctrl,
-html[data-lang="en"] .btn {
+html[data-lang="en"] .btn,
+.en,
+.sub.en,
+.cover-sub.en,
+.names.en,
+.date.en,
+.together.en {
   font-family: var(--font-en) !important;
-  font-style: italic;
+  font-style: italic !important;
   font-weight: 400;
   letter-spacing: 0.02em;
 }
@@ -129,7 +150,7 @@ html[data-lang="en"] .btn {
 .garden .vine-r { right: 0; top: 22%; transform: scaleX(-1); mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent); }
 
 .gate-card::after {
-  content: "❀";
+  content: "✿";
   pointer-events: none;
   position: absolute;
   left: 50%;
