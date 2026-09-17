@@ -420,9 +420,9 @@ var ClaireWebGLNS = (() => {
     );
     const edge = new THREE.Mesh(new THREE.BoxGeometry(0.015, 1, 0.05), edgeMat);
     const groundMat = new THREE.MeshBasicMaterial({
-      color: 7042692,
+      color: 9082790,
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.055,
       depthWrite: false,
       toneMapped: false
     });

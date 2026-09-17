@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hans" data-lang="zh" data-screen="cover" data-build="40">
+<html lang="zh-Hans" data-lang="zh" data-screen="cover" data-build="41">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -7,10 +7,10 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta name="theme-color" content="#fdfaf5" />
     <title>For Claire My Love · 写给秋然</title>
-    <link rel="preload" href="fonts/mashanzheng.woff2?v=40" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="fonts/cormorant-italic.woff2?v=40" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="css/app.css?v=40" />
-    <link rel="stylesheet" href="css/unify.css?v=40" />
+    <link rel="preload" href="fonts/mashanzheng.woff2?v=41" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/cormorant-italic.woff2?v=41" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/app.css?v=41" />
+    <link rel="stylesheet" href="css/unify.css?v=41" />
     <style>
       body.locked #password-gate.gate {
         display: flex !important;
@@ -77,12 +77,13 @@
     </div>
     <div id="password-gate" class="gate">
       <div class="gate-card">
-        <p class="kicker zh">写给秋然</p>
-        <h1 class="zh">请输入密码</h1>
-        <p class="sub en">For Claire My Love</p>
+        <div class="gate-mark" aria-hidden="true"></div>
+        <p class="kicker en">For Claire My Love</p>
+        <h1 class="zh">写给秋然</h1>
+        <p class="sub zh">请输入密码</p>
         <form id="password-form" action="javascript:void(0)" method="post" onsubmit="return false;">
-          <input type="password" id="password-input" placeholder="密码 / password" required autocomplete="off" />
-          <button type="submit" class="btn zh">进入</button>
+          <input type="password" id="password-input" placeholder=" " required autocomplete="off" aria-label="密码" />
+          <button type="submit" class="btn-open zh">进入</button>
         </form>
         <p id="password-error" class="error zh" hidden>密码不对，再试一次</p>
       </div>
@@ -158,12 +159,12 @@
       <p id="lightbox-note"></p>
     </div>
     <audio id="bgm" src="audio/wind-poem.mp3" loop preload="none"></audio>
-    <script src="js/config.js?v=40"></script>
-    <script src="js/sha256.js?v=40"></script>
+    <script src="js/config.js?v=41"></script>
+    <script src="js/sha256.js?v=41"></script>
     <script>
       (function () {
         var cfg = window.SITE_CONFIG || {};
-        var key = cfg.passwordStorageKey || "claire-gate-v40";
+        var key = cfg.passwordStorageKey || "claire-gate-v41";
         var hash = cfg.sitePasswordHash || "310f089018032ba50b85d43ed54f70c81cf8e8a4846b26bc2037274e56f1acd1";
         window.__CLAIRE_OK = false;
         try {
@@ -190,7 +191,7 @@
         var appendHead = document.head.appendChild.bind(document.head);
         document.head.appendChild = function (node) {
           if (node && node.src && /webgl-book\.js/.test(node.src || "")) {
-            node.src = "js/webgl-book.js?v=40";
+            node.src = "js/webgl-book.js?v=41";
           }
           return appendHead(node);
         };
@@ -209,9 +210,9 @@
         function loadRest() {
           if (started) return;
           started = true;
-          loadScript("data/album.js?v=40")
-            .then(function () { return loadScript("js/phone.js?v=40"); })
-            .then(function () { return loadScript("js/app.js?v=40"); });
+          loadScript("data/album.js?v=41")
+            .then(function () { return loadScript("js/phone.js?v=41"); })
+            .then(function () { return loadScript("js/app.js?v=41"); });
         }
 
         function reveal() {
