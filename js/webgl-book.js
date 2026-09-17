@@ -88,6 +88,40 @@ var ClaireWebGLNS = (() => {
       img.src = src;
     });
   }
+  function liftPhoto(img) {
+    const iw = Math.max(1, Math.round("width" in img ? Number(img.width) : TEX_W));
+    const ih = Math.max(1, Math.round("height" in img ? Number(img.height) : TEX_H));
+    const c = document.createElement("canvas");
+    c.width = iw;
+    c.height = ih;
+    const x = c.getContext("2d", { willReadFrequently: true });
+    if (!x) return c;
+    x.drawImage(img, 0, 0, iw, ih);
+    let data;
+    try {
+      data = x.getImageData(0, 0, iw, ih);
+    } catch {
+      return c;
+    }
+    const px = data.data;
+    let sum = 0;
+    let n = 0;
+    for (let i = 0; i < px.length; i += 48) {
+      sum += 0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2];
+      n += 1;
+    }
+    const avg = sum / Math.max(1, n);
+    const gain = avg < 18 ? 2.2 : avg < 168 ? Math.min(2.2, 168 / Math.max(avg, 14)) : 1;
+    if (gain > 1.04) {
+      for (let i = 0; i < px.length; i += 4) {
+        px[i] = Math.min(255, px[i] * gain);
+        px[i + 1] = Math.min(255, px[i + 1] * gain);
+        px[i + 2] = Math.min(255, px[i + 2] * gain);
+      }
+      x.putImageData(data, 0, 0);
+    }
+    return c;
+  }
   function roundImage(ctx, img, x, y, w, h, r) {
     ctx.save();
     ctx.beginPath();
@@ -98,7 +132,9 @@ var ClaireWebGLNS = (() => {
     ctx.arcTo(x, y, x + w, y, r);
     ctx.closePath();
     ctx.clip();
+    ctx.filter = "brightness(1.08) contrast(1.04)";
     ctx.drawImage(img, x, y, w, h);
+    ctx.filter = "none";
     ctx.restore();
   }
   function wrapText(ctx, text, x, y, maxW, lineH, maxLines) {
@@ -132,10 +168,10 @@ var ClaireWebGLNS = (() => {
     ctx.fillStyle = "rgba(197,208,220,0.05)";
     ctx.fillRect(TEX_W - 18, 0, 18, TEX_H);
     ctx.save();
-    ctx.strokeStyle = "rgba(184,195,208,0.32)";
+    ctx.strokeStyle = "rgba(210,218,226,0.22)";
     ctx.lineWidth = 2;
     ctx.strokeRect(40, 40, TEX_W - 80, TEX_H - 80);
-    ctx.strokeStyle = "rgba(184,195,208,0.16)";
+    ctx.strokeStyle = "rgba(210,218,226,0.1)";
     ctx.lineWidth = 1;
     ctx.strokeRect(48, 48, TEX_W - 96, TEX_H - 96);
     ctx.restore();
@@ -191,7 +227,9 @@ var ClaireWebGLNS = (() => {
       const textH = caption || note ? note ? 118 : 64 : 18;
       const maxH = Math.max(160, slotH - textH);
       try {
-        const img = await loadImage(helpers.asset(ph.src));
+        const raw = await loadImage(helpers.asset(ph.src));
+        const img = liftPhoto(raw);
+        if (typeof ImageBitmap !== "undefined" && raw instanceof ImageBitmap) raw.close();
         const iw = "width" in img ? Number(img.width) : TEX_W;
         const ih = "height" in img ? Number(img.height) : TEX_H;
         const s = Math.min(innerW / iw, maxH / ih);
@@ -200,7 +238,6 @@ var ClaireWebGLNS = (() => {
         const dx = (TEX_W - dw) / 2;
         const dy = y0 + Math.max(0, (maxH - dh) * 0.35);
         roundImage(ctx, img, dx, dy, dw, dh, 18);
-        if (typeof ImageBitmap !== "undefined" && img instanceof ImageBitmap) img.close();
         ctx.textAlign = "center";
         ctx.textBaseline = "alphabetic";
         if (caption) {
@@ -429,7 +466,7 @@ var ClaireWebGLNS = (() => {
     const spine = new THREE.Mesh(
       new THREE.BoxGeometry(0.03, 1, 0.04),
       new THREE.MeshBasicMaterial({
-        color: 14147303,
+        color: 15659766,
         toneMapped: false
       })
     );
@@ -444,7 +481,7 @@ var ClaireWebGLNS = (() => {
     const ground = new THREE.Mesh(new THREE.CircleGeometry(0.72, 40), groundMat);
     ground.rotation.x = -Math.PI / 2;
     ground.position.set(0.52, -0.7, 0.01);
-    book.add(stack, under, shade, flipBack, flip, spine, edge, ground);
+    book.add(stack, under, shade, flipBack, flip, spine, edge);
     const cache = /* @__PURE__ */ new Map();
     const backCache = /* @__PURE__ */ new Map();
     let disposed = false;
