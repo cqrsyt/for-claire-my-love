@@ -1735,7 +1735,7 @@ html[data-screen="story"] .bloom-a {
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0.3rem 0.55rem;
   color: #9aa8b6;
   transition-property: color, box-shadow, transform;
@@ -1799,7 +1799,7 @@ html[data-lang="zh"] .btn {
   background: transparent;
   border: 0;
   box-shadow: none;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0.22rem 0.62rem;
   color: #9aa8b6;
   transition-property: color, box-shadow, transform;
@@ -1845,6 +1845,18 @@ html[data-lang="zh"] .btn {
 }
 .letter-rule {
   opacity: 0.85;
+}
+
+.avatars img,
+.end-avatars img,
+.card img,
+.lightbox-frame img {
+  background: #efe8df;
+}
+
+.book-gl,
+.book-gl-canvas {
+  contain: strict;
 }
 .nav button:active:not(:disabled),
 .lang button:active:not(:disabled),

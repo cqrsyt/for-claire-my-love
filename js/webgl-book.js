@@ -59,11 +59,11 @@ var ClaireWebGLNS = (() => {
   var REST_Z = 8e-3;
   function applyQuality() {
     const mobile = typeof window !== "undefined" && window.innerWidth < 720;
-    TEX_W = mobile ? 768 : 1024;
-    TEX_H = mobile ? 1032 : 1376;
-    SEG_X = mobile ? 28 : 42;
-    SEG_Y = mobile ? 18 : 28;
-    CACHE_MAX = mobile ? 6 : 16;
+    TEX_W = mobile ? 640 : 1024;
+    TEX_H = mobile ? 860 : 1376;
+    SEG_X = mobile ? 18 : 36;
+    SEG_Y = mobile ? 12 : 24;
+    CACHE_MAX = mobile ? 8 : 18;
   }
   function easePaper(t) {
     const x = Math.min(1, Math.max(0, t));
@@ -74,33 +74,19 @@ var ClaireWebGLNS = (() => {
     return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   }
   function loadImage(src) {
-    return (async () => {
-      try {
-        const res = await fetch(src);
-        const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.decoding = "async";
+      img.onload = () => {
         if (typeof createImageBitmap === "function") {
-          return await createImageBitmap(blob, { resizeWidth: TEX_W, resizeQuality: "medium" });
+          void createImageBitmap(img, { resizeWidth: TEX_W, resizeQuality: "medium" }).then(resolve, () => resolve(img));
+          return;
         }
-        const url = URL.createObjectURL(blob);
-        const img = await new Promise((resolve, reject) => {
-          const el = new Image();
-          el.onload = () => resolve(el);
-          el.onerror = () => reject(new Error("img"));
-          el.src = url;
-        });
-        URL.revokeObjectURL(url);
-        return img;
-      } catch {
-        return await new Promise((resolve, reject) => {
-          const img = new Image();
-          img.crossOrigin = "anonymous";
-          img.onload = () => resolve(img);
-          img.onerror = () => reject(new Error("img"));
-          img.decoding = "async";
-          img.src = src;
-        });
-      }
-    })();
+        resolve(img);
+      };
+      img.onerror = () => reject(new Error("img"));
+      img.src = src;
+    });
   }
   function roundImage(ctx, img, x, y, w, h, r) {
     ctx.save();
@@ -234,7 +220,7 @@ var ClaireWebGLNS = (() => {
     }
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
-    tex.anisotropy = 8;
+    tex.anisotropy = typeof window !== "undefined" && window.innerWidth < 720 ? 2 : 4;
     tex.needsUpdate = true;
     return tex;
   }
@@ -612,6 +598,9 @@ var ClaireWebGLNS = (() => {
       progress = 0;
       peekTarget = 0;
       peekCurrent = 0;
+      restPose();
+      applyShade(0);
+      renderOnce();
       const [front, underTex] = await Promise.all([
         texFor(current, helpers),
         texFor(next, helpers)
