@@ -472,6 +472,60 @@ body.locked .gate { display: flex; }
 }
 .btn-music .music-glyph { display: block; }
 .btn-music.is-on .music-slash { display: none; }
+.music-ctl {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  position: relative;
+  z-index: 9;
+  pointer-events: auto;
+  flex-wrap: nowrap;
+}
+.music-vol-wrap {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  width: 4.6rem;
+  padding: 0 0.15rem;
+}
+.music-vol-wrap[hidden] { display: none !important; }
+.music-vol {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 4.6rem;
+  height: 44px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.music-vol::-webkit-slider-runnable-track {
+  height: 3px;
+  background: #c5d0dc;
+  border-radius: 99px;
+}
+.music-vol::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5.5px;
+  border-radius: 50%;
+  background: #a8b5c4;
+  border: 1px solid #f6f1e8;
+}
+.music-vol::-moz-range-track {
+  height: 3px;
+  background: #c5d0dc;
+  border-radius: 99px;
+  border: 0;
+}
+.music-vol::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #a8b5c4;
+  border: 1px solid #f6f1e8;
+}
 .btn {
   min-height: 48px;
   min-width: 12rem;
@@ -903,7 +957,30 @@ html:not([data-screen="album"]) .controls { display: none; }
   color: #fff;
   font-size: 2rem;
   cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+  pointer-events: auto;
+  z-index: 32;
 }
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(243, 230, 218, 0.35);
+  background: rgba(42, 32, 28, 0.45);
+  color: #f3e6da;
+  border-radius: 999px;
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 32;
+}
+.lightbox-nav.is-prev { left: 10px; }
+.lightbox-nav.is-next { right: 10px; }
+.lightbox-nav:disabled { opacity: 0.28; }
 #lightbox-caption { color: #f3e6da; margin-top: 0.7rem; text-align: center; font-size: var(--fs-caption); line-height: 1.5; }
 #lightbox-note {
   color: #d5c8bb;

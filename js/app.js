@@ -18,9 +18,18 @@
   };
   var glBook = null;
   var musicOn = true;
+  var bgmVol = 0.38;
   var bgmArmed = false;
   var bgmFadeBound = false;
   var bgmLastT = 0;
+  var lbIndex = 0;
+
+  try {
+    var storedVol = Number(sessionStorage.getItem("claire-my-love-vol"));
+    if (isFinite(storedVol) && storedVol > 0) {
+      bgmVol = Math.min(0.85, Math.max(0.08, storedVol));
+    }
+  } catch (e) {}
 
   function helpers() {
     return { asset: asset, zh: zh };
@@ -89,7 +98,7 @@
   function startBgm() {
     var a = bgmEl();
     if (!a || !musicOn) return;
-    a.volume = 0.38;
+    a.volume = bgmVol;
     a.loop = true;
     bindBgmFade();
     var p = a.play();
@@ -106,6 +115,17 @@
     }
   }
 
+  function setBgmVol(raw) {
+    var v = Number(raw);
+    if (!isFinite(v)) v = 0.38;
+    bgmVol = Math.min(0.85, Math.max(0.08, v));
+    var a = bgmEl();
+    if (a) a.volume = bgmVol;
+    try { sessionStorage.setItem("claire-my-love-vol", String(bgmVol)); } catch (e) {}
+    var input = document.getElementById("music-vol");
+    if (input && Number(input.value) !== bgmVol) input.value = String(bgmVol);
+  }
+
   function syncMusicBtn() {
     var btn = document.getElementById("btn-music");
     if (!btn) return;
@@ -114,18 +134,25 @@
     var label = musicOn ? t("musicPause") : t("musicPlay");
     btn.setAttribute("aria-label", label);
     btn.setAttribute("title", label);
+    var wrap = document.getElementById("music-vol-wrap");
+    if (wrap) wrap.hidden = !musicOn;
+    var input = document.getElementById("music-vol");
+    if (input) {
+      input.value = String(bgmVol);
+      input.setAttribute("aria-label", t("musicVol"));
+    }
   }
 
   function toggleMusic() {
     var a = bgmEl();
     if (musicOn && a && a.paused) {
-      a.volume = 0.38;
+      a.volume = bgmVol;
       a.play().catch(function () {});
       return;
     }
     musicOn = !musicOn;
     if (a) {
-      a.volume = 0.38;
+      a.volume = bgmVol;
       if (musicOn) a.play().catch(function () {});
       else a.pause();
     }
@@ -151,12 +178,14 @@
       var t = a.currentTime;
       var d = a.duration || 0;
       if (d && bgmLastT > d * 0.72 && t < 1.1) {
-        a.volume = 0.05;
+        var target = bgmVol;
+        var low = Math.max(0.04, target * 0.12);
+        a.volume = low;
         var start = performance.now();
         function ramp(now) {
           if (!musicOn || a.paused) return;
           var k = Math.min(1, (now - start) / 520);
-          a.volume = 0.05 + (0.38 - 0.05) * k;
+          a.volume = low + (bgmVol - low) * k;
           if (k < 1) requestAnimationFrame(ramp);
         }
         requestAnimationFrame(ramp);
@@ -193,7 +222,7 @@
       e.preventDefault();
       var a = bgmEl();
       if (a) {
-        a.volume = 0.38;
+        a.volume = bgmVol;
         a.loop = true;
         a.play().catch(function () {});
       }
@@ -553,9 +582,39 @@
       note.hidden = !note.textContent;
     }
     box.hidden = false;
+    syncLightboxNav();
   }
   function closeLightbox() {
     document.getElementById("lightbox").hidden = true;
+    syncLightboxNav();
+  }
+  function currentPhotos() {
+    var item = pages[state.page];
+    return (item && item.photos) || [];
+  }
+  function showLightboxAt(i) {
+    var photos = currentPhotos();
+    if (!photos[i]) return;
+    lbIndex = i;
+    openLightbox(photos[i]);
+  }
+  function stepLightbox(d) {
+    showLightboxAt(lbIndex + d);
+  }
+  function syncLightboxNav() {
+    var box = document.getElementById("lightbox");
+    var photos = currentPhotos();
+    var many = box && !box.hidden && photos.length > 1;
+    var prev = document.getElementById("lightbox-prev");
+    var next = document.getElementById("lightbox-next");
+    if (prev) {
+      prev.hidden = !many;
+      prev.disabled = lbIndex <= 0;
+    }
+    if (next) {
+      next.hidden = !many;
+      next.disabled = lbIndex >= photos.length - 1;
+    }
   }
 
   function bindAlbumTurn() {
@@ -608,9 +667,10 @@
         return;
       }
       var img = e.target.closest ? e.target.closest("#book-page img") : null;
-      if (!img) return;
       var item = pages[state.page];
-      if (item) openLightbox(item.photos[Number(img.dataset.i)]);
+      if (!item || !item.photos || !item.photos.length) return;
+      if (img) showLightboxAt(Number(img.dataset.i) || 0);
+      else showLightboxAt(0);
     });
     prev.addEventListener("click", function () {
       go(state.page - 1, true);
@@ -938,6 +998,15 @@
     if (musicBtn) {
       musicBtn.onclick = function () { toggleMusic(); };
     }
+    var volInput = document.getElementById("music-vol");
+    if (volInput) {
+      volInput.value = String(bgmVol);
+      volInput.addEventListener("input", function (e) {
+        setBgmVol(e.target.value);
+      });
+      volInput.addEventListener("click", function (e) { e.stopPropagation(); });
+      volInput.addEventListener("pointerdown", function (e) { e.stopPropagation(); });
+    }
     document.querySelectorAll("#nav button").forEach(function (btn) {
       btn.onclick = function () {
         if (btn.dataset.view === "story") {
@@ -964,21 +1033,32 @@
       };
     }
     document.getElementById("lightbox-close").onclick = closeLightbox;
+    var lbPrev = document.getElementById("lightbox-prev");
+    var lbNext = document.getElementById("lightbox-next");
+    if (lbPrev) lbPrev.onclick = function (ev) { if (ev && ev.stopPropagation) ev.stopPropagation(); stepLightbox(-1); };
+    if (lbNext) lbNext.onclick = function (ev) { if (ev && ev.stopPropagation) ev.stopPropagation(); stepLightbox(1); };
     document.getElementById("lightbox").onclick = function (e) {
       if (e.target.id === "lightbox") closeLightbox();
     };
     (function () {
       var box = document.getElementById("lightbox");
-      var startY = null;
+      var start = null;
       box.addEventListener("touchstart", function (e) {
         var t = e.changedTouches && e.changedTouches[0];
-        startY = t ? t.clientY : null;
+        start = t ? { x: t.clientX, y: t.clientY } : null;
       }, { passive: true });
       box.addEventListener("touchend", function (e) {
         var t = e.changedTouches && e.changedTouches[0];
-        if (startY == null || !t) return;
-        if (t.clientY - startY > 72) closeLightbox();
-        startY = null;
+        if (!start || !t) return;
+        var dx = t.clientX - start.x;
+        var dy = t.clientY - start.y;
+        start = null;
+        if (dy > 72 && dy > Math.abs(dx)) {
+          closeLightbox();
+          return;
+        }
+        if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
+        stepLightbox(dx < 0 ? 1 : -1);
       }, { passive: true });
     })();
     document.addEventListener("keydown", function (e) {
@@ -986,6 +1066,8 @@
       if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
       if (!document.getElementById("lightbox").hidden) {
         if (e.key === "Escape") closeLightbox();
+        if (e.key === "ArrowLeft") stepLightbox(-1);
+        if (e.key === "ArrowRight") stepLightbox(1);
         return;
       }
       if (state.view !== "album") return;

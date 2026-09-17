@@ -68,6 +68,8 @@ window.ALBUM_DATA = {
     musicPauseEn: "Pause music",
     musicPlayZh: "播放音乐",
     musicPlayEn: "Play music",
+    musicVolZh: "音量",
+    musicVolEn: "Volume",
     motifHintZh: "小图案都可以点。",
     motifHintEn: "The little marks can be tapped.",
   },
