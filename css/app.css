@@ -1688,7 +1688,13 @@ html.webgl-book .album-book {
 }
 
 html.webgl-book .album-spine,
-html.webgl-book .album-stack {
+html.webgl-book .album-stack,
+.album-book:has(.book-gl-canvas) .album-spine,
+.album-book:has(.book-gl-canvas) .album-stack {
+  opacity: 0;
+}
+
+.album-book:has(.book-gl-canvas) #book-page:not(.is-letter):not(.is-end) {
   opacity: 0;
 }
 

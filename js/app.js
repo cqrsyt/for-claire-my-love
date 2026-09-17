@@ -113,14 +113,14 @@
     if (document.getElementById("three-src")) return;
     var s = document.createElement("script");
     s.id = "three-src";
-    s.src = "js/three.min.js?v=26";
+    s.src = "js/three.min.js?v=46";
     s.onload = function () {
       if (window.ClaireWebGLBook) {
         bootGl();
         return;
       }
       var w = document.createElement("script");
-      w.src = "js/webgl-book.js?v=26";
+      w.src = "js/webgl-book.js?v=46";
       w.onload = bootGl;
       document.head.appendChild(w);
     };
@@ -613,13 +613,10 @@
     state.page = i;
     if (glBook && glBook.ready && animate) {
       renderPage("gl-keep");
-      glBook.flip(from, to, dir, helpers(), pages[i + 1] || null);
-      var album = document.querySelector(".album-book");
-      if (album) {
-        album.classList.remove("is-flipping-next", "is-flipping-prev");
-        void album.offsetWidth;
-        album.classList.add(dir === "prev" ? "is-flipping-prev" : "is-flipping-next");
-      }
+      Promise.resolve(glBook.flip(from, to, dir, helpers(), pages[i + 1] || null)).catch(function () {
+        document.documentElement.classList.add("webgl-book");
+        if (glBook && glBook.show) glBook.show(to, pages[i + 1] || null, helpers());
+      });
       return;
     }
     renderPage(animate ? dir : false);

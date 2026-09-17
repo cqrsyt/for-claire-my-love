@@ -59,11 +59,11 @@ var ClaireWebGLNS = (() => {
   var REST_Z = 8e-3;
   function applyQuality() {
     const mobile = typeof window !== "undefined" && window.innerWidth < 720;
-    TEX_W = mobile ? 640 : 1024;
-    TEX_H = mobile ? 860 : 1376;
-    SEG_X = mobile ? 18 : 36;
-    SEG_Y = mobile ? 12 : 24;
-    CACHE_MAX = mobile ? 8 : 18;
+    TEX_W = mobile ? 768 : 1024;
+    TEX_H = mobile ? 1032 : 1376;
+    SEG_X = mobile ? 28 : 36;
+    SEG_Y = mobile ? 18 : 24;
+    CACHE_MAX = mobile ? 14 : 18;
   }
   function easePaper(t) {
     const x = Math.min(1, Math.max(0, t));
@@ -78,7 +78,8 @@ var ClaireWebGLNS = (() => {
       const img = new Image();
       img.decoding = "async";
       img.onload = () => {
-        if (typeof createImageBitmap === "function") {
+        const mobile = window.innerWidth < 720;
+        if (!mobile && typeof createImageBitmap === "function") {
           void createImageBitmap(img, { resizeWidth: TEX_W, resizeQuality: "medium" }).then(resolve, () => resolve(img));
           return;
         }
@@ -97,6 +98,8 @@ var ClaireWebGLNS = (() => {
     const x = c.getContext("2d", { willReadFrequently: true });
     if (!x) return c;
     x.drawImage(img, 0, 0, iw, ih);
+    if (typeof window !== "undefined" && window.innerWidth < 720) return c;
+    if (iw * ih > 12e5) return c;
     let data;
     try {
       data = x.getImageData(0, 0, iw, ih);
@@ -564,13 +567,14 @@ var ClaireWebGLNS = (() => {
       const made = await composePage(item, helpers);
       cache.set(k, made);
       if (cache.size > CACHE_MAX) {
-        const first = cache.keys().next().value;
-        if (first && first !== k) {
-          cache.get(first)?.dispose();
-          cache.delete(first);
-          const bk = "back|" + first;
+        for (const [key2, tex] of cache) {
+          if (tex === frontMat.map || tex === underMat.map || tex === backMat.map) continue;
+          tex.dispose();
+          cache.delete(key2);
+          const bk = "back|" + key2;
           backCache.get(bk)?.dispose();
           backCache.delete(bk);
+          if (cache.size <= CACHE_MAX) break;
         }
       }
       return made;
@@ -680,70 +684,77 @@ var ClaireWebGLNS = (() => {
       api.busy = true;
       peekTarget = 0;
       peekCurrent = 0;
-      const reveal = dir === "next" ? to : from;
-      const frontItem = dir === "next" ? from : to;
-      const [front, underTex] = await Promise.all([
-        texFor(frontItem, helpers),
-        texFor(reveal, helpers)
-      ]);
-      if (disposed) {
+      try {
+        const reveal = dir === "next" ? to : from;
+        const frontItem = dir === "next" ? from : to;
+        const [front, underTex] = await Promise.all([
+          texFor(frontItem, helpers),
+          texFor(reveal, helpers)
+        ]);
+        if (disposed) return;
+        setMaps(front, underTex, pageKey(frontItem, helpers.zh()));
+        const fromP = dir === "next" ? 0 : 1;
+        const toP = dir === "next" ? 1 : 0;
+        progress = fromP;
+        deform(geo, progress);
+        last = performance.now();
+        const start = last;
+        const rock = dir === "next" ? -0.22 : 0.2;
+        await new Promise((resolve) => {
+          const tick = (now) => {
+            if (disposed) {
+              resolve();
+              return;
+            }
+            const dt = Math.min(0.1, (now - last) / 1e3);
+            last = now;
+            const t = Math.min(1, (now - start) / (DURATION * 1e3) || dt);
+            const e = easePaper(t);
+            progress = fromP + (toP - fromP) * e;
+            deform(geo, progress);
+            const bounce = Math.sin(e * Math.PI);
+            const kick = Math.sin(e * Math.PI * 2) * 0.035;
+            book.rotation.y = REST_Y + bounce * rock + kick;
+            book.rotation.x = REST_X + bounce * 0.085;
+            const ridge = dir === "next" ? Math.min(1, progress) : Math.min(1, 1 - progress);
+            applyShade(ridge);
+            renderer.render(scene, camera);
+            if (t < 1) {
+              raf = requestAnimationFrame(tick);
+            } else {
+              raf = 0;
+              resolve();
+            }
+          };
+          raf = requestAnimationFrame(tick);
+        });
+        progress = 0;
+        const [restFront, restUnder] = await Promise.all([
+          texFor(to, helpers),
+          texFor(underPage, helpers)
+        ]);
+        if (disposed) return;
+        setMaps(restFront, restUnder, pageKey(to, helpers.zh()));
+        const y0 = book.rotation.y;
+        const x0 = book.rotation.x;
+        applyShade(0);
+        deform(geo, 0);
+        await lerpRest(x0, y0, 180);
+        restPose();
+        renderer.render(scene, camera);
+      } catch {
+        progress = 0;
+        restPose();
+        deform(geo, 0);
+        try {
+          await api.show(to, underPage, helpers);
+        } catch {
+          document.documentElement.classList.add("webgl-book");
+          renderOnce();
+        }
+      } finally {
         api.busy = false;
-        return;
       }
-      setMaps(front, underTex, pageKey(frontItem, helpers.zh()));
-      const fromP = dir === "next" ? 0 : 1;
-      const toP = dir === "next" ? 1 : 0;
-      progress = fromP;
-      deform(geo, progress);
-      last = performance.now();
-      const start = last;
-      const rock = dir === "next" ? -0.22 : 0.2;
-      await new Promise((resolve) => {
-        const tick = (now) => {
-          if (disposed) {
-            resolve();
-            return;
-          }
-          const dt = Math.min(0.1, (now - last) / 1e3);
-          last = now;
-          const t = Math.min(1, (now - start) / (DURATION * 1e3) || dt);
-          const e = easePaper(t);
-          progress = fromP + (toP - fromP) * e;
-          deform(geo, progress);
-          const bounce = Math.sin(e * Math.PI);
-          const kick = Math.sin(e * Math.PI * 2) * 0.035;
-          book.rotation.y = REST_Y + bounce * rock + kick;
-          book.rotation.x = REST_X + bounce * 0.085;
-          const ridge = dir === "next" ? Math.min(1, progress) : Math.min(1, 1 - progress);
-          applyShade(ridge);
-          renderer.render(scene, camera);
-          if (t < 1) {
-            raf = requestAnimationFrame(tick);
-          } else {
-            raf = 0;
-            resolve();
-          }
-        };
-        raf = requestAnimationFrame(tick);
-      });
-      progress = 0;
-      const [restFront, restUnder] = await Promise.all([
-        texFor(to, helpers),
-        texFor(underPage, helpers)
-      ]);
-      if (disposed) {
-        api.busy = false;
-        return;
-      }
-      setMaps(restFront, restUnder, pageKey(to, helpers.zh()));
-      const y0 = book.rotation.y;
-      const x0 = book.rotation.x;
-      applyShade(0);
-      deform(geo, 0);
-      await lerpRest(x0, y0, 180);
-      restPose();
-      renderer.render(scene, camera);
-      api.busy = false;
     };
     api.peek = (amount) => {
       if (disposed || api.busy || reducedMotion()) return;

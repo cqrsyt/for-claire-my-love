@@ -1,14 +1,14 @@
 /* v41 — fonts + garden + forced password gate. Do not override page-turn. */
 @font-face {
   font-family: "Ma Shan Zheng";
-  src: url("../fonts/mashanzheng.woff2?v=45") format("woff2");
+  src: url("../fonts/mashanzheng.woff2?v=46") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Cormorant Garamond";
-  src: url("../fonts/cormorant-italic.woff2?v=45") format("woff2");
+  src: url("../fonts/cormorant-italic.woff2?v=46") format("woff2");
   font-weight: 400;
   font-style: italic;
   font-display: swap;
