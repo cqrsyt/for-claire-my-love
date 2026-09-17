@@ -1,8 +1,54 @@
-/* v35 — fonts + garden only. Do not override page-turn animations. */
+/* v38 — fonts + garden + forced password gate. Do not override page-turn. */
+@font-face {
+  font-family: "Ma Shan Zheng";
+  src: url("../fonts/mashanzheng.woff2?v=38") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("../fonts/cormorant-italic.woff2?v=38") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   --font-display: "Ma Shan Zheng", "KaiTi", "STKaiti", cursive, serif;
   --font-zh: "Ma Shan Zheng", "KaiTi", "STKaiti", cursive, serif;
   --font-en: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+}
+
+body.locked #password-gate.gate {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 80 !important;
+}
+body.locked #app {
+  display: none !important;
+}
+
+html[data-lang="zh"] #app,
+html[data-lang="zh"] #book-page,
+html[data-lang="zh"] #book-page *,
+html[data-lang="zh"] .page,
+html[data-lang="zh"] .card,
+html[data-lang="zh"] .card *,
+html[data-lang="zh"] .chapter,
+html[data-lang="zh"] .chapter *,
+html[data-lang="zh"] .letter,
+html[data-lang="zh"] .letter *,
+html[data-lang="zh"] .stack,
+html[data-lang="zh"] .stack * {
+  font-family: var(--font-zh) !important;
+  font-style: normal !important;
+}
+html[data-lang="zh"] .en,
+html[data-lang="zh"] .sub.en {
+  font-family: var(--font-en) !important;
+  font-style: italic !important;
 }
 
 html[data-lang="zh"] body,

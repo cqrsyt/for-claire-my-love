@@ -1,14 +1,44 @@
 <!DOCTYPE html>
-<html lang="zh-Hans" data-lang="zh" data-screen="cover">
+<html lang="zh-Hans" data-lang="zh" data-screen="cover" data-build="38">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
     <meta name="theme-color" content="#fdfaf5" />
     <title>For Claire My Love · 写给秋然</title>
-    <link rel="preload" href="fonts/mashanzheng.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="fonts/cormorant-italic.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="css/app.css?v=36" />
-    <link rel="stylesheet" href="css/unify.css?v=36" />
+    <link rel="preload" href="fonts/mashanzheng.woff2?v=38" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/cormorant-italic.woff2?v=38" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/app.css?v=38" />
+    <link rel="stylesheet" href="css/unify.css?v=38" />
+    <style>
+      body.locked #password-gate.gate {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 80 !important;
+      }
+      body.locked #app { display: none !important; }
+      html[data-lang="zh"] .zh,
+      html[data-lang="zh"] .card,
+      html[data-lang="zh"] .card h3,
+      html[data-lang="zh"] .card p,
+      html[data-lang="zh"] .chapter,
+      html[data-lang="zh"] .chapter h2,
+      html[data-lang="zh"] .chapter p,
+      html[data-lang="zh"] .letter,
+      html[data-lang="zh"] .letter p,
+      html[data-lang="zh"] .letter h2,
+      html[data-lang="zh"] #book-page,
+      html[data-lang="zh"] #chapter-header {
+        font-family: "Ma Shan Zheng", "KaiTi", "STKaiti", cursive, serif !important;
+        font-style: normal !important;
+      }
+      .en, .sub.en {
+        font-family: "Cormorant Garamond", Georgia, serif !important;
+        font-style: italic !important;
+      }
+    </style>
   </head>
   <body class="locked">
     <div class="paper-grain" aria-hidden="true"></div>
@@ -128,34 +158,75 @@
       <p id="lightbox-note"></p>
     </div>
     <audio id="bgm" src="audio/wind-poem.mp3" loop preload="none"></audio>
-    <script src="js/config.js?v=36"></script>
-    <script src="js/sha256.js"></script>
+    <script src="js/config.js?v=38"></script>
+    <script src="js/sha256.js?v=38"></script>
     <script>
       (function () {
         var cfg = window.SITE_CONFIG || {};
-        var key = cfg.passwordStorageKey || "claire-my-love-unlocked";
+        var key = cfg.passwordStorageKey || "claire-gate-v38";
         var hash = cfg.sitePasswordHash || "310f089018032ba50b85d43ed54f70c81cf8e8a4846b26bc2037274e56f1acd1";
-        var form = document.getElementById("password-form");
-        var input = document.getElementById("password-input");
-        var err = document.getElementById("password-error");
-        try { sessionStorage.removeItem(key); } catch (e) {}
-        try { localStorage.removeItem(key); } catch (e) {}
+        window.__CLAIRE_OK = false;
+        try {
+          var rawGet = Storage.prototype.getItem;
+          Storage.prototype.getItem = function (k) {
+            if ((k === key || k === "claire-my-love-unlocked") && !window.__CLAIRE_OK) return null;
+            return rawGet.call(this, k);
+          };
+        } catch (e) {}
+        try { sessionStorage.removeItem(key); sessionStorage.removeItem("claire-my-love-unlocked"); } catch (e) {}
+        try { localStorage.removeItem(key); localStorage.removeItem("claire-my-love-unlocked"); } catch (e) {}
         document.body.classList.add("locked");
         var gate = document.getElementById("password-gate");
-        if (gate) gate.removeAttribute("hidden");
+        if (gate) {
+          gate.removeAttribute("hidden");
+          gate.style.display = "flex";
+        }
         var app = document.getElementById("app");
         if (app) {
           app.hidden = true;
           app.classList.remove("is-on");
         }
+
+        var appendHead = document.head.appendChild.bind(document.head);
+        document.head.appendChild = function (node) {
+          if (node && node.src && /webgl-book\.js/.test(node.src || "")) {
+            node.src = "js/webgl-book.js?v=38";
+          }
+          return appendHead(node);
+        };
+
+        function loadScript(src) {
+          return new Promise(function (resolve, reject) {
+            var s = document.createElement("script");
+            s.src = src;
+            s.async = false;
+            s.onload = resolve;
+            s.onerror = reject;
+            document.body.appendChild(s);
+          });
+        }
+        var started = false;
+        function loadRest() {
+          if (started) return;
+          started = true;
+          loadScript("data/album.js?v=38")
+            .then(function () { return loadScript("js/phone.js?v=38"); })
+            .then(function () { return loadScript("js/app.js?v=38"); });
+        }
+
         function reveal() {
+          window.__CLAIRE_OK = true;
           try { sessionStorage.setItem(key, "1"); } catch (e) {}
           document.body.classList.remove("locked");
-          if (gate) gate.setAttribute("hidden", "");
+          if (gate) {
+            gate.setAttribute("hidden", "");
+            gate.style.display = "none";
+          }
           if (app) {
             app.hidden = false;
             app.classList.add("is-on");
           }
+          loadRest();
         }
         function digest(val) {
           if (window.ClaireSha256) return Promise.resolve(window.ClaireSha256(val));
@@ -168,6 +239,9 @@
           }
           return Promise.reject(new Error("no-hash"));
         }
+        var form = document.getElementById("password-form");
+        var input = document.getElementById("password-input");
+        var err = document.getElementById("password-error");
         if (form) {
           form.addEventListener("submit", function (e) {
             e.preventDefault();
@@ -180,10 +254,8 @@
             });
           });
         }
+        setTimeout(function () { if (input) input.focus(); }, 60);
       })();
     </script>
-    <script src="data/album.js?v=36"></script>
-    <script src="js/phone.js?v=36"></script>
-    <script src="js/app.js?v=36"></script>
   </body>
 </html>

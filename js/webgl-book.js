@@ -140,11 +140,11 @@
       var sample = "写给秋然 Claire";
       ready = Promise.race([
         Promise.all([
-          document.fonts.load('36px "PingFang SC"', sample),
           document.fonts.load('40px "Ma Shan Zheng"', sample),
+          document.fonts.load('24px "Ma Shan Zheng"', sample),
           document.fonts.load('italic 30px "Cormorant Garamond"', sample)
         ]).catch(function () {}),
-        new Promise(function (resolve) { setTimeout(resolve, 280); })
+        new Promise(function (resolve) { setTimeout(resolve, 2200); })
       ]);
     }
     return ready.then(function () {
@@ -178,14 +178,14 @@
             if (caption) {
               ctx.fillStyle = "#3a4450";
               ctx.font = zh
-                ? '36px "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif'
+                ? '36px "Ma Shan Zheng", KaiTi, STKaiti, serif'
                 : 'italic 30px "Cormorant Garamond", Georgia, serif';
               ctx.fillText(caption, TEX_W / 2, dy + dh + 50);
             }
             if (note) {
               ctx.fillStyle = "#8a97a6";
               ctx.font = zh
-                ? '24px "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif'
+                ? '24px "Ma Shan Zheng", KaiTi, STKaiti, serif'
                 : 'italic 20px "Cormorant Garamond", Georgia, serif';
               wrapText(ctx, note, TEX_W / 2, dy + dh + (caption ? 88 : 52), innerW - 24, 34, 2);
             }
