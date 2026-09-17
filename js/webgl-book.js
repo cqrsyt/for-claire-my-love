@@ -3,17 +3,17 @@
 
   var TEX_W = 1024;
   var TEX_H = 1376;
-  var SEG_X = 42;
-  var SEG_Y = 28;
+  var SEG_X = 24;
+  var SEG_Y = 16;
   var CACHE_MAX = 16;
-  var DURATION = 1.08;
+  var DURATION = 0.72;
 
   function applyQuality() {
     var mobile = window.innerWidth < 720;
     TEX_W = mobile ? 768 : 1024;
     TEX_H = mobile ? 1032 : 1376;
-    SEG_X = mobile ? 28 : 42;
-    SEG_Y = mobile ? 18 : 28;
+    SEG_X = mobile ? 18 : 24;
+    SEG_Y = mobile ? 12 : 16;
     CACHE_MAX = mobile ? 6 : 16;
   }
 
@@ -140,8 +140,9 @@
       var sample = "写给秋然 Claire";
       ready = Promise.race([
         Promise.all([
+          document.fonts.load('36px "PingFang SC"', sample),
           document.fonts.load('40px "Ma Shan Zheng"', sample),
-          document.fonts.load('italic 32px "Cormorant Garamond"', sample)
+          document.fonts.load('italic 30px "Cormorant Garamond"', sample)
         ]).catch(function () {}),
         new Promise(function (resolve) { setTimeout(resolve, 280); })
       ]);
@@ -177,15 +178,15 @@
             if (caption) {
               ctx.fillStyle = "#3a4450";
               ctx.font = zh
-                ? '40px "Ma Shan Zheng", KaiTi, serif'
-                : 'italic 32px "Cormorant Garamond", Georgia, serif';
+                ? '36px "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif'
+                : 'italic 30px "Cormorant Garamond", Georgia, serif';
               ctx.fillText(caption, TEX_W / 2, dy + dh + 50);
             }
             if (note) {
               ctx.fillStyle = "#8a97a6";
               ctx.font = zh
-                ? '26px "Ma Shan Zheng", KaiTi, serif'
-                : 'italic 22px "Cormorant Garamond", Georgia, serif';
+                ? '24px "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif'
+                : 'italic 20px "Cormorant Garamond", Georgia, serif';
               wrapText(ctx, note, TEX_W / 2, dy + dh + (caption ? 88 : 52), innerW - 24, 34, 2);
             }
           }).catch(function () {
@@ -229,17 +230,18 @@
     var W = geo.userData.W;
     var H = geo.userData.H;
     var t = Math.min(1, Math.max(0, progress));
-    var thetaMax = t * Math.PI;
+    var thetaMax = t * Math.PI * 0.92;
     var bulge = Math.sin(t * Math.PI);
     var halfH = H * 0.5;
-    var i, ox, oy, u, theta, lift;
+    var i, ox, oy, u, theta, lift, soft;
     for (i = 0; i < pos.count; i++) {
       ox = orig[i * 3];
       oy = orig[i * 3 + 1];
       u = Math.min(1, Math.max(0, ox / W));
-      theta = thetaMax * Math.pow(u, 0.68);
-      theta *= 1 + 0.14 * bulge * (oy / halfH);
-      lift = bulge * 0.045 * W * Math.sin(u * Math.PI);
+      soft = u * u * (3 - 2 * u);
+      theta = thetaMax * Math.pow(soft, 0.85);
+      theta *= 1 + 0.04 * bulge * (oy / halfH);
+      lift = bulge * 0.02 * W * Math.sin(soft * Math.PI);
       pos.setXYZ(i, ox * Math.cos(theta), oy, ox * Math.sin(theta) + lift);
     }
     pos.needsUpdate = true;
@@ -453,13 +455,7 @@
               deform(geo, progress);
               book.rotation.y = -0.03 + Math.sin(e * Math.PI) * rock;
               book.rotation.x = 0.02 + Math.sin(e * Math.PI) * 0.05;
-              var ridge = dir === "next" ? progress : 1 - progress;
-              curlLight.intensity = 0.55 * Math.sin(ridge * Math.PI);
-              curlLight.position.set(
-                W * Math.cos(ridge * Math.PI) * 0.55,
-                H * 0.15,
-                W * Math.sin(ridge * Math.PI) * 0.7
-              );
+              curlLight.intensity = 0;
               renderer.render(scene, camera);
               if (t < 1) raf = requestAnimationFrame(tick);
               else { raf = 0; resolve(); }
