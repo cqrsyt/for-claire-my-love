@@ -3,7 +3,10 @@
 
   var phone = false;
   try {
-    phone = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+    phone = !!(window.matchMedia && (
+      window.matchMedia("(max-width: 900px)").matches ||
+      window.matchMedia("(pointer: coarse)").matches
+    ));
   } catch (e) {}
 
   if (phone) {
@@ -22,7 +25,7 @@
     ".cover-open-wrap .btn-open{min-width:12rem;min-height:48px;pointer-events:auto}" +
     ".letter-go{margin:.7rem 0 1rem}" +
     ".letter-go .btn{min-width:12rem}" +
-    "@media (max-width:720px){.music-vol-wrap{display:none!important}}";
+    "@media (max-width:900px){.music-vol-wrap{display:none!important}}";
   document.head.appendChild(style);
 
   function placeOpen() {
