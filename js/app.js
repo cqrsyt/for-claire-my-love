@@ -106,15 +106,24 @@
   }
 
   function loadThree() {
-    if (window.THREE) {
+    if (window.THREE && window.ClaireWebGLBook) {
       bootGl();
       return;
     }
     if (document.getElementById("three-src")) return;
     var s = document.createElement("script");
     s.id = "three-src";
-    s.src = "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js";
-    s.onload = bootGl;
+    s.src = "js/three.min.js?v=26";
+    s.onload = function () {
+      if (window.ClaireWebGLBook) {
+        bootGl();
+        return;
+      }
+      var w = document.createElement("script");
+      w.src = "js/webgl-book.js?v=26";
+      w.onload = bootGl;
+      document.head.appendChild(w);
+    };
     document.head.appendChild(s);
   }
 
