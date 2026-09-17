@@ -108,6 +108,10 @@ html[data-screen="story"] .bloom-a {
   .motif .say {
     top: 2.4rem;
   }
+  .music-vol-wrap,
+  .music-vol {
+    width: 3.8rem;
+  }
 }
 
 @media (max-height: 720px) {

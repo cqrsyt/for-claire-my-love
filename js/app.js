@@ -342,6 +342,7 @@
       '<div class="cover-face cover-face-back" aria-hidden="true"></div>' +
       "</div></div></div></div>";
     bindCoverOpen();
+    warmNearby();
   }
 
   function bindCoverOpen() {
@@ -421,6 +422,23 @@
     document.documentElement.removeAttribute("data-chapter");
     syncControls();
     updateBirthdayWish();
+    warmNearby();
+  }
+
+  function warmNearby() {
+    var idxs;
+    if (state.view === "cover" || state.page < 0) idxs = [0, 1];
+    else if (state.page >= pages.length) idxs = [pages.length - 1];
+    else idxs = [state.page - 1, state.page + 1, state.page + 2];
+    idxs.forEach(function (i) {
+      var item = pages[i];
+      if (!item) return;
+      (item.photos || []).forEach(function (ph) {
+        if (!ph || !ph.src) return;
+        var im = new Image();
+        im.src = asset(ph.src);
+      });
+    });
   }
 
   function renderEndPage() {
@@ -454,6 +472,7 @@
     document.documentElement.removeAttribute("data-chapter");
     syncControls();
     updateBirthdayWish();
+    warmNearby();
   }
 
   function renderPage(animate) {
@@ -489,6 +508,7 @@
     syncControls();
     document.documentElement.setAttribute("data-chapter", ch.id || "");
     updateBirthdayWish();
+    warmNearby();
     if (glBook && glBook.ready) {
       document.documentElement.classList.add("webgl-book");
       if (animate !== "gl-keep") glBook.show(item, pages[state.page + 1] || null, helpers());
