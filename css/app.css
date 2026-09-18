@@ -2238,7 +2238,6 @@ button:active:not(:disabled),
 #book-page.page.is-end {
   box-shadow: 4px 10px 22px rgba(107, 118, 132, 0.06);
 }
-}
 
 .avatars img,
 .end-avatars img,
