@@ -348,21 +348,12 @@ var ClaireWebGLNS = (() => {
     canvas.height = TEX_H;
     const ctx = canvas.getContext("2d");
     paintPaper(ctx);
-    ctx.fillStyle = "rgba(90, 108, 128, 0.1)";
-    ctx.fillRect(0, 0, TEX_W, TEX_H);
-    const src = front.image;
-    if (src) {
-      ctx.save();
-      ctx.globalAlpha = 0.14;
-      ctx.translate(TEX_W, 0);
-      ctx.scale(-1, 1);
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(src, 0, 0, TEX_W, TEX_H);
-      ctx.restore();
+    ctx.fillStyle = "rgba(232, 237, 243, 0.55)";
+    ctx.fillRect(0, 0, 22, TEX_H);
+    for (let y = 96; y < TEX_H - 80; y += 42) {
+      ctx.fillStyle = "rgba(197, 208, 220, 0.22)";
+      ctx.fillRect(64, y, TEX_W - 128, 2);
     }
-    ctx.fillStyle = "rgba(197, 208, 220, 0.12)";
-    ctx.fillRect(0, 0, 28, TEX_H);
     return sharpMap(new THREE.CanvasTexture(canvas));
   }
   function deform(geo, progress) {
