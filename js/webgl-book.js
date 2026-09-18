@@ -57,6 +57,7 @@ var ClaireWebGLNS = (() => {
   var REST_X = 0.03;
   var REST_Y = -0.06;
   var REST_Z = 4e-3;
+  var IDLE = 0.048;
   function applyQuality() {
     const mobile = typeof window !== "undefined" && window.innerWidth < 720;
     TEX_W = mobile ? 1280 : 1536;
@@ -190,6 +191,15 @@ var ClaireWebGLNS = (() => {
     ctx.fillText("\u{1F341}", TEX_W - 70, 70);
     ctx.fillText("\u{1F415}", 40, TEX_H - 48);
     ctx.fillText("\u{1F338}", TEX_W - 72, TEX_H - 52);
+    ctx.restore();
+    ctx.save();
+    ctx.globalAlpha = 0.08;
+    for (let i = 0; i < 52; i++) {
+      const x = (i * 97 + 41) % TEX_W;
+      const y = (i * 173 + 29) % TEX_H;
+      ctx.fillStyle = i % 3 === 0 ? "#8a97a6" : "#c5d0dc";
+      ctx.fillRect(x, y, i % 5 === 0 ? 2 : 1, 1);
+    }
     ctx.restore();
   }
   function pageKey(item, zh) {
@@ -507,6 +517,10 @@ var ClaireWebGLNS = (() => {
     let peekTarget = 0;
     let peekCurrent = 0;
     let wantArrive = false;
+    let dragging = false;
+    let dragDir = "next";
+    let hintOn = true;
+    let idlePhase = 0;
     const api = {
       ready: true,
       busy: false
@@ -635,29 +649,57 @@ var ClaireWebGLNS = (() => {
       });
     }
     function tickPeek() {
-      if (disposed || api.busy) {
+      if (disposed || api.busy || dragging) {
         raf = 0;
         return;
       }
-      peekCurrent += (peekTarget - peekCurrent) * 0.2;
-      if (Math.abs(peekTarget - peekCurrent) < 2e-3) peekCurrent = peekTarget;
+      if (hintOn && peekTarget <= IDLE + 2e-3) {
+        idlePhase += 0.018;
+        peekTarget = IDLE + 0.016 * (0.5 + 0.5 * Math.sin(idlePhase));
+      }
+      peekCurrent += (peekTarget - peekCurrent) * 0.16;
+      if (Math.abs(peekTarget - peekCurrent) < 15e-4) peekCurrent = peekTarget;
       progress = peekCurrent;
       deform(geo, progress);
-      const k = Math.min(1, progress / 0.16);
+      const k = Math.min(1, progress / 0.18);
       shadowMat.opacity = 0.14 * k;
       shade.scale.set(0.35 + 0.4 * k, 1, 1);
-      curlLight.intensity = 0.7 * k;
+      curlLight.intensity = 0.55 * k;
       curlLight.position.set(W * 0.78, H * 0.1, 0.14);
-      if (progress < 2e-3) {
-        progress = 0;
-        restPose();
-        deform(geo, 0);
-        renderer.render(scene, camera);
-        raf = 0;
-        return;
-      }
       renderer.render(scene, camera);
       raf = requestAnimationFrame(tickPeek);
+    }
+    function startHint() {
+      if (disposed || reducedMotion()) return;
+      hintOn = true;
+      peekTarget = IDLE;
+      if (!raf) raf = requestAnimationFrame(tickPeek);
+    }
+    function animateProgress(from, to, ms) {
+      return new Promise((resolve) => {
+        const start = performance.now();
+        const tick = (now) => {
+          if (disposed) {
+            resolve();
+            return;
+          }
+          const k = Math.min(1, (now - start) / ms);
+          const e = easePaper(k);
+          progress = from + (to - from) * e;
+          deform(geo, progress);
+          const ridge = Math.min(1, dragDir === "next" ? progress : 1 - progress);
+          applyShade(ridge);
+          const bounce = Math.sin(e * Math.PI);
+          book.rotation.y = REST_Y + bounce * (dragDir === "next" ? -0.14 : 0.12);
+          renderer.render(scene, camera);
+          if (k < 1) raf = requestAnimationFrame(tick);
+          else {
+            raf = 0;
+            resolve();
+          }
+        };
+        raf = requestAnimationFrame(tick);
+      });
     }
     function fadeIn(from, to, ms) {
       return new Promise((resolve) => {
@@ -684,6 +726,8 @@ var ClaireWebGLNS = (() => {
     api.show = async (current, next, helpers) => {
       if (disposed) return;
       document.documentElement.classList.add("webgl-book");
+      canvas.style.transition = "opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1)";
+      canvas.style.opacity = "1";
       if (api.busy) return;
       const [front, underTex] = await Promise.all([
         texFor(current, helpers),
@@ -706,20 +750,30 @@ var ClaireWebGLNS = (() => {
         fadeMesh.visible = false;
         applyShade(0);
         restPose();
+        progress = IDLE;
+        peekCurrent = IDLE;
+        peekTarget = IDLE;
+        deform(geo, progress);
         renderOnce();
+        startHint();
       } else {
         setMaps(front, underTex, pageKey(current, helpers.zh()));
         applyShade(0);
         canvas.style.opacity = "1";
+        progress = IDLE;
+        peekCurrent = IDLE;
         if (wantArrive && !reducedMotion()) {
           wantArrive = false;
           book.rotation.set(REST_X + 0.06, REST_Y - 0.1, REST_Z);
+          deform(geo, progress);
           renderOnce();
           await lerpRest(book.rotation.x, book.rotation.y, 720);
         } else {
           restPose();
+          deform(geo, progress);
           renderOnce();
         }
+        startHint();
       }
     };
     api.flip = async (from, to, dir, helpers, underPage) => {
@@ -786,10 +840,14 @@ var ClaireWebGLNS = (() => {
         const y0 = book.rotation.y;
         const x0 = book.rotation.x;
         applyShade(0);
-        deform(geo, 0);
+        deform(geo, IDLE);
         canvas.style.opacity = "1";
         await lerpRest(x0, y0, 280);
         restPose();
+        progress = IDLE;
+        peekCurrent = IDLE;
+        peekTarget = IDLE;
+        deform(geo, progress);
         renderer.render(scene, camera);
       } catch {
         progress = 0;
@@ -803,12 +861,116 @@ var ClaireWebGLNS = (() => {
         }
       } finally {
         api.busy = false;
+        startHint();
       }
     };
     api.peek = (amount) => {
-      if (disposed || api.busy || reducedMotion()) return;
-      peekTarget = Math.max(0, Math.min(0.16, amount));
+      if (disposed || api.busy || dragging || reducedMotion()) return;
+      peekTarget = amount > 0.01 ? Math.min(0.2, amount) : IDLE;
       if (!raf) raf = requestAnimationFrame(tickPeek);
+    };
+    api.beginDrag = async (dir, current, other, helpers) => {
+      if (disposed || api.busy || reducedMotion()) return;
+      dragging = true;
+      dragDir = dir;
+      hintOn = false;
+      stopLoop();
+      const frontItem = dir === "next" ? current : other;
+      const reveal = dir === "next" ? other : current;
+      const [front, underTex] = await Promise.all([
+        texFor(frontItem, helpers),
+        texFor(reveal, helpers)
+      ]);
+      if (disposed || !dragging) return;
+      setMaps(front, underTex, pageKey(frontItem, helpers.zh()));
+      progress = dir === "next" ? IDLE : 1 - IDLE;
+      peekCurrent = progress;
+      deform(geo, progress);
+      renderOnce();
+    };
+    api.dragTo = (amount) => {
+      if (disposed || !dragging) return;
+      const t = Math.max(0, Math.min(1, amount));
+      progress = dragDir === "next" ? Math.max(IDLE, t) : Math.min(1 - IDLE, 1 - t);
+      peekCurrent = progress;
+      deform(geo, progress);
+      const ridge = dragDir === "next" ? progress : 1 - progress;
+      applyShade(ridge);
+      book.rotation.y = REST_Y + Math.sin(ridge * Math.PI) * (dragDir === "next" ? -0.16 : 0.14);
+      renderer.render(scene, camera);
+    };
+    api.endDrag = async (helpers, to, under2) => {
+      if (disposed || !dragging) return false;
+      dragging = false;
+      const commit = dragDir === "next" ? progress > 0.3 : progress < 0.7;
+      if (!commit) {
+        const back = dragDir === "next" ? IDLE : 1 - IDLE;
+        await animateProgress(progress, back, 320);
+        restPose();
+        progress = IDLE;
+        peekCurrent = IDLE;
+        startHint();
+        return false;
+      }
+      if (!to) return true;
+      api.busy = true;
+      const finish = dragDir === "next" ? 1 : 0;
+      await animateProgress(progress, finish, 480);
+      if (disposed) return false;
+      const [front, underTex] = await Promise.all([
+        texFor(to, helpers),
+        texFor(under2, helpers)
+      ]);
+      setMaps(front, underTex, pageKey(to, helpers.zh()));
+      restPose();
+      progress = IDLE;
+      peekCurrent = IDLE;
+      peekTarget = IDLE;
+      deform(geo, progress);
+      canvas.style.opacity = "1";
+      renderOnce();
+      api.busy = false;
+      startHint();
+      return true;
+    };
+    api.close = async () => {
+      if (disposed) return;
+      api.busy = true;
+      dragging = false;
+      hintOn = false;
+      stopLoop();
+      const start = performance.now();
+      const y0 = book.rotation.y;
+      const x0 = book.rotation.x;
+      const p0 = progress || IDLE;
+      canvas.style.transition = "none";
+      await new Promise((resolve) => {
+        const tick = (now) => {
+          if (disposed) {
+            resolve();
+            return;
+          }
+          const t = Math.min(1, (now - start) / 780);
+          const e = easePaper(t);
+          progress = p0 + (0.22 - p0) * e;
+          book.rotation.y = y0 + (-1.08 - y0) * e;
+          book.rotation.x = x0 + (0.1 - x0) * e;
+          canvas.style.opacity = String(1 - e);
+          deform(geo, progress);
+          applyShade(progress);
+          renderer.render(scene, camera);
+          if (t < 1) raf = requestAnimationFrame(tick);
+          else {
+            raf = 0;
+            resolve();
+          }
+        };
+        raf = requestAnimationFrame(tick);
+      });
+      document.documentElement.classList.remove("webgl-book");
+      restPose();
+      progress = 0;
+      api.busy = false;
     };
     api.arrive = () => {
       wantArrive = true;

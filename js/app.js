@@ -113,14 +113,14 @@
     if (document.getElementById("three-src")) return;
     var s = document.createElement("script");
     s.id = "three-src";
-    s.src = "js/three.min.js?v=52";
+    s.src = "js/three.min.js?v=53";
     s.onload = function () {
       if (window.ClaireWebGLBook) {
         bootGl();
         return;
       }
       var w = document.createElement("script");
-      w.src = "js/webgl-book.js?v=52";
+      w.src = "js/webgl-book.js?v=53";
       w.onload = bootGl;
       document.head.appendChild(w);
     };
@@ -395,7 +395,7 @@
       }
       btn.disabled = true;
       book.classList.add("is-open");
-      var fallback = setTimeout(enterAlbum, 1200);
+      var fallback = setTimeout(enterAlbum, 860);
       leaf.addEventListener("transitionend", function onEnd(e) {
         if (e.target !== leaf) return;
         if (e.propertyName && e.propertyName.indexOf("transform") === -1) return;
@@ -631,9 +631,43 @@
     syncTurnHint();
   }
 
+  function duckBgm(on) {
+    var a = bgmEl();
+    if (!a || !musicOn) return;
+    var target = on ? Math.max(0.05, bgmVol * 0.3) : bgmVol;
+    var start = a.volume;
+    var t0 = performance.now();
+    function tick(now) {
+      var k = Math.min(1, (now - t0) / 280);
+      a.volume = start + (target - start) * k;
+      if (k < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function syncRail() {
+    var rail = document.getElementById("book-rail");
+    if (!rail) return;
+    var on = state.view === "album" && state.page >= 0 && state.page < pages.length;
+    rail.hidden = !on;
+    var span = rail.querySelector("span");
+    if (span && on) {
+      span.style.height = Math.max(8, ((state.page + 1) / Math.max(1, pages.length)) * 100) + "%";
+    }
+  }
+
   function go(i, animate) {
     if (glBook && glBook.busy) return;
     if (i < -1 || i > pages.length || i === state.page) return;
+    if (i >= pages.length && glBook && glBook.ready && animate && state.page >= 0 && state.page < pages.length) {
+      duckBgm(true);
+      Promise.resolve(glBook.close()).then(function () {
+        state.page = i;
+        duckBgm(false);
+        renderPage(false);
+      });
+      return;
+    }
     if (state.page < 0 || i < 0 || state.page >= pages.length || i >= pages.length) {
       state.page = i;
       renderPage(false);
@@ -644,8 +678,11 @@
     var to = pages[i];
     state.page = i;
     if (glBook && glBook.ready && animate) {
+      duckBgm(true);
       document.documentElement.classList.add("webgl-book");
-      glBook.flip(from, to, dir, helpers(), pages[i + 1] || null);
+      Promise.resolve(glBook.flip(from, to, dir, helpers(), pages[i + 1] || null)).finally(function () {
+        duckBgm(false);
+      });
       return;
     }
     renderPage(animate ? dir : false);
@@ -707,6 +744,8 @@
     var next = document.getElementById("btn-next");
     var swipe = null;
     var skipClick = false;
+    var drag = null;
+    var lastTap = 0;
     stage.addEventListener("touchstart", function (e) {
       var t = e.changedTouches && e.changedTouches[0];
       if (!t) return;
@@ -714,6 +753,7 @@
       swipe = { x: t.clientX, y: t.clientY, fromUi: !!fromUi };
     }, { passive: true });
     stage.addEventListener("touchend", function (e) {
+      if (drag) return;
       var start = swipe;
       swipe = null;
       if (!start || start.fromUi || state.view !== "album") return;
@@ -737,25 +777,86 @@
       if (e.target && e.target.closest && e.target.closest("button, a, select, input, label")) return;
       var r = stage.getBoundingClientRect();
       var x = e.clientX - r.left;
+      var now = Date.now();
+      var dbl = now - lastTap < 320;
+      lastTap = now;
       if (x < r.width * 0.28) {
-        if (state.page < 0) return;
-        go(state.page - 1, true);
+        if (!dbl) {
+          if (state.page < 0) return;
+          go(state.page - 1, true);
+        }
         return;
       }
       if (x > r.width * 0.72) {
-        if (state.page < 0) {
-          go(0, true);
-          return;
+        if (!dbl) {
+          if (state.page < 0) go(0, true);
+          else go(state.page + 1, true);
         }
-        go(state.page + 1, true);
         return;
       }
-      var img = e.target.closest ? e.target.closest("#book-page img") : null;
       var item = pages[state.page];
       if (!item || !item.photos || !item.photos.length) return;
-      if (img) showLightboxAt(Number(img.dataset.i) || 0);
-      else showLightboxAt(0);
+      if (dbl) showLightboxAt(0);
     });
+    stage.addEventListener("pointerdown", function (e) {
+      if (!glBook || !glBook.ready || glBook.busy) return;
+      if (state.view !== "album" || state.page < 0 || state.page >= pages.length) return;
+      if (e.target && e.target.closest && e.target.closest("button, a, select, input, label")) return;
+      var r = stage.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width;
+      var dir = null;
+      if (x > 0.68) dir = "next";
+      else if (x < 0.32 && state.page > 0) dir = "prev";
+      if (!dir) return;
+      drag = { dir: dir, startX: e.clientX };
+      try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+      var other = dir === "next" ? pages[state.page + 1] : pages[state.page - 1];
+      if (glBook.beginDrag) glBook.beginDrag(dir, pages[state.page], other || null, helpers());
+    });
+    function finishDrag() {
+      if (!drag || !glBook || !glBook.endDrag) { drag = null; return; }
+      var d = drag;
+      drag = null;
+      skipClick = true;
+      var toIdx = d.dir === "next" ? state.page + 1 : state.page - 1;
+      var to = toIdx >= 0 && toIdx < pages.length ? pages[toIdx] : null;
+      var under = pages[toIdx + 1] || null;
+      duckBgm(true);
+      Promise.resolve(glBook.endDrag(helpers(), to, under)).then(function (committed) {
+        if (committed && !to && d.dir === "next" && glBook.close) {
+          return Promise.resolve(glBook.close()).then(function () {
+            state.page = pages.length;
+            duckBgm(false);
+            renderPage(false);
+          });
+        }
+        if (committed && to) {
+          state.page = toIdx;
+          renderPage("gl-keep");
+        }
+        duckBgm(false);
+      });
+    }
+    stage.addEventListener("pointermove", function (e) {
+      if (drag && glBook && glBook.dragTo) {
+        var r = stage.getBoundingClientRect();
+        var t = drag.dir === "next"
+          ? (drag.startX - e.clientX) / (r.width * 0.52)
+          : (e.clientX - drag.startX) / (r.width * 0.52);
+        glBook.dragTo(t);
+        return;
+      }
+      if (!glBook || !glBook.ready || glBook.busy) return;
+      if (state.view !== "album" || state.page < 0 || state.page >= pages.length) return;
+      var r = stage.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width;
+      if (glBook.peek) {
+        if (x > 0.78) glBook.peek(0.14 * Math.min(1, (x - 0.78) / 0.22));
+        else glBook.peek(0);
+      }
+    });
+    stage.addEventListener("pointerup", finishDrag);
+    stage.addEventListener("pointercancel", finishDrag);
     prev.addEventListener("click", function () {
       go(state.page - 1, true);
     });
@@ -930,6 +1031,7 @@
     fillPageJump();
     fillChapterStrip();
     syncNav();
+    syncRail();
   }
 
   function syncNav() {

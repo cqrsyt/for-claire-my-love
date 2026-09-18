@@ -7,10 +7,10 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta name="theme-color" content="#fdfaf5" />
     <title>For Claire My Love · 写给秋然</title>
-    <link rel="preload" href="fonts/mashanzheng.woff2?v=52" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="fonts/cormorant-italic.woff2?v=52" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="css/app.css?v=52" />
-    <link rel="stylesheet" href="css/unify.css?v=52" />
+    <link rel="preload" href="fonts/mashanzheng.woff2?v=53" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/cormorant-italic.woff2?v=53" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/app.css?v=53" />
+    <link rel="stylesheet" href="css/unify.css?v=53" />
     <style>
       body.locked #password-gate.gate {
         display: flex !important;
@@ -146,6 +146,7 @@
           <div class="album-book">
             <div class="album-spine" aria-hidden="true"><span class="spine-foil"></span></div>
             <div class="album-stack" aria-hidden="true"></div>
+            <div class="book-rail" id="book-rail" hidden aria-hidden="true"><span></span></div>
             <div class="album-block">
               <div id="book-page" class="page"></div>
               <div id="book-gl" class="book-gl" aria-hidden="true"></div>
@@ -172,8 +173,8 @@
       <p id="lightbox-note"></p>
     </div>
     <audio id="bgm" src="audio/wind-poem.mp3" loop preload="none"></audio>
-    <script src="js/config.js?v=52"></script>
-    <script src="js/sha256.js?v=52"></script>
+    <script src="js/config.js?v=53"></script>
+    <script src="js/sha256.js?v=53"></script>
     <script>
       (function () {
         var cfg = window.SITE_CONFIG || {};
@@ -204,7 +205,7 @@
         var appendHead = document.head.appendChild.bind(document.head);
         document.head.appendChild = function (node) {
           if (node && node.src && /webgl-book\.js/.test(node.src || "")) {
-            node.src = "js/webgl-book.js?v=52";
+            node.src = "js/webgl-book.js?v=53";
           }
           return appendHead(node);
         };
@@ -223,11 +224,11 @@
         function loadRest() {
           if (started) return;
           started = true;
-          loadScript("data/album.js?v=52")
-            .then(function () { return loadScript("js/phone.js?v=52"); })
-            .then(function () { return loadScript("js/three.min.js?v=52"); })
-            .then(function () { return loadScript("js/webgl-book.js?v=52"); })
-            .then(function () { return loadScript("js/app.js?v=52"); });
+          loadScript("data/album.js?v=53")
+            .then(function () { return loadScript("js/phone.js?v=53"); })
+            .then(function () { return loadScript("js/three.min.js?v=53"); })
+            .then(function () { return loadScript("js/webgl-book.js?v=53"); })
+            .then(function () { return loadScript("js/app.js?v=53"); });
         }
 
         function reveal() {
