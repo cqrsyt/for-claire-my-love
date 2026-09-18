@@ -1322,16 +1322,19 @@ html.is-quiet .star-field span {
 }
 
 .bday-surprise {
+  display: none;
   position: fixed;
   inset: 0;
   z-index: 70;
-  display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.4rem 1.2rem;
   background:
     radial-gradient(ellipse at 50% 22%, rgba(255, 252, 248, 0.92), transparent 50%),
     rgba(253, 250, 245, 0.72);
+}
+.bday-surprise.is-on {
+  display: flex;
 }
 .bday-surprise[hidden] {
   display: none !important;

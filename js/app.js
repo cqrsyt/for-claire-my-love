@@ -75,36 +75,26 @@
     try {
       if (sessionStorage.getItem("claire-bday-note") === y) return;
     } catch (e) {}
-    var el = document.getElementById("bday-surprise");
-    if (!el) return;
+    if (document.getElementById("bday-surprise")) return;
     var n = zh() ? "zh" : "en";
-    var title = el.querySelector("#bday-title");
-    var note = el.querySelector(".bday-letter");
-    var sign = el.querySelector(".letter-sign");
-    var btn = document.getElementById("bday-open");
-    var kicker = el.querySelector(".kicker");
-    if (kicker) kicker.textContent = zh() ? "九月二十二日" : "September 22";
-    if (title) {
-      title.textContent = zh() ? data.cover.bdayTitleZh : data.cover.bdayTitleEn;
-      title.className = n;
-    }
-    if (note) {
-      note.textContent = zh() ? data.cover.bdayNoteZh : data.cover.bdayNoteEn;
-      note.className = "bday-letter " + n;
-    }
-    if (sign) {
-      sign.textContent = zh() ? data.story.signZh : data.story.signEn;
-      sign.className = "letter-sign " + n;
-    }
-    if (btn) {
-      btn.textContent = zh() ? data.cover.bdayOpenZh : data.cover.bdayOpenEn;
-      btn.className = "btn-open " + n;
-      btn.onclick = function () {
-        el.hidden = true;
-        try { sessionStorage.setItem("claire-bday-note", y); } catch (err) {}
-      };
-    }
-    el.hidden = false;
+    var el = document.createElement("div");
+    el.id = "bday-surprise";
+    el.className = "bday-surprise is-on";
+    el.innerHTML =
+      '<div class="bday-card">' +
+      '<div class="gate-plate" aria-hidden="true"></div>' +
+      '<p class="kicker ' + n + '">' + (zh() ? "九月二十二日" : "September 22") + "</p>" +
+      '<h2 id="bday-title" class="' + n + '">' + esc(zh() ? data.cover.bdayTitleZh : data.cover.bdayTitleEn) + "</h2>" +
+      '<div class="gate-ornament" aria-hidden="true"></div>' +
+      '<p class="bday-letter ' + n + '">' + esc(zh() ? data.cover.bdayNoteZh : data.cover.bdayNoteEn) + "</p>" +
+      '<p class="letter-sign ' + n + '">' + esc(zh() ? data.story.signZh : data.story.signEn) + "</p>" +
+      '<button type="button" id="bday-open" class="btn-open ' + n + '">' + esc(zh() ? data.cover.bdayOpenZh : data.cover.bdayOpenEn) + "</button>" +
+      "</div>";
+    document.body.appendChild(el);
+    document.getElementById("bday-open").onclick = function () {
+      el.remove();
+      try { sessionStorage.setItem("claire-bday-note", y); } catch (err) {}
+    };
   }
   function onEnd() { return state.view === "album" && state.page >= pages.length; }
   function onLetter() { return state.view === "album" && state.page < 0; }
@@ -155,14 +145,14 @@
     if (document.getElementById("three-src")) return;
     var s = document.createElement("script");
     s.id = "three-src";
-    s.src = "js/three.min.js?v=58";
+    s.src = "js/three.min.js?v=59";
     s.onload = function () {
       if (window.ClaireWebGLBook) {
         bootGl();
         return;
       }
       var w = document.createElement("script");
-      w.src = "js/webgl-book.js?v=58";
+      w.src = "js/webgl-book.js?v=59";
       w.onload = bootGl;
       document.head.appendChild(w);
     };
@@ -646,7 +636,7 @@
     var el = document.getElementById("bday-wish");
     if (!el) return;
     var n = state.page + 1;
-    var on = state.view === "album" && (n === 9 || n === 22);
+    var on = isClaireBirthday() && state.view === "album" && (n === 9 || n === 22);
     if (!on) {
       el.hidden = true;
       el.classList.remove("is-on");
