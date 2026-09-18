@@ -64,6 +64,51 @@
     var hk = new Date(Date.now() + 8 * 3600 * 1000);
     return hk.getUTCMonth() === 6 && hk.getUTCDate() === 30;
   }
+  function isClaireBirthday() {
+    try {
+      if (/(?:^|[?&])bday=1(?:&|$)/.test(location.search)) return true;
+    } catch (e) {}
+    var hk = new Date(Date.now() + 8 * 3600 * 1000);
+    return hk.getUTCMonth() === 8 && hk.getUTCDate() === 22;
+  }
+  function showBdaySurprise() {
+    if (!isClaireBirthday()) return;
+    document.documentElement.classList.add("is-bday");
+    var y = String(new Date().getFullYear());
+    try {
+      if (sessionStorage.getItem("claire-bday-note") === y) return;
+    } catch (e) {}
+    var el = document.getElementById("bday-surprise");
+    if (!el) return;
+    var n = zh() ? "zh" : "en";
+    var title = el.querySelector("#bday-title");
+    var note = el.querySelector(".bday-letter");
+    var sign = el.querySelector(".letter-sign");
+    var btn = document.getElementById("bday-open");
+    var kicker = el.querySelector(".kicker");
+    if (kicker) kicker.textContent = zh() ? "九月二十二日" : "September 22";
+    if (title) {
+      title.textContent = zh() ? data.cover.bdayTitleZh : data.cover.bdayTitleEn;
+      title.className = n;
+    }
+    if (note) {
+      note.textContent = zh() ? data.cover.bdayNoteZh : data.cover.bdayNoteEn;
+      note.className = "bday-letter " + n;
+    }
+    if (sign) {
+      sign.textContent = zh() ? data.story.signZh : data.story.signEn;
+      sign.className = "letter-sign " + n;
+    }
+    if (btn) {
+      btn.textContent = zh() ? data.cover.bdayOpenZh : data.cover.bdayOpenEn;
+      btn.className = "btn-open " + n;
+      btn.onclick = function () {
+        el.hidden = true;
+        try { sessionStorage.setItem("claire-bday-note", y); } catch (err) {}
+      };
+    }
+    el.hidden = false;
+  }
   function onEnd() { return state.view === "album" && state.page >= pages.length; }
   function onLetter() { return state.view === "album" && state.page < 0; }
   function asset(src) {
@@ -113,14 +158,14 @@
     if (document.getElementById("three-src")) return;
     var s = document.createElement("script");
     s.id = "three-src";
-    s.src = "js/three.min.js?v=56";
+    s.src = "js/three.min.js?v=57";
     s.onload = function () {
       if (window.ClaireWebGLBook) {
         bootGl();
         return;
       }
       var w = document.createElement("script");
-      w.src = "js/webgl-book.js?v=56";
+      w.src = "js/webgl-book.js?v=57";
       w.onload = bootGl;
       document.head.appendChild(w);
     };
@@ -247,6 +292,11 @@
   }
 
   function bindGate() {
+    if (isClaireBirthday()) {
+      document.documentElement.classList.add("is-bday");
+      var gn = document.querySelector(".gate-note");
+      if (gn) gn.textContent = "今天是你的生日。";
+    }
     var form = document.getElementById("password-form");
     var input = document.getElementById("password-input");
     var err = document.getElementById("password-error");
@@ -371,7 +421,8 @@
       "<p class=\"names " + n + "\">" + esc(zh() ? data.meta.fromZh + " × " + data.meta.toZh : data.meta.fromEn + " × " + data.meta.toEn) + "</p>" +
       "<p class=\"date " + n + "\">" + esc(zh() ? data.cover.dateLineZh : data.cover.dateLineEn) + "</p>" +
       "<p class=\"together " + n + "\">" + esc(togetherLine()) + "</p>" +
-      (isTogetherAnniversary() ? ("<p class=\"today-mark " + n + "\">" + esc(zh() ? data.cover.todayMarkZh : data.cover.todayMarkEn) + "</p>") : "") +
+      (isClaireBirthday() ? ("<p class=\"today-mark " + n + "\">" + esc(zh() ? data.cover.bdayMarkZh : data.cover.bdayMarkEn) + "</p>") :
+        (isTogetherAnniversary() ? ("<p class=\"today-mark " + n + "\">" + esc(zh() ? data.cover.todayMarkZh : data.cover.todayMarkEn) + "</p>") : "")) +
       "<button type=\"button\" class=\"btn-open " + n + "\" id=\"btn-open\">" + esc(zh() ? data.cover.hintZh : data.cover.hintEn) + "</button>" +
       "</div>" +
       '<div class="cover-face cover-face-back" aria-hidden="true"></div>' +
@@ -1280,6 +1331,7 @@
     setLang(state.lang);
     syncMotifHint();
     open("cover");
+    showBdaySurprise();
     window.ClaireAlbum = { open: open, go: go };
   }
 

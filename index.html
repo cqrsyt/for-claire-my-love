@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#fdfaf5" />
     <title>For Claire My Love · 写给秋然</title>
-    <link rel="preload" href="fonts/mashanzheng.woff2?v=56" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="fonts/cormorant-italic.woff2?v=56" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="css/app.css?v=56" />
-    <link rel="stylesheet" href="css/unify.css?v=56" />
+    <link rel="preload" href="fonts/mashanzheng.woff2?v=57" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/cormorant-italic.woff2?v=57" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/app.css?v=57" />
+    <link rel="stylesheet" href="css/unify.css?v=57" />
     <style>
       body.locked #password-gate.gate {
         display: flex !important;
@@ -72,6 +72,17 @@
     </div>
     <div id="wish-toast" class="wish-toast" hidden aria-hidden="true">
       <span class="wish-text zh">大宝，我在。</span>
+    </div>
+    <div id="bday-surprise" class="bday-surprise" hidden>
+      <div class="bday-card">
+        <div class="gate-plate" aria-hidden="true"></div>
+        <p class="kicker zh">九月二十二日</p>
+        <h2 id="bday-title" class="zh">生日快乐，大宝</h2>
+        <div class="gate-ornament" aria-hidden="true"></div>
+        <p class="bday-letter zh">日历又走到零。去年我想着你，今年也是。这本相册，是我给你的礼物。我在。</p>
+        <p class="letter-sign zh">孙郁桐</p>
+        <button type="button" id="bday-open" class="btn-open zh">打开今天</button>
+      </div>
     </div>
     <div id="password-gate" class="gate">
       <div class="gate-stage">
@@ -171,8 +182,8 @@
       <p id="lightbox-note"></p>
     </div>
     <audio id="bgm" src="audio/wind-poem.mp3" loop preload="none"></audio>
-    <script src="js/config.js?v=56"></script>
-    <script src="js/sha256.js?v=56"></script>
+    <script src="js/config.js?v=57"></script>
+    <script src="js/sha256.js?v=57"></script>
     <script>
       (function () {
         var cfg = window.SITE_CONFIG || {};
@@ -203,7 +214,7 @@
         var appendHead = document.head.appendChild.bind(document.head);
         document.head.appendChild = function (node) {
           if (node && node.src && /webgl-book\.js/.test(node.src || "")) {
-            node.src = "js/webgl-book.js?v=56";
+            node.src = "js/webgl-book.js?v=57";
           }
           return appendHead(node);
         };
@@ -222,9 +233,9 @@
         function loadRest() {
           if (started) return;
           started = true;
-          loadScript("data/album.js?v=56")
-            .then(function () { return loadScript("js/phone.js?v=56"); })
-            .then(function () { return loadScript("js/app.js?v=56"); });
+          loadScript("data/album.js?v=57")
+            .then(function () { return loadScript("js/phone.js?v=57"); })
+            .then(function () { return loadScript("js/app.js?v=57"); });
         }
 
         function reveal() {

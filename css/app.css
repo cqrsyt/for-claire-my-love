@@ -1321,6 +1321,52 @@ html.is-quiet .star-field span {
   animation-play-state: paused !important;
 }
 
+.bday-surprise {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.4rem 1.2rem;
+  background:
+    radial-gradient(ellipse at 50% 22%, rgba(255, 252, 248, 0.92), transparent 50%),
+    rgba(253, 250, 245, 0.72);
+}
+.bday-card {
+  position: relative;
+  width: min(100%, 328px);
+  background: #fefcf8;
+  border: 1px solid rgba(138, 155, 176, 0.24);
+  border-radius: 3px 14px 14px 3px;
+  padding: 2.1rem 1.5rem 1.7rem;
+  text-align: center;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 18px 36px rgba(138, 155, 176, 0.12);
+  animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.bday-card h2 {
+  color: var(--ink);
+  font-size: var(--fs-display);
+  margin: 0.3rem 0 0.2rem;
+  line-height: 1.35;
+}
+.bday-letter {
+  color: var(--ink);
+  font-size: var(--fs-body);
+  line-height: 1.85;
+  margin: 0.85rem 0 0.4rem;
+  text-align: left;
+}
+.bday-card .letter-sign {
+  margin: 0.2rem 0 1.1rem;
+}
+.bday-card .btn-open {
+  margin: 0 auto;
+}
+html.is-bday .bloom-field { opacity: 0.9; }
+
 
 /* === book.css === */
 /* Album book body. Clicks stay on #book-stage and the two page buttons. */
