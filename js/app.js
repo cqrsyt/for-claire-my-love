@@ -113,14 +113,14 @@
     if (document.getElementById("three-src")) return;
     var s = document.createElement("script");
     s.id = "three-src";
-    s.src = "js/three.min.js?v=51";
+    s.src = "js/three.min.js?v=52";
     s.onload = function () {
       if (window.ClaireWebGLBook) {
         bootGl();
         return;
       }
       var w = document.createElement("script");
-      w.src = "js/webgl-book.js?v=51";
+      w.src = "js/webgl-book.js?v=52";
       w.onload = bootGl;
       document.head.appendChild(w);
     };
@@ -308,6 +308,7 @@
   }
 
   function setLang(lang) {
+    lastInk = "";
     state.lang = lang;
     localStorage.setItem("claire-my-love-lang", lang);
     document.documentElement.lang = lang === "en" ? "en" : "zh-Hans";
@@ -354,7 +355,7 @@
       '<div class="cover-stage">' +
       '<div class="cover-book" id="cover-book">' +
       '<div class="cover-stack" aria-hidden="true"></div>' +
-      '<div class="cover-spine" aria-hidden="true"></div>' +
+      '<div class="cover-spine" aria-hidden="true"><span class="spine-foil"></span></div>' +
       '<div class="cover-leaf" id="cover-leaf">' +
       '<div class="cover-face cover-face-front">' +
       '<div class="cover-plate" aria-hidden="true"></div>' +
@@ -418,11 +419,22 @@
       "<div class=\"dedication " + n + "\">" + esc(zh() ? data.meta.dedicationZh : data.meta.dedicationEn) + "</div>";
   }
 
+  var lastInk = "";
+  function inkChapter(html, key) {
+    var el = document.getElementById("chapter-header");
+    if (!el) return;
+    if (key === lastInk) return;
+    lastInk = key;
+    el.innerHTML = html;
+  }
+
   function renderLetterPage() {
     var n = zh() ? "zh" : "en";
-    document.getElementById("chapter-header").innerHTML =
+    inkChapter(
       "<h2 class=\"" + n + "\">" + esc(zh() ? data.story.titleZh : data.story.titleEn) + "</h2>" +
-      "<p class=\"" + n + "\">" + esc(zh() ? "翻开后的第一页。下一页，是我们。" : "The first page. Next is us.") + "</p>";
+      "<p class=\"" + n + "\">" + esc(zh() ? "翻开后的第一页。下一页，是我们。" : "The first page. Next is us.") + "</p>",
+      "letter"
+    );
     var box = document.getElementById("book-page");
     box.classList.remove("is-turn-next", "is-turn-prev", "is-end");
     box.classList.add("is-letter");
@@ -481,9 +493,11 @@
   function renderEndPage() {
     var n = zh() ? "zh" : "en";
     var end = data.end || {};
-    document.getElementById("chapter-header").innerHTML =
+    inkChapter(
       "<h2 class=\"" + n + "\">" + esc(zh() ? end.titleZh : end.titleEn) + "</h2>" +
-      "<p class=\"" + n + "\">" + esc(zh() ? end.kickerZh : end.kickerEn) + "</p>";
+      "<p class=\"" + n + "\">" + esc(zh() ? end.kickerZh : end.kickerEn) + "</p>",
+      "end"
+    );
     var box = document.getElementById("book-page");
     box.classList.remove("is-turn-next", "is-turn-prev");
     box.classList.add("is-letter", "is-end");
@@ -526,9 +540,11 @@
     if (!item) return;
     var n = zh() ? "zh" : "en";
     var ch = item.chapter;
-    document.getElementById("chapter-header").innerHTML =
+    inkChapter(
       "<h2 class=\"" + n + "\">" + esc(zh() ? ch.titleZh : ch.titleEn) + "</h2>" +
-      "<p class=\"" + n + "\">" + esc(zh() ? ch.introZh : ch.introEn) + "</p>";
+      "<p class=\"" + n + "\">" + esc(zh() ? ch.introZh : ch.introEn) + "</p>",
+      ch.id || ch.titleZh || "ch"
+    );
     var box = document.getElementById("book-page");
     box.classList.remove("is-turn-next", "is-turn-prev", "is-letter", "is-end");
     if (!glBook && window.ClaireWebGLBook && window.THREE) bootGl();

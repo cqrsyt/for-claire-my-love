@@ -421,7 +421,8 @@ body.locked #app { display: none !important; }
     radial-gradient(ellipse at 50% 22%, rgba(255, 252, 248, 0.95), transparent 48%),
     linear-gradient(168deg, #fefcf8 0%, #f7f4ee 52%, #f3f5f8 100%);
 }
-body.locked .gate { display: flex; }
+body.locked .gate,
+.gate.is-opening { display: flex; }
 body.locked .star-field,
 body.locked #motif-bits,
 body.locked .bloom-field,
@@ -468,6 +469,7 @@ body.locked #leaves {
   border-radius: 3px 0 0 3px;
   background: linear-gradient(90deg, #b7c2cf, #d5dde6 55%, #c5d0dc);
   z-index: 2;
+  overflow: hidden;
 }
 .gate-card {
   position: relative;
@@ -480,9 +482,35 @@ body.locked #leaves {
   border-radius: 3px 14px 14px 3px;
   padding: 2.05rem 1.45rem 1.7rem;
   text-align: center;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.72),
     0 18px 36px rgba(138, 155, 176, 0.1);
+}
+.gate.is-opening {
+  pointer-events: none;
+  animation: gate-veil 0.92s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.gate.is-opening .gate-card {
+  animation: gate-leaf-open 0.92s cubic-bezier(0.4, 0.05, 0.2, 1) both;
+}
+.gate.is-opening form,
+.gate.is-opening .gate-label,
+.gate.is-opening .gate-note,
+.gate.is-opening .error {
+  opacity: 0;
+  transition: opacity 0.2s linear;
+}
+@keyframes gate-leaf-open {
+  0% { transform: rotateY(0); }
+  100% { transform: rotateY(-168deg); }
+}
+@keyframes gate-veil {
+  0% { opacity: 1; }
+  55% { opacity: 1; }
+  100% { opacity: 0; }
 }
 .gate-card::before { content: none; }
 .gate-plate {
@@ -827,6 +855,7 @@ body.locked #leaves {
   background: linear-gradient(90deg, #b7c2cf, #dce3eb 55%, #c5d0dc);
   border-radius: 3px 0 0 3px;
   z-index: 3;
+  overflow: hidden;
 }
 .cover-face {
   position: absolute;
@@ -1313,6 +1342,7 @@ html.is-quiet .star-field span {
   background: linear-gradient(90deg, #b7c2cf, #d5dde6 55%, #c5d0dc);
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.35);
   z-index: 3;
+  overflow: hidden;
 }
 
 .album-stack {
@@ -1701,7 +1731,6 @@ html.webgl-book .book-stage {
   perspective: none;
 }
 
-html.webgl-book .album-spine,
 html.webgl-book .album-stack {
   opacity: 0;
 }
@@ -2145,12 +2174,68 @@ html[data-lang="zh"] .btn {
   animation: edge-drift 18s ease-in-out infinite alternate-reverse;
 }
 
+@keyframes ink-seep {
+  from {
+    opacity: 0.2;
+    filter: blur(4px);
+    clip-path: inset(0 88% 0 0);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(0.6px);
+    clip-path: inset(0 12% 0 0);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
 .chapter h2 {
-  animation: rise-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: ink-seep 0.78s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .chapter p {
-  animation: rise-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: 0.08s;
+  animation: ink-seep 0.92s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+.spine-foil {
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -50%;
+  height: 46%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 18%,
+    rgba(248, 250, 252, 0.92) 50%,
+    rgba(197, 208, 220, 0.2) 68%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+  animation: spine-foil 8.4s ease-in-out 1.4s infinite;
+}
+@keyframes spine-foil {
+  0%, 68% { transform: translateY(0); opacity: 0; }
+  74% { opacity: 0.95; }
+  86% { opacity: 0.35; }
+  100% { transform: translateY(280%); opacity: 0; }
+}
+
+html.webgl-book .album-spine {
+  opacity: 1;
+  width: 8px;
+  left: -6px;
+  background: linear-gradient(90deg, #aeb8c4, #d5dde6 60%, transparent);
+  box-shadow: none;
+}
+
+body:has(.gate.is-opening) .cover-place {
+  animation: none;
+  opacity: 1;
+  transform: none;
 }
 
 .album-block {
@@ -2158,7 +2243,7 @@ html[data-lang="zh"] .btn {
 }
 
 .gate {
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: none;
 }
 
 #book-page.page.is-letter .letter.in-book > * {
@@ -2257,6 +2342,9 @@ html[data-screen="album"] .controls {
   .edge-right,
   .chapter h2,
   .chapter p,
+  .spine-foil,
+  .gate.is-opening,
+  .gate.is-opening .gate-card,
   #book-page.page.is-letter .letter.in-book > *,
   .lightbox:not([hidden]),
   .lightbox-frame,
