@@ -62,8 +62,8 @@ var ClaireWebGLNS = (() => {
     const mobile = typeof window !== "undefined" && window.innerWidth < 720;
     TEX_W = mobile ? 1280 : 1536;
     TEX_H = mobile ? 1720 : 2064;
-    SEG_X = mobile ? 28 : 36;
-    SEG_Y = mobile ? 18 : 24;
+    SEG_X = mobile ? 32 : 36;
+    SEG_Y = mobile ? 22 : 24;
     CACHE_MAX = mobile ? 8 : 10;
   }
   function easePaper(t) {
@@ -162,6 +162,7 @@ var ClaireWebGLNS = (() => {
     tex.minFilter = THREE.LinearFilter;
     tex.magFilter = THREE.LinearFilter;
     tex.anisotropy = 1;
+    tex.flipY = true;
     tex.needsUpdate = true;
     return tex;
   }
@@ -342,20 +343,6 @@ var ClaireWebGLNS = (() => {
     }
     return sharpMap(new THREE.CanvasTexture(canvas));
   }
-  function backFrom(front) {
-    const canvas = document.createElement("canvas");
-    canvas.width = TEX_W;
-    canvas.height = TEX_H;
-    const ctx = canvas.getContext("2d");
-    paintPaper(ctx);
-    ctx.fillStyle = "rgba(232, 237, 243, 0.55)";
-    ctx.fillRect(0, 0, 22, TEX_H);
-    for (let y = 96; y < TEX_H - 80; y += 42) {
-      ctx.fillStyle = "rgba(197, 208, 220, 0.22)";
-      ctx.fillRect(64, y, TEX_W - 128, 2);
-    }
-    return sharpMap(new THREE.CanvasTexture(canvas));
-  }
   function deform(geo, progress) {
     const pos = geo.attributes.position;
     const orig = geo.userData.orig;
@@ -438,10 +425,12 @@ var ClaireWebGLNS = (() => {
       toneMapped: false
     });
     const backMat = new THREE.MeshBasicMaterial({
-      map: paper,
-      color: 16776697,
-      side: THREE.BackSide,
-      toneMapped: false
+      color: 15986662,
+      side: THREE.FrontSide,
+      toneMapped: false,
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1
     });
     const underMat = new THREE.MeshBasicMaterial({
       map: paper,
@@ -464,6 +453,8 @@ var ClaireWebGLNS = (() => {
     });
     const flip = new THREE.Mesh(geo, frontMat);
     const flipBack = new THREE.Mesh(geo, backMat);
+    flip.frustumCulled = false;
+    flipBack.frustumCulled = false;
     const under = new THREE.Mesh(underGeo, underMat);
     under.position.z = -6e-3;
     const shade = new THREE.Mesh(underGeo, shadowMat);
@@ -500,7 +491,6 @@ var ClaireWebGLNS = (() => {
     fadeMesh.visible = false;
     book.add(stack, under, shade, flipBack, flip, fadeMesh, spine, edge);
     const cache = /* @__PURE__ */ new Map();
-    const backCache = /* @__PURE__ */ new Map();
     let disposed = false;
     let raf = 0;
     let progress = 0;
@@ -586,30 +576,19 @@ var ClaireWebGLNS = (() => {
       cache.set(k, made);
       if (cache.size > CACHE_MAX) {
         for (const [key2, tex] of cache) {
-          if (tex === frontMat.map || tex === underMat.map || tex === backMat.map) continue;
+          if (tex === frontMat.map || tex === underMat.map) continue;
           tex.dispose();
           cache.delete(key2);
-          const bk = "back|" + key2;
-          backCache.get(bk)?.dispose();
-          backCache.delete(bk);
           if (cache.size <= CACHE_MAX) break;
         }
       }
       return made;
     }
-    function setMaps(front, underMap, frontKey) {
+    function setMaps(front, underMap, _frontKey) {
       frontMat.map = front;
       frontMat.needsUpdate = true;
       underMat.map = underMap;
       underMat.needsUpdate = true;
-      const bk = "back|" + frontKey;
-      let back = backCache.get(bk);
-      if (!back) {
-        back = backFrom(front);
-        backCache.set(bk, back);
-      }
-      backMat.map = back;
-      backMat.needsUpdate = true;
     }
     function restPose() {
       book.rotation.set(REST_X, REST_Y, REST_Z);
@@ -981,8 +960,6 @@ var ClaireWebGLNS = (() => {
       stopLoop();
       cache.forEach((tex) => tex.dispose());
       cache.clear();
-      backCache.forEach((tex) => tex.dispose());
-      backCache.clear();
       geo.dispose();
       underGeo.dispose();
       frontMat.dispose();
