@@ -145,14 +145,14 @@
     if (document.getElementById("three-src")) return;
     var s = document.createElement("script");
     s.id = "three-src";
-    s.src = "js/three.min.js?v=59";
+    s.src = "js/three.min.js?v=60";
     s.onload = function () {
       if (window.ClaireWebGLBook) {
         bootGl();
         return;
       }
       var w = document.createElement("script");
-      w.src = "js/webgl-book.js?v=59";
+      w.src = "js/webgl-book.js?v=60";
       w.onload = bootGl;
       document.head.appendChild(w);
     };
@@ -707,6 +707,9 @@
       return;
     }
     if (state.page < 0 || i < 0 || state.page >= pages.length || i >= pages.length) {
+      if ((state.page < 0 || state.page >= pages.length) && i >= 0 && i < pages.length && glBook && glBook.arrive) {
+        glBook.arrive();
+      }
       state.page = i;
       renderPage(false);
       return;
