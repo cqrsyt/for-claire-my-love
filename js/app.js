@@ -65,9 +65,6 @@
     return hk.getUTCMonth() === 6 && hk.getUTCDate() === 30;
   }
   function isClaireBirthday() {
-    try {
-      if (/(?:^|[?&])bday=1(?:&|$)/.test(location.search)) return true;
-    } catch (e) {}
     var hk = new Date(Date.now() + 8 * 3600 * 1000);
     return hk.getUTCMonth() === 8 && hk.getUTCDate() === 22;
   }
@@ -158,14 +155,14 @@
     if (document.getElementById("three-src")) return;
     var s = document.createElement("script");
     s.id = "three-src";
-    s.src = "js/three.min.js?v=57";
+    s.src = "js/three.min.js?v=58";
     s.onload = function () {
       if (window.ClaireWebGLBook) {
         bootGl();
         return;
       }
       var w = document.createElement("script");
-      w.src = "js/webgl-book.js?v=57";
+      w.src = "js/webgl-book.js?v=58";
       w.onload = bootGl;
       document.head.appendChild(w);
     };

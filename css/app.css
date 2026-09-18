@@ -1333,6 +1333,9 @@ html.is-quiet .star-field span {
     radial-gradient(ellipse at 50% 22%, rgba(255, 252, 248, 0.92), transparent 50%),
     rgba(253, 250, 245, 0.72);
 }
+.bday-surprise[hidden] {
+  display: none !important;
+}
 .bday-card {
   position: relative;
   width: min(100%, 328px);
